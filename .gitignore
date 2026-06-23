@@ -1,0 +1,14 @@
+# Data
+data/
+
+# PyTorch models
+*.pth
+*.pt
+
+# Python caches
+__pycache__/
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.env
