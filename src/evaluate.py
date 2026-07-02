@@ -62,8 +62,24 @@ class DisasterNetPredictor:
                     logits = self.model(pixel_values, curr_ids, curr_mask, task="captioning")
                     logits[:, -1, self.tokenizer.cls_token_id] = -float('inf')
                     logits[:, -1, self.tokenizer.pad_token_id] = -float('inf')
+                    
+                    # ---- [ THE REPETITION PENALTY HACK ] ----
+                    for token in set(generated_ids):
+                        if logits[:, -1, token] < 0:
+                            logits[:, -1, token] *= 2.0
+                        else:
+                            logits[:, -1, token] /= 2.0
+                    # Hard block immediate repetition
                     if len(generated_ids) > 0:
                         logits[:, -1, generated_ids[-1]] = -float('inf')
+                    # Hard block bigram repetition (prevents 2-token loops like A B A B)
+                    if len(generated_ids) >= 2:
+                        prev_token = generated_ids[-1]
+                        for i in range(len(generated_ids) - 1):
+                            if generated_ids[i] == prev_token:
+                                logits[:, -1, generated_ids[i+1]] = -float('inf')
+                    # ------------------------------------------------
+                    
                     next_token_id = torch.argmax(logits[:, -1, :], dim=-1).item()
                     generated_ids.append(next_token_id)
                     if next_token_id == self.tokenizer.sep_token_id:
@@ -89,9 +105,24 @@ class DisasterNetPredictor:
                         logits = self.model(pixel_values, curr_ids, curr_mask, task="captioning")
                         logits[:, -1, self.tokenizer.cls_token_id] = -float('inf')
                         logits[:, -1, self.tokenizer.pad_token_id] = -float('inf')
-                        # Prevent consecutive token repetition (looping bug fix)
+                        
+                        # ---- [ THE REPETITION PENALTY HACK ] ----
+                        for token in set(seq):
+                            if logits[:, -1, token] < 0:
+                                logits[:, -1, token] *= 2.0
+                            else:
+                                logits[:, -1, token] /= 2.0
+                        # Hard block immediate repetition
                         if len(seq) > 0:
                             logits[:, -1, seq[-1]] = -float('inf')
+                        # Hard block bigram repetition (prevents 2-token loops like A B A B)
+                        if len(seq) >= 2:
+                            prev_token = seq[-1]
+                            for i in range(len(seq) - 1):
+                                if seq[i] == prev_token:
+                                    logits[:, -1, seq[i+1]] = -float('inf')
+                        # ------------------------------------------------
+                        
                         log_probs = torch.log_softmax(logits[0, -1, :], dim=-1)
                         topk_probs, topk_ids = torch.topk(log_probs, beam_width)
                         
