@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌊 DisasterNet-Bangla
+# 🌊 DRISHTI-Bn
 
 ### A Parameter-Efficient Multimodal Vision-Language Framework for Flood Damage Assessment and Bengali Caption Generation
 
@@ -17,11 +17,11 @@
 
 ## 📖 Overview
 
-**DisasterNet-Bangla** is a joint vision-language architecture designed for simultaneous **flood damage classification** and **Bengali caption generation** from disaster photographs. The framework targets the critical operational gap in low-resource, real-world emergency response — where ground-level humanitarian workers require immediate, native-language situational intelligence under strict hardware constraints.
+**DRISHTI-Bn** (**D**isaster **R**esponse **I**ntelligence via **S**imultaneous **T**ext and **I**mage for Bangla) is a joint vision-language architecture designed for simultaneous **flood damage classification** and **Bengali caption generation** from disaster photographs. The framework targets the critical operational gap in low-resource, real-world emergency response — where ground-level humanitarian workers require immediate, native-language situational intelligence under strict hardware constraints.
 
 The system fuses a **Vision Transformer (ViT-Base/16)** image encoder with a **BanglaBERT**-based cross-attention decoder, adapting both components via **Low-Rank Adaptation (LoRA)** matrices. This parameter-efficient design allows the entire multimodal pipeline to execute within a single **NVIDIA T4 GPU (16 GB VRAM)**, making it viable for deployment in resource-constrained regional emergency centers.
 
-> **Thesis Title:** *DisasterNet-Bangla: A Multimodal Vision-Language Framework for Flood Damage Assessment*
+> **Thesis Title:** *DRISHTI-Bn: A Multimodal Vision-Language Framework for Flood Damage Assessment and Bengali Caption Generation*
 
 ---
 
@@ -29,7 +29,7 @@ The system fuses a **Vision Transformer (ViT-Base/16)** image encoder with a **B
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     DisasterNet-Bangla                              │
+│                        DRISHTI-Bn                                   │
 │                                                                     │
 │  ┌──────────────────────┐      ┌─────────────────────────────────┐  │
 │  │   Flood Image Input  │      │       Bengali Text Input        │  │
@@ -153,8 +153,8 @@ L_total = λ_cls · L_cls + λ_cap · L_cap
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/<your-username>/DisasterNet-Bangla.git
-cd DisasterNet-Bangla
+git clone https://github.com/<your-username>/DRISHTI-Bn.git
+cd DRISHTI-Bn
 
 python -m venv venv
 
@@ -208,7 +208,7 @@ Open `http://127.0.0.1:7860` in your browser.
 
 ## 🖥️ Live Demo Interface
 
-![DisasterNet-Bangla Gradio Demo — live flood image inference with damage classification and Bengali caption generation](docs/demo_screenshot.png)
+![DRISHTI-Bn Gradio Demo — live flood image inference with damage classification and Bengali caption generation](docs/demo_screenshot.png)
 
 The Gradio web application provides a real-time inference interface:
 
@@ -225,10 +225,10 @@ The Gradio web application provides a real-time inference interface:
 ## 📁 Project Structure
 
 ```
-DisasterNet-Bangla/
+DRISHTI-Bn/
 │
 ├── src/
-│   ├── model.py          # DisasterNetMultimodal architecture (ViT + BanglaBERT + LoRA)
+│   ├── model.py          # DRISHTI-Bn architecture (ViT + BanglaBERT + LoRA)
 │   ├── train.py          # Multi-task training loop (AdamW, AMP, checkpoint saving)
 │   ├── data_loader.py    # CrisisMMD Bengali corpus loader & preprocessing
 │   ├── evaluate.py       # Classification metrics + BLEU evaluation
@@ -292,7 +292,7 @@ If you use this work in your research, please cite:
 ```bibtex
 @thesis{disasternet2026,
   author    = {Jahid Hasan},
-  title     = {DisasterNet-Bangla: A Multimodal Vision-Language Framework
+  title     = {DRISHTI-Bn: A Multimodal Vision-Language Framework
                for Flood Damage Assessment},
   school    = {Daffodil International University},
   year      = {2026},
