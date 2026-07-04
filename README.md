@@ -208,7 +208,7 @@ Open `http://127.0.0.1:7860` in your browser.
 
 ## 🖥️ Live Demo Interface
 
-![DRISHTI-Bn Gradio Demo — live flood image inference with damage classification and Bengali caption generation](docs/demo_screenshot.png)
+![DRISHTI-Bn Gradio Demo — live flood image inference with damage classification and Bengali caption generation](C:\Users\user\Documents\DisasterNet-Bangla/demo_screenshot.png)
 
 The Gradio web application provides a real-time inference interface:
 
