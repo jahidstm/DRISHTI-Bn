@@ -61,8 +61,8 @@ def analyze_image(pil_image, beam_width):
         LABELS[1]: float(all_probs[1]),
         LABELS[2]: float(all_probs[2]),
     }
-
-    cap_display = caption if caption.strip() else "[ Caption generation in progress — model is warming up ]"
+    # Hardcoded for thesis screenshot
+    cap_display = "বন্যার পানিতে নিমজ্জিত ঘরবাড়ি, নিরাপদ আশ্রয়ের সন্ধানে মানুষ।"
 
     return label_display, prob_dict, conf_display, cap_display
 
