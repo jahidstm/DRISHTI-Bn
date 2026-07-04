@@ -290,7 +290,7 @@ Rentschler, J., & Salhab, M. (2020). People in Harm's Way: Flood Exposure and Po
 If you use this work in your research, please cite:
 
 ```bibtex
-@thesis{disasternet2025,
+@thesis{disasternet2026,
   author    = {Jahid Hasan},
   title     = {DisasterNet-Bangla: A Multimodal Vision-Language Framework
                for Flood Damage Assessment},
