@@ -12,8 +12,9 @@ Digital communication networks fundamentally altered emergency reporting mechani
 The resulting data influx creates severe analytical bottlenecks [REF]. Conventional emergency assessment methodologies depend heavily upon manual human inspection [REF]. This process fails. Processing this monumental volume of unstructured visual information by hand proves prohibitively slow [REF]. Human evaluation introduces substantial error rates during high-stress situations [REF]. Consequently, critical rescue operations experience dangerous delays [REF]. Time-sensitive humanitarian interventions require immediate situational intelligence to distribute life-saving resources efficiently [REF]. Evaluating thousands of optical reports manually remains entirely unsustainable [REF]. Automated artificial intelligence frameworks must triage this visual intelligence [REF]. Machine learning algorithms can rapidly categorize optical damage severity [REF]. Such automated systems represent an absolute necessity for expediting modern disaster management operations [REF].
 
 
-………………………………………………………………………………………………………………………………………………
-[Figure 1.1: Flood exposure statistics for Bangladesh — 94.42 million individuals (57.5% of national population) at risk (Source: [REF])]
+  
+
+Figure 1.1: Flood exposure statistics for Bangladesh — 94.42 million individuals at risk (Source: [REF])
 1.2 Problem Statement and Research Gap
 Conventional emergency evaluation systems operate fundamentally as unimodal frameworks [REF]. These isolated optical architectures extract spatial features to predict distinct categorical tags, including 'severe damage' or 'mild damage' [REF]. The outputs remain rigidly discrete [REF]. Such isolated mechanisms entirely lack the generative linguistic capacity necessary to synthesize interpretable textual descriptions elucidating the underlying physical context of the identified destruction [REF]. 
 
@@ -82,11 +83,12 @@ A fundamental limitation persists despite these computational advancements. The 
 2.2 Transformer Architectures and Multimodal AI
 Vision-language algorithms rapidly evolved [REF]. Modern architectures actively merge optical patterns with semantic sequences. A discrete visual encoder extracts spatial feature embeddings [REF]. Simultaneously, a dedicated tokenizer processes linguistic inputs. Cross-attention modules then project these extracted visual components directly into the semantic dimensional space of the language decoder [REF]. This operation computes global dot-product alignment scores across variable sequence lengths. The resulting multimodal synthesis produces coherent descriptive texts directly from raw optical data.
 Severe hardware restrictions emerge. Conventional adaptation methods demand full architectural retraining [REF]. Every single network parameter receives gradient updates during this comprehensive optimization process. The resulting memory footprint equals the massive requirements of initial pretraining. Updating models with billions of variables requires extraordinary computational capacity. Storage demands scale linearly with each new task adaptation [REF]. Deploying such resource-intensive systems proves completely impractical. Low-resource environments, typical of Bangladeshi emergency management centers, cannot support these exorbitant hardware dependencies.
-………………………………………………………………………………………………………………………………………………
-[Figure 2.1: LoRA Adapter Injection — frozen weight matrix W₀ with parallel low-rank matrices A and B]
+
+
+  
+
+Figure 2.1: LoRA Adapter Injection — frozen weight matrix W₀ with parallel low-rank matrices A and B
 2.3 Natural Language Processing for Low-Resource Languages (Bengali)
-
-
 Standard linguistic models struggle immensely [REF]. Applying global computational linguistics architectures to Bengali presents severe difficulties [REF]. The language exhibits extreme morphological complexity [REF]. It features relatively flexible syntactic ordering alongside intricate derivational affixation [REF]. Such structural attributes confound standard multilingual networks [REF]. Massive multilingual encoders demonstrate degraded analytical capacities within low-resource environments [REF]. A critical dataset scarcity compounds this difficulty [REF]. Annotated multimodal crisis collections simply do not exist natively for Bengali [REF]. The domain relies entirely on English-centric corpora [REF]. Direct transfer proves impossible [REF]. No generative mechanism currently exists to parse optical disaster data into local dialects [REF]. 
 
 
@@ -104,11 +106,11 @@ Split
 	Labels
 	Language
 	Training (80%)
-	~XXX
+	3,004
 	Severe Damage, Humanitarian Rescue, Affected People
 	Bengali (Translated)
 	Validation (20%)
-	~XXX
+	751
 	Same
 	Bengali (Translated)
 	Image Resolution
@@ -141,8 +143,11 @@ A sophisticated architectural bridge connects the isolated modalities. Extracted
 
 
 The semantic generation phase employs a specialized linguistic module. BanglaBERT functions exclusively as an autoregressive text decoder [REF]. It continuously analyzes the injected optical embeddings alongside its own previously generated tokens. This joint evaluation allows the network to predict the subsequent localized Bengali subword sequentially [REF]. The mathematical integration merges spatial vectors with a comprehensive native vocabulary. This unified multi-task configuration flawlessly converts raw pixel matrices into operational, descriptive emergency insights. Humanitarian organizations receive immediate, native-language situational awareness directly from optical evidence.
-……………………………………………………………………………………………………………………………………………… 
-[Figure 3.1: Architecture Diagram]
+
+
+  
+
+Figure 3.1: DisasterNet-Bangla Multimodal Architecture Diagram.
 
 
 3.3 Parameter-Efficient Fine-Tuning (PEFT)
@@ -289,8 +294,11 @@ Qualitative case study evaluations supplement quantitative statistical measureme
 
 
 Analysts submitted an unverified photograph depicting displaced individuals navigating an inundated shanty settlement. The multi-task network responded instantly. It designated the scene as "Affected People | ক্ষতিগ্রস্ত মানুষ". The assigned confidence score registered exactly 65.71% during this live demonstration. Secondary probability estimations distributed 34% of the mathematical weight toward the Severe Damage category, allocating absolute zero to Humanitarian Rescue operations. This algorithmic distribution provides essential insight. It explicitly demonstrates that the multimodal feature fusion mechanism exhibits heightened sensitivity toward human physiological forms compared to collapsed architectural elements [REF].
-……………………………………………………………………………………………………………………………………………… 
-Figure 4.1: DisasterNet-Bangla Live Inference Demo Interface [Image Placeholder]
+
+
+  
+
+Figure 4.1: DisasterNet-Bangla Live Inference Demo Interface
 
 
 Semantic text generation mirrored this contextual awareness. The mathematically restricted decoding module successfully synthesized domain-specific Bengali subword fragments. These generated tokens accurately referenced relevant geographic environments alongside specific emergency conditions. Prior iterations produced recursive garbage sequences. The implemented n-gram penalties entirely eliminated those infinite loops. While the resulting outputs occasionally lack perfect grammatical fluency, the predicted vocabulary remains rigidly anchored to the specific disaster context. The cross-attention modules successfully isolate and interpret specific optical variables [REF]. 
