@@ -15,7 +15,7 @@ from src.data_loader import get_dataloaders
 CSV_PATH = '../data/processed/master_dataset_translated.csv'
 IMG_DIR = '../data/processed/' # ইমেজ পাথগুলো macro_label/filename আকারে আছে
 
-print("[+] Initializing DisasterNet-Bangla DataLoaders...")
+print("[+] Initializing DRISHTI-Bn DataLoaders...")
 
 try:
     # আমরা টেস্ট করার জন্য ছোট ব্যাচ সাইজ (Batch Size = 4) ব্যবহার করব

@@ -9,7 +9,7 @@ from transformers import AutoTokenizer
 class DisasterNetMultimodalDataset(Dataset):
     def __init__(self, csv_file, root_dir, max_length=128):
         """
-        Custom PyTorch Dataset for DisasterNet-Bangla
+        Custom PyTorch Dataset for DRISHTI-Bn
         """
         self.df = pd.read_csv(csv_file)
         self.root_dir = root_dir

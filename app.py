@@ -227,7 +227,7 @@ label { color: #94a3b8 !important; font-size: 0.78rem !important; text-transform
 
 BANNER_HTML = """
 <div id="header-banner">
-  <p id="banner-title">🛰️ DisasterNet-Bangla</p>
+  <p id="banner-title">🛰️ DRISHTI-Bn</p>
   <p id="banner-sub">
     <b>Multi-Task Multimodal AI</b> for Disaster Severity Assessment &amp; Bengali Caption Generation<br>
     Vision Transformer (ViT-Base) &nbsp;+&nbsp; BanglaBERT &nbsp;+&nbsp; LoRA &nbsp;+&nbsp; Cross-Attention Decoder
@@ -235,7 +235,7 @@ BANNER_HTML = """
 </div>
 """
 
-with gr.Blocks(title="DisasterNet-Bangla Demo") as demo:
+with gr.Blocks(title="DRISHTI-Bn Demo") as demo:
 
     gr.HTML(BANNER_HTML)
 
@@ -305,7 +305,7 @@ with gr.Blocks(title="DisasterNet-Bangla Demo") as demo:
 **Model Architecture:** ViT-Base/16 + BanglaBERT + LoRA (r=8) + Cross-Attention Decoder (4 layers)
         """)
 
-    gr.HTML('<div id="footer-note">DisasterNet-Bangla &nbsp;|&nbsp; Thesis Research Demo &nbsp;|&nbsp; All rights reserved</div>')
+    gr.HTML('<div id="footer-note">DRISHTI-Bn &nbsp;|&nbsp; Thesis Research Demo &nbsp;|&nbsp; All rights reserved</div>')
 
     # ── Wire up ─────────────────────────────────────────
     run_btn.click(

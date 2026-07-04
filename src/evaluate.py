@@ -20,7 +20,7 @@ ID_TO_LABEL = {
 class DisasterNetPredictor:
     def __init__(self, model_path='../models/disasternet_multitask_v2.pth', device=None):
         self.device = device if device else torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print(f"[+] Initializing DisasterNet-Bangla Predictor on {self.device}...")
+        print(f"[+] Initializing DRISHTI-Bn Predictor on {self.device}...")
         
         # 1. Vision Preprocessing Pipeline
         self.transform = transforms.Compose([
@@ -199,7 +199,7 @@ class DisasterNetPredictor:
         }
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="DisasterNet-Bangla Master Inference")
+    parser = argparse.ArgumentParser(description="DRISHTI-Bn Master Inference")
     parser.add_argument("image_path", nargs="?", help="Path to disaster image")
     parser.add_argument("--beam-width", type=int, default=3, help="Beam width for decoding (1=Greedy, >1=Beam Search)")
     args = parser.parse_args()

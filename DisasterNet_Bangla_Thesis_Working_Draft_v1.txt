@@ -1,4 +1,4 @@
-﻿DisasterNet-Bangla: A Multimodal Vision-Language Framework for Flood Damage Assessment
+﻿DRISHTI-Bn: A Multimodal Vision-Language Framework for Flood Damage Assessment
 Abstract
 ________________
 Chapter 1: Introduction
@@ -66,7 +66,7 @@ Architecture
 	83.07%
 	Domain-specific, English-only
 	Proposed
-	DisasterNet-Bangla
+	DRISHTI-Bn
 	66.67% F1
 	Multimodal + Bengali generation
 	
@@ -95,7 +95,7 @@ Standard linguistic models struggle immensely [REF]. Applying global computation
 Language-specific pretraining resolves these linguistic constraints [REF]. Researchers developed BanglaBERT using 27.5 gigabytes of unannotated information [REF]. This massive corpus encompasses over two billion lexical units extracted from 110 frequently visited domains [REF]. The architecture employs a specialized tokenization mechanism [REF]. Specifically, it utilizes a dictionary containing 32,000 subwords alongside an expanded 400-character alphabet [REF]. This configuration efficiently captures localized inflectional variations and complex code-switching phenomena [REF]. The design optimizes computational overhead [REF]. It implements a substitution-based token identification objective [REF]. A generator network identifies masked elements [REF]. A parallel discriminator subsequently verifies the authenticity of these constructed sequences [REF]. This joint optimization yields superior downstream semantic understanding metrics compared to conventional multilingual variants [REF]. The efficiency is exceptional [REF].
 
 
-The present study directly addresses the identified gap [REF]. DisasterNet-Bangla unifies isolated optical and linguistic components [REF]. Within this proposed configuration, BanglaBERT operates as the autoregressive text decoder [REF]. A shared Vision Transformer extracts optical patterns from flood imagery [REF]. These spatial features generate globally aware token embeddings [REF]. Low-rank adaptation matrices subsequently fine-tune the vast parameter spaces of both the visual extractor and the linguistic decoder [REF]. The resulting multimodal synthesis bridges the semantic divide [REF]. It transforms complex spatial vectors into descriptive, operational emergency intelligence rendered directly in native Bengali [REF]. The unified framework eliminates the historical dependence on unimodal English architectures [REF].
+The present study directly addresses the identified gap [REF]. DRISHTI-Bn unifies isolated optical and linguistic components [REF]. Within this proposed configuration, BanglaBERT operates as the autoregressive text decoder [REF]. A shared Vision Transformer extracts optical patterns from flood imagery [REF]. These spatial features generate globally aware token embeddings [REF]. Low-rank adaptation matrices subsequently fine-tune the vast parameter spaces of both the visual extractor and the linguistic decoder [REF]. The resulting multimodal synthesis bridges the semantic divide [REF]. It transforms complex spatial vectors into descriptive, operational emergency intelligence rendered directly in native Bengali [REF]. The unified framework eliminates the historical dependence on unimodal English architectures [REF].
 
 
 Chapter 3: Methodology
@@ -147,7 +147,7 @@ The semantic generation phase employs a specialized linguistic module. BanglaBER
 
   
 
-Figure 3.1: DisasterNet-Bangla Multimodal Architecture Diagram.
+Figure 3.1: DRISHTI-Bn Multimodal Architecture Diagram.
 
 
 3.3 Parameter-Efficient Fine-Tuning (PEFT)
@@ -162,7 +162,7 @@ Low-Rank Adaptation (LoRA) resolves this structural obstacle entirely [REF]. The
 This specific mathematical intervention restructures the internal data flow. The modified forward pass incorporates the injected matrices to compute the localized feature update. The exact mathematical execution follows the formula W0 + BA. Within this equation, the rank parameter r=8 dictates the inner dimension of the multiplicative matrices. Researchers deliberately configure r=8 to remain exceptionally tiny compared to the expansive original matrix dimensions. This precise mathematical factorization shrinks the trainable parameter count by orders of magnitude [REF].
 
 
-Such algorithmic economy drives the entire proposed system. DisasterNet-Bangla depends entirely upon this specialized mathematical reduction. The massive multimodal framework successfully executes simultaneous flood severity categorization and Bengali text generation without exceeding local processing constraints. Deploying sophisticated emergency artificial intelligence in real-world, hardware-limited environments becomes fully viable.
+Such algorithmic economy drives the entire proposed system. DRISHTI-Bn depends entirely upon this specialized mathematical reduction. The massive multimodal framework successfully executes simultaneous flood severity categorization and Bengali text generation without exceeding local processing constraints. Deploying sophisticated emergency artificial intelligence in real-world, hardware-limited environments becomes fully viable.
 
 
 3.4 Multi-Task Learning and Loss Optimization
@@ -298,7 +298,7 @@ Analysts submitted an unverified photograph depicting displaced individuals navi
 
   
 
-Figure 4.1: DisasterNet-Bangla Live Inference Demo Interface
+Figure 4.1: DRISHTI-Bn Live Inference Demo Interface
 
 
 Semantic text generation mirrored this contextual awareness. The mathematically restricted decoding module successfully synthesized domain-specific Bengali subword fragments. These generated tokens accurately referenced relevant geographic environments alongside specific emergency conditions. Prior iterations produced recursive garbage sequences. The implemented n-gram penalties entirely eliminated those infinite loops. While the resulting outputs occasionally lack perfect grammatical fluency, the predicted vocabulary remains rigidly anchored to the specific disaster context. The cross-attention modules successfully isolate and interpret specific optical variables [REF]. 
@@ -373,7 +373,7 @@ The foundational CrisisMMD corpus originates exclusively from English-language s
 Linguistic adaptation pipelines introduce additional complexities. Ground-truth Bengali descriptions emerged through algorithmic translation of the original English annotations, followed immediately by manual human verification [REF]. Exact semantic mapping fails occasionally. Automated conversion systems frequently generate subtle linguistic distortions within highly specialized emergency vocabulary matrices. Specific operational concepts like "structural damage" or "humanitarian aid" may not transfer with equivalent pragmatic force when rendered within native Bengali emergency discourse [REF]. The limitation is absolute. Such semantic degradation remains a universally acknowledged methodological constraint when constructing multimodal intelligence resources for linguistically scarce demographic populations.
 
 
-Operational deployment carries immense responsibility. DisasterNet-Bangla specifically targets high-stakes emergency triage environments where algorithmic misclassifications directly precipitate severe humanitarian consequences [REF]. Categorization failures prove dangerous. An incorrect assessment, particularly a failure to accurately assign the "Severe Damage" classification to a devastated zone, could severely delay essential life-saving resource distributions to highly vulnerable affected populations [REF]. Autonomous operation is strictly prohibited. The proposed multimodal architecture must never function as an isolated, standalone operational decision mechanism during active crises. It must operate conditionally. The framework must serve strictly as an auxiliary decision-support instrument requiring mandatory, continuous human oversight to validate all machine-generated intelligence [REF].
+Operational deployment carries immense responsibility. DRISHTI-Bn specifically targets high-stakes emergency triage environments where algorithmic misclassifications directly precipitate severe humanitarian consequences [REF]. Categorization failures prove dangerous. An incorrect assessment, particularly a failure to accurately assign the "Severe Damage" classification to a devastated zone, could severely delay essential life-saving resource distributions to highly vulnerable affected populations [REF]. Autonomous operation is strictly prohibited. The proposed multimodal architecture must never function as an isolated, standalone operational decision mechanism during active crises. It must operate conditionally. The framework must serve strictly as an auxiliary decision-support instrument requiring mandatory, continuous human oversight to validate all machine-generated intelligence [REF].
 
 
 Privacy preservation requires explicit confirmation. The underlying CrisisMMD repository consists entirely of publicly broadcasted social networking communications [REF]. The present investigation strictly avoided compiling any personally identifiable information without explicit user consent. No human subjects were involved. Researchers conducted absolutely no primary data gathering procedures involving direct human participants during any phase of this multimodal architectural evaluation. Ethical compliance remains absolute.
@@ -423,7 +423,7 @@ Long-term architectural evolution necessitates advanced contextual memory. Engin
 
 
 5.5 Conclusion
-The humanitarian assessment domain lacks parameter-efficient, multimodal architectures capable of generating Bengali triage intelligence [REF]. Ground-level responders face severe operational delays. No existing computational framework simultaneously evaluates optical flood evidence and formulates localized linguistic reports under strict regional hardware constraints [REF]. DisasterNet-Bangla constitutes a joint vision-language system. It merges a ViT-Base/16 optical extractor directly with a BanglaBERT-based cross-attention linguistic module [REF]. Low-rank matrices (  ,   ) adapt these integrated components [REF]. The unified framework mathematically learns spatial damage categorization alongside localized Bengali sequence formulation [REF].
+The humanitarian assessment domain lacks parameter-efficient, multimodal architectures capable of generating Bengali triage intelligence [REF]. Ground-level responders face severe operational delays. No existing computational framework simultaneously evaluates optical flood evidence and formulates localized linguistic reports under strict regional hardware constraints [REF]. DRISHTI-Bn constitutes a joint vision-language system. It merges a ViT-Base/16 optical extractor directly with a BanglaBERT-based cross-attention linguistic module [REF]. Low-rank matrices (  ,   ) adapt these integrated components [REF]. The unified framework mathematically learns spatial damage categorization alongside localized Bengali sequence formulation [REF].
 The empirical outcomes remain definitive. The spatial classification objective attained a macroscopic harmonic mean of exactly 66.67%, registering flawless detection rates across two out of three targeted destruction categories [REF]. The semantic branch succeeded. The linguistic generation phase achieved a final BLEU-4 score of 5.14 [REF]. Researchers secured this specific metric by implementing strict three-stage decoding interventions to neutralize a catastrophic Autoencoding Identity Bias [REF]. Processing efficiency proved exceptional. The complete network executes entirely within the physical memory limits of a single Google Colab T4 graphics processing unit [REF]. This specific constraint verifies that deploying advanced multimodal algorithms remains highly viable inside hardware-restricted regional facilities [REF].
 The trajectory shifts completely. The proposed system fundamentally advances regional computational linguistics and humanitarian algorithmic operations [REF]. This investigation documents the initial attempt at executing simultaneous optical severity evaluation and native linguistic description generation directly from catastrophic photographs [REF]. Systematic failures provide essential data. The rigorous empirical definition of architectural constraints and the specific classification of generative collapse mechanisms represent independent scientific advancements [REF]. Subsequent analytical networks will directly inherit these established mathematical observations. Automated disaster intelligence now speaks the native dialect.
 
