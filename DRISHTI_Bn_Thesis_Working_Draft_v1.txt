@@ -1,6 +1,15 @@
-﻿DRISHTI-Bn: A Multimodal Vision-Language Framework for Flood Damage Assessment
-Abstract
+﻿DRISHTI-Bn: A Parameter-Efficient Multimodal Vision-Language Framework for Simultaneous Flood Damage Classification and Bengali Caption Generation
+
+
 ________________
+
+
+Abstract
+Severe inundations continually devastate South Asia. These catastrophic environmental emergencies, particularly within the highly susceptible Bangladeshi deltaic regions, dictate an absolute requirement for instantaneous and spatially precise damage assessments to accurately dispatch emergency personnel and direct life-saving humanitarian interventions during acute crisis periods. Current automated emergency evaluation algorithms operate predominantly as isolated, English-biased mechanisms requiring prohibitive computational resources. These fragmented architectures fundamentally fail to generate simultaneous visual damage categorization and Bengali caption generation for frontline responders restricted by severe hardware limits. To resolve these operational bottlenecks, the present study introduces DRISHTI-Bn. This parameter-efficient multimodal vision-language framework executes simultaneous flood damage classification and Bengali caption generation from disaster imagery during one unified inference cycle. The proposed configuration unifies a ViT-Base/16 visual encoder directly with an autoregressive BanglaBERT cross-attention decoder, injecting low-rank adaptation matrices (  ,   ) throughout the architecture to jointly minimize the integrated multi-task loss equation   . The model was trained on 3,755 annotated flood photographs, partitioned into 3,004 training samples and 751 validation records. To mitigate the observed Autoencoding Identity Bias during Bengali caption generation, the inference-time decoding pipeline employs beam search (  ) governed by a dynamic N-gram repetition blocker. Empirical assessments yield a Macro F1-Score of 66.67% on the three-class flood damage classification task and a BLEU-4 score of 5.14 on Bengali caption generation — establishing the first multimodal generative benchmark for localized disaster response. The complete pipeline operates within a single NVIDIA T4 GPU (16 GB VRAM), validating parameter-efficient multimodal learning as a scalable mechanism for deploying disaster intelligence across technologically constrained crisis coordination centers in South Asia.
+
+
+
+
 Chapter 1: Introduction
 1.1 Background
 Natural catastrophes continuously escalate in both occurrence rate and destructive capacity worldwide [REF]. These events precipitate extensive socio-economic instability [REF]. The Ganges River Delta constitutes the most expansive riverine basin globally [REF]. This specific geographic zone experiences severe inundation vulnerability [REF]. Within Bangladesh, approximately 94.42 million individuals face significant flooding threats [REF]. Such exposure represents exactly 57.5% of the entire national population [REF]. Repetitive hydrological hazards destroy public infrastructure [REF]. The consequences are catastrophic. These events claim human lives and devastate agricultural systems [REF]. The resulting economic devastation demands immediate emergency interventions [REF].
@@ -12,9 +21,17 @@ Digital communication networks fundamentally altered emergency reporting mechani
 The resulting data influx creates severe analytical bottlenecks [REF]. Conventional emergency assessment methodologies depend heavily upon manual human inspection [REF]. This process fails. Processing this monumental volume of unstructured visual information by hand proves prohibitively slow [REF]. Human evaluation introduces substantial error rates during high-stress situations [REF]. Consequently, critical rescue operations experience dangerous delays [REF]. Time-sensitive humanitarian interventions require immediate situational intelligence to distribute life-saving resources efficiently [REF]. Evaluating thousands of optical reports manually remains entirely unsustainable [REF]. Automated artificial intelligence frameworks must triage this visual intelligence [REF]. Machine learning algorithms can rapidly categorize optical damage severity [REF]. Such automated systems represent an absolute necessity for expediting modern disaster management operations [REF].
 
 
+During sudden inundation events across isolated Bangladeshi territories, central management authorities frequently acquire raw aerial imagery from unmanned flight systems before physical rescue units ever arrive [REF]. Ground-level realities remain entirely unknown [REF]. Existing analytical frameworks cannot autonomously process these incoming visual streams to formulate native Bengali tactical summaries for regional dispatchers [REF]. This technical void paralyzes local response efforts [REF]. Transitioning from manual optical inspection toward automated multimodal intelligence generation therefore represents an absolute operational necessity [REF].
+
+
   
 
 Figure 1.1: Flood exposure statistics for Bangladesh — 94.42 million individuals at risk (Source: [REF])
+
+
+  
+
+Figure 1.2: End-to-end disaster intelligence pipeline highlighting the DRISHTI-Bn core module.
 1.2 Problem Statement and Research Gap
 Conventional emergency evaluation systems operate fundamentally as unimodal frameworks [REF]. These isolated optical architectures extract spatial features to predict distinct categorical tags, including 'severe damage' or 'mild damage' [REF]. The outputs remain rigidly discrete [REF]. Such isolated mechanisms entirely lack the generative linguistic capacity necessary to synthesize interpretable textual descriptions elucidating the underlying physical context of the identified destruction [REF]. 
 
@@ -33,6 +50,9 @@ The primary objective of the present study entails formulating an optimized mult
 2. To design an integrated vision-language network. This proposed structure unites a shared Vision Transformer for optical pattern extraction alongside an autoregressive BanglaBERT module intended for sequential semantic synthesis.
 3. To implement low-rank adaptation matrices directly inside the respective attention blocks. This mathematical optimization guarantees the massive multimodal system executes flawlessly within strict hardware limitations.
 4. To evaluate the joint multi-task configuration. The empirical assessment must establish its capacity for performing simultaneous spatial damage categorization and descriptive native text formulation while maintaining superior computational economy.
+
+
+The present study specifically isolates the core artificial intelligence inference module [REF]. This analytical component functions inside a vastly broader emergency response pipeline [REF]. Procuring raw satellite visuals, broadcasting geographic hazard notifications, and linking these predictive outputs with regional coordination networks constitute subsequent macro-level engineering challenges [REF]. Building those expansive operational systems strictly exceeds current methodological boundaries [REF].
 
 
 ________________
@@ -420,6 +440,9 @@ Extended training cycles remain equally essential. Optimizing the expanded corpu
 
 
 Long-term architectural evolution necessitates advanced contextual memory. Engineers should augment the sequential text generator utilizing specialized retrieval mechanisms. Retrieval transforms generation. The proposed configuration actively extracts semantically related historical crisis photographs alongside their verified annotations. The autoregressive decoder subsequently formulates its current descriptive sequence conditioned directly upon these retrieved multimodal reference examples, ensuring the output aligns perfectly with previously verified ground-level observations. This sophisticated algorithmic integration yields highly fluent, contextually accurate Bengali emergency intelligence.
+
+
+Future iterations must transcend ground-level optical processing [REF]. Engineers should extend the primary visual encoder to interpret unmanned aerial vehicle streams alongside multi-spectral orbital datasets, specifically integrating Sentinel-1 synthetic aperture radar measurements and MODIS inundation records [REF]. This architectural expansion facilitates active national deployment [REF]. The envisioned framework will interface directly with Bangladesh Department of Disaster Management networks to establish an automated, real-time Bengali tactical notification pipeline serving isolated regional emergency coordination centers [REF]. Field operatives require immediate localized intelligence [REF]. Quantizing this foundational artificial intelligence core for hardware-accelerated edge execution allows disconnected responders to generate autonomous field assessments directly upon mobile devices [REF].
 
 
 5.5 Conclusion
