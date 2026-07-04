@@ -21,7 +21,8 @@
 
 The system fuses a **Vision Transformer (ViT-Base/16)** image encoder with a **BanglaBERT**-based cross-attention decoder, adapting both components via **Low-Rank Adaptation (LoRA)** matrices. This parameter-efficient design allows the entire multimodal pipeline to execute within a single **NVIDIA T4 GPU (16 GB VRAM)**, making it viable for deployment in resource-constrained regional emergency centers.
 
-> **Thesis Title:** *DRISHTI-Bn: A Multimodal Vision-Language Framework for Flood Damage Assessment and Bengali Caption Generation*
+> **Thesis Title:** *DRISHTI-Bn: A Parameter-Efficient Multimodal Vision-Language 
+Framework for Simultaneous Flood Damage Classification and Bengali Caption Generation*
 
 ---
 
