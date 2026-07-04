@@ -129,7 +129,7 @@ The model is trained on a **CrisisMMD-derived Bengali Flood Corpus** — a curat
 | Learning Rate | 1e-4 |
 | Weight Decay | 0.01 |
 | λ\_cls (Classification Loss Weight) | 1.0 |
-| λ\_cap (Caption Loss Weight) | 0.2 |
+| λ\_cap (Caption Loss Weight) | 0.5 |
 | LoRA Rank (r) | 8 |
 | LoRA Alpha (α) | 16 |
 | LoRA Target Modules (ViT) | `q_proj`, `v_proj` |
@@ -143,7 +143,7 @@ The model is trained on a **CrisisMMD-derived Bengali Flood Corpus** — a curat
 **Loss Function:**
 ```
 L_total = λ_cls · L_cls + λ_cap · L_cap
-        = 1.0 · CrossEntropy(class_logits, y) + 0.2 · NLL(caption_logits, tokens)
+        = 1.0 · CrossEntropy(class_logits, y) + 0.5 · NLL(caption_logits, tokens)
 ```
 
 ---
@@ -207,6 +207,8 @@ Open `http://127.0.0.1:7860` in your browser.
 ---
 
 ## 🖥️ Live Demo Interface
+
+![DisasterNet-Bangla Gradio Demo — live flood image inference with damage classification and Bengali caption generation](docs/demo_screenshot.png)
 
 The Gradio web application provides a real-time inference interface:
 
@@ -289,11 +291,11 @@ If you use this work in your research, please cite:
 
 ```bibtex
 @thesis{disasternet2025,
-  author    = {[Your Name]},
+  author    = {Jahid Hasan},
   title     = {DisasterNet-Bangla: A Multimodal Vision-Language Framework
                for Flood Damage Assessment},
-  school    = {[Your University]},
-  year      = {2025},
+  school    = {Daffodil International University},
+  year      = {2026},
   type      = {B.Sc. Thesis}
 }
 ```
