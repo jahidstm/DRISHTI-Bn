@@ -18,7 +18,7 @@ def train_multitask_model():
     
     # Loss Scaling Factors (Lambda)
     LAMBDA_CLS = 1.0
-    LAMBDA_CAP = 0.2  # Scaling down text generation loss to prevent gradient explosion
+    LAMBDA_CAP = 0.5  # Aligned with thesis Section 5.1: λ_cap = 0.5
     
     os.makedirs(os.path.dirname(MODEL_SAVE_PATH), exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -58,18 +58,23 @@ def train_multitask_model():
             optimizer.zero_grad()
 
             with torch.amp.autocast('cuda'):
-                # Task 1: Forward Pass (Classification)
+                # Task 1: Forward Pass (Classification) — uses full input_ids
                 logits_cls = model(pixel_values, input_ids, attention_mask, task="classification")
                 loss_cls = criterion_cls(logits_cls, labels)
-                
-                # Task 2: Forward Pass (Captioning)
-                # To teach autoregression, we pass the text as input, and the SAME text as target
-                logits_cap = model(pixel_values, input_ids, attention_mask, task="captioning")
-                
-                # Reshaping for CrossEntropy: [batch*seq_len, vocab_size] vs [batch*seq_len]
-                loss_cap = criterion_cap(logits_cap.view(-1, 32000), input_ids.view(-1))
-                
-                # The Core Thesis Equation
+
+                # Task 2: Forward Pass (Captioning) — RIGHT-SHIFTED TEACHER FORCING
+                # FIX: Decoder receives [CLS, w1, ..., wN-1] and must predict [w1, ..., wN, SEP]
+                # This resolves the Autoencoding Identity Bias (Unshifted Teacher Forcing bug)
+                decoder_input_ids  = input_ids[:, :-1]           # drop last token  → decoder input
+                caption_target_ids = input_ids[:, 1:].contiguous()  # drop first token → prediction target
+                decoder_attn_mask  = attention_mask[:, :-1]      # trim mask to match shorter seq
+
+                logits_cap = model(pixel_values, decoder_input_ids, decoder_attn_mask, task="captioning")
+
+                # CrossEntropy over vocab: [batch*(seq-1), vocab_size] vs [batch*(seq-1)]
+                loss_cap = criterion_cap(logits_cap.view(-1, 32000), caption_target_ids.view(-1))
+
+                # The Core Thesis Equation: L_total = λ_cls·L_cls + λ_cap·L_cap
                 total_loss = (LAMBDA_CLS * loss_cls) + (LAMBDA_CAP * loss_cap)
 
             # Backpropagation of the Fused Loss
@@ -102,11 +107,16 @@ def train_multitask_model():
                 
                 with torch.amp.autocast('cuda'):
                     logits_cls = model(pixel_values, input_ids, attention_mask, task="classification")
-                    logits_cap = model(pixel_values, input_ids, attention_mask, task="captioning")
-                    
                     loss_cls = criterion_cls(logits_cls, labels)
-                    loss_cap = criterion_cap(logits_cap.view(-1, 32000), input_ids.view(-1))
-                    
+
+                    # RIGHT-SHIFTED TEACHER FORCING (same fix as training loop)
+                    decoder_input_ids  = input_ids[:, :-1]
+                    caption_target_ids = input_ids[:, 1:].contiguous()
+                    decoder_attn_mask  = attention_mask[:, :-1]
+
+                    logits_cap = model(pixel_values, decoder_input_ids, decoder_attn_mask, task="captioning")
+                    loss_cap = criterion_cap(logits_cap.view(-1, 32000), caption_target_ids.view(-1))
+
                     batch_val_loss = (LAMBDA_CLS * loss_cls) + (LAMBDA_CAP * loss_cap)
                     val_total_loss += batch_val_loss.item()
                 
