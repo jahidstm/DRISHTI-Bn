@@ -9,3 +9,6 @@ matplotlib
 jupyter
 tqdm
 scikit-learn
+nltk
+rouge-score
+bert-score

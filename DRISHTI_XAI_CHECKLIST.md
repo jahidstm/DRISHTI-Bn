@@ -17,13 +17,10 @@
 > Fatal evaluation gaps বন্ধ করা — Q1 publication-এর minimum requirement
 
 - [x] **Task 0.1** ~~Stratified 80/10/10 Data Split~~ — `src/data_loader.py` রিফ্যাক্টর ✅
-  - `random_split` → `sklearn.train_test_split(stratify=)` দিয়ে প্রতিস্থাপিত
-  - তিনটি আলাদা loader: train(3004) / val(375) / test(376)
-  - ৩টি split-এই class ratio identical (~59.7% / 31.6% / 8.8%)
-  - Zero overlap verified ✅
-  - `scikit-learn` → `requirements.txt`-এ যোগ করা হয়েছে ✅
+  - Train=3004 / Val=375 / Test=376 | Class ratio identical | Zero overlap ✅
+  - Commit: `0e36ed2`
 
-- [ ] **Task 0.2** Extended Metrics Module — METEOR, ROUGE-L, BERTScore যোগ
+- [/] **Task 0.2** Extended Metrics Module — `src/metrics.py` নতুন module, `src/benchmark.py` refactor ← **চলমান**
 - [ ] **Task 0.3** Full Test Set Evaluation — v2 checkpoint দিয়ে proper benchmark ⚡ Colab
 - [ ] **Task 0.4** Baseline #1 — Random/Majority Classifier
 - [ ] **Task 0.5** Baseline #2 — ViT-Only (no text encoder)
