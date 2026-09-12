@@ -2,14 +2,16 @@ import os
 import pandas as pd
 from PIL import Image
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, Subset
 from torchvision import transforms
 from transformers import AutoTokenizer
+from sklearn.model_selection import train_test_split
 
 class DisasterNetMultimodalDataset(Dataset):
     def __init__(self, csv_file, root_dir, max_length=128):
         """
-        Custom PyTorch Dataset for DRISHTI-Bn
+        Custom PyTorch Dataset for DRISHTI-Bn / DRISHTI-XAI.
+        Loads CrisisMMD-derived Bengali flood corpus with image, caption, and label.
         """
         self.df = pd.read_csv(csv_file)
         self.root_dir = root_dir
@@ -64,16 +66,99 @@ class DisasterNetMultimodalDataset(Dataset):
             'labels': label
         }
 
-# Helper function to initialize the DataLoader
-def get_dataloaders(csv_path, img_dir, batch_size=32):
-    dataset = DisasterNetMultimodalDataset(csv_file=csv_path, root_dir=img_dir)
+
+def get_split_indices(csv_path, random_state=42):
+    """
+    Compute stratified 80/10/10 train/val/test split indices.
+    Returns (train_indices, val_indices, test_indices) as lists of int.
     
-    # Splitting into 80% Train and 20% Validation
-    train_size = int(0.8 * len(dataset))
-    val_size = len(dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+    Uses sklearn.model_selection.train_test_split with stratify to ensure
+    each split has proportional class representation.
+    """
+    df = pd.read_csv(csv_path)
+    labels = df['macro_label'].values
+    all_indices = list(range(len(df)))
+
+    # Step 1: Split into 80% train and 20% temp (val + test)
+    train_idx, temp_idx = train_test_split(
+        all_indices,
+        test_size=0.2,
+        stratify=labels,
+        random_state=random_state
+    )
+
+    # Step 2: Split temp into 50/50 → 10% val + 10% test of total
+    temp_labels = labels[temp_idx]
+    val_idx, test_idx = train_test_split(
+        temp_idx,
+        test_size=0.5,
+        stratify=temp_labels,
+        random_state=random_state
+    )
+
+    return train_idx, val_idx, test_idx
+
+
+def print_split_stats(df, train_idx, val_idx, test_idx):
+    """Print class distribution for each split for verification."""
+    label_names = {0: 'Severe_Damage', 1: 'Humanitarian_Rescue', 2: 'Affected_People'}
+    label_map = {'Severe_Damage': 0, 'Humanitarian_Rescue': 1, 'Affected_People': 2}
+    
+    print(f"\n{'='*60}")
+    print(f"📊 STRATIFIED SPLIT STATISTICS")
+    print(f"{'='*60}")
+    print(f"Total samples : {len(df)}")
+    print(f"Train samples : {len(train_idx)} ({len(train_idx)/len(df)*100:.1f}%)")
+    print(f"Val samples   : {len(val_idx)} ({len(val_idx)/len(df)*100:.1f}%)")
+    print(f"Test samples  : {len(test_idx)} ({len(test_idx)/len(df)*100:.1f}%)")
+    
+    for split_name, indices in [("Train", train_idx), ("Val", val_idx), ("Test", test_idx)]:
+        split_labels = df.iloc[indices]['macro_label'].value_counts()
+        print(f"\n  {split_name} class distribution:")
+        for cls_name in ['Severe_Damage', 'Humanitarian_Rescue', 'Affected_People']:
+            count = split_labels.get(cls_name, 0)
+            pct = count / len(indices) * 100
+            print(f"    {cls_name:<22}: {count:>5} ({pct:.1f}%)")
+    print(f"{'='*60}\n")
+
+
+def get_dataloaders(csv_path, img_dir, batch_size=32, split='all', random_state=42):
+    """
+    Initialize DataLoaders with stratified 80/10/10 split.
+    
+    Args:
+        csv_path: Path to master_dataset_translated.csv
+        img_dir: Path to data/processed/ directory
+        batch_size: Batch size for DataLoader
+        split: 'all' returns (train, val, test) loaders;
+               'train', 'val', 'test' returns only that specific loader
+        random_state: Random seed for reproducibility
+    
+    Returns:
+        If split='all': (train_loader, val_loader, test_loader)
+        Otherwise: single DataLoader for the requested split
+    """
+    dataset = DisasterNetMultimodalDataset(csv_file=csv_path, root_dir=img_dir)
+    train_idx, val_idx, test_idx = get_split_indices(csv_path, random_state=random_state)
+    
+    # Print stats on first call for verification
+    print_split_stats(dataset.df, train_idx, val_idx, test_idx)
+    
+    train_dataset = Subset(dataset, train_idx)
+    val_dataset = Subset(dataset, val_idx)
+    test_dataset = Subset(dataset, test_idx)
     
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     
-    return train_loader, val_loader
+    if split == 'all':
+        return train_loader, val_loader, test_loader
+    elif split == 'train':
+        return train_loader
+    elif split == 'val':
+        return val_loader
+    elif split == 'test':
+        return test_loader
+    else:
+        raise ValueError(f"Invalid split '{split}'. Use 'all', 'train', 'val', or 'test'.")
