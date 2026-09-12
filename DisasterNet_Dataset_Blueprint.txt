@@ -1,0 +1,48 @@
+DisasterNet-Bangla: Dataset Preparation Blueprint
+Execution Date: May 2026
+Status: Theoretical Framework & Pipeline Locked for Phase 3 Physical Coding.
+
+1. Dataset Origin: CrisisMMD (Filtered for Flood Events: Harvey, Irma, Sri Lanka).
+2. Target Pipeline: Translating English captions to Bengali using deep-translator.
+
+3. The Resilient Batch Translation Script (For Future Execution):
+
+Python
+import pandas as pd
+import time
+from deep_translator import GoogleTranslator
+from tqdm import tqdm
+
+def batch_translation_with_checkpointing(df_source, chunk_size=100):
+    translator = GoogleTranslator(source='en', target='bn')
+    target_csv = 'DisasterNet_Bangla_Dataset_Final.csv'
+    pd.DataFrame(columns=['image_path', 'en_caption', 'bn_caption', 'severity_label']).to_csv(target_csv, index=False)
+    
+    for start in tqdm(range(0, len(df_source), chunk_size), desc="Batch Processing"):
+        chunk = df_source.iloc[start:start + chunk_size]
+        translated_chunk = []
+        
+        for _, row in chunk.iterrows():
+            try:
+                bn_text = translator.translate(row['en_caption'])
+                translated_chunk.append({'image_path': row['image_path'], 'en_caption': row['en_caption'], 'bn_caption': bn_text, 'severity_label': row['severity_label']})
+                time.sleep(1) # Evasion tactic
+            except Exception as e:
+                translated_chunk.append({'image_path': row['image_path'], 'en_caption': row['en_caption'], 'bn_caption': '[FAILED]', 'severity_label': row['severity_label']})
+                time.sleep(5)
+        
+        pd.DataFrame(translated_chunk).to_csv(target_csv, mode='a', header=False, index=False)
+4. The Stratified Split Logic (To prevent Data Leakage):
+
+Python
+from sklearn.model_selection import train_test_split
+# 80/10/10 Ratio Split enforcing Class Distribution
+train_df, temp_df = train_test_split(df, test_size=0.20, stratify=df['severity_label'], random_state=42)
+val_df, test_df = train_test_split(temp_df, test_size=0.50, stratify=temp_df['severity_label'], random_state=42)
+5. Locked Dataset Target Statistics (8,000 Samples):
+
+Train Set (80% - 6,400 samples): Little (3200), Mild (2240), Severe (960)
+
+Val Set (10% - 800 samples): Little (400), Mild (280), Severe (120)
+
+Test Set (10% - 800 samples): Little (400), Mild (280), Severe (120)
