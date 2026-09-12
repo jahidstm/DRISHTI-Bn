@@ -1,80 +1,89 @@
 # DRISHTI-XAI: Master Implementation Checklist
-> **Project:** DisasterNet-Bangla (DRISHTI-Bn)  
-> **Extension:** DRISHTI-XAI (Explainable AI & Uncertainty Calibration for Multimodal Disaster Assessment)  
-> **Last Updated:** ১২ সেপ্টেম্বর ২০২৬ | **Status:** 🟡 In Progress
+> **Last Updated:** ১২ সেপ্টেম্বর ২০২৬
+> **Branch:** `main` | **Target:** IEEE Access / ISCRAM 2027
 
 ---
 
-## 📊 Quick Progress Overview
-- **Phase 0:** 1 / 8 Completed (12.5%)
-- **Phase 1:** 0 / 6 Completed (0%)
-- **Phase 2:** 0 / 5 Completed (0%)
-- **Phase 3:** 0 / 4 Completed (0%)
-- **Phase 4:** 0 / 5 Completed (0%)
-- **Overall Progress:** 1 / 28 Tasks (3.6%)
+## ⚠️ গুরুত্বপূর্ণ Writing Rule (ভুলবে না!)
+
+> **Thesis writing (`DRISHTI_Bn_Thesis_Working_Draft_v1.txt`) কখনো সরাসরি edit করব না।**
+> প্রতিটি heading/subheading-এর জন্য আগে তোমাকে একটি **NotebookLM prompt** দেব।
+> তুমি সেটা NotebookLM-এ দিয়ে writing generate করবে এবং draft-এ যোগ করবে।
+> **আমার অনুমতি ছাড়া কোনো writing section touch হবে না।**
 
 ---
 
-## Phase 0: Foundation Fixes (ন্যূনতম প্রকাশনা যোগ্যতা)
-> *এই Phase সম্পন্ন না হলে কোনো Extension বা Ablation পেপারের রিভিউতে টিকবে না।*
+## Phase 0: Foundation Fixes
+> Fatal evaluation gaps বন্ধ করা — Q1 publication-এর minimum requirement
 
-- [x] **Task 0.1:** Stratified 80/10/10 Data Split — `src/data_loader.py` রিফ্যাক্টর (✅ Commit `c52a989`)
-- [/] **Task 0.2:** Extended Metrics Module — `src/metrics.py` (METEOR, ROUGE-L, BERTScore যোগ)
-- [ ] **Task 0.3:** Full Test Set Evaluation — ৩৭৬ স্যাম্পলের টেস্ট সেটে বর্তমান v2 মডেল বেঞ্চমার্ক ⚡ Colab
-- [ ] **Task 0.4:** Baseline #1 — Random & Majority Class Baseline
-- [ ] **Task 0.5:** Baseline #2 — ViT-Only Classifier (Unimodal Image Baseline)
-- [ ] **Task 0.6:** Baseline #3 — BanglaBERT-Only Classifier (Unimodal Text Baseline)
-- [ ] **Task 0.7:** Baseline #4 — Full Fine-Tuning (Without LoRA) ⚡ Colab
-- [ ] **Task 0.8:** Baseline #5 — CrisisViT / SOTA Architecture Comparison ⚡ Colab
+- [x] **Task 0.1** ~~Stratified 80/10/10 Data Split~~ — `src/data_loader.py` রিফ্যাক্টর ✅
+  - `random_split` → `sklearn.train_test_split(stratify=)` দিয়ে প্রতিস্থাপিত
+  - তিনটি আলাদা loader: train(3004) / val(375) / test(376)
+  - ৩টি split-এই class ratio identical (~59.7% / 31.6% / 8.8%)
+  - Zero overlap verified ✅
+  - `scikit-learn` → `requirements.txt`-এ যোগ করা হয়েছে ✅
 
----
-
-## Phase 1: Ablation Study (Component Contribution Analysis)
-> *মডেলের প্রতিটি কম্পোনেন্টের একক ও যৌথ কার্যকারিতা প্রমাণ।*
-
-- [ ] **Task 1.1:** Ablation — Classification Only ($\lambda_{cap} = 0$) ⚡ Colab
-- [ ] **Task 1.2:** Ablation — Caption Only ($\lambda_{cls} = 0$) ⚡ Colab
-- [ ] **Task 1.3:** Ablation — Frozen Encoders (No LoRA adaptation) ⚡ Colab
-- [ ] **Task 1.4:** Ablation — No Cross-Attention (Self-Attention Decoder Only) ⚡ Colab
-- [ ] **Task 1.5:** Ablation — LoRA Rank Sensitivity Analysis ($r \in \{4, 8, 16\}$) ⚡ Colab
-- [ ] **Task 1.6:** Results Compilation — Comprehensive Ablation Table & Trade-off Analysis
+- [ ] **Task 0.2** Extended Metrics Module — METEOR, ROUGE-L, BERTScore যোগ
+- [ ] **Task 0.3** Full Test Set Evaluation — v2 checkpoint দিয়ে proper benchmark ⚡ Colab
+- [ ] **Task 0.4** Baseline #1 — Random/Majority Classifier
+- [ ] **Task 0.5** Baseline #2 — ViT-Only (no text encoder)
+- [ ] **Task 0.6** Baseline #3 — BanglaBERT-Only (no image)
+- [ ] **Task 0.7** Baseline #4 — Full Fine-Tune (no LoRA) ⚡ Colab
+- [ ] **Task 0.8** Baseline #5 — CrisisViT SOTA comparison ⚡ Colab
 
 ---
 
-## Phase 2: XAI Extension Modules (DRISHTI-XAI Core Innovation)
-> *ডিসিশন-সাপোর্ট এবং রেসপন্সিবল এআই আর্কিটেকচার।*
+## Phase 1: Ablation Study
+> কোন component কতটুকু contribute করছে তা পরিমাপ
 
-- [ ] **Task 2.1:** Grad-CAM Implementation — ViT visual attention heatmaps (`src/xai/gradcam.py`)
-- [ ] **Task 2.2:** Cross-Attention Heatmaps — Multimodal Token-to-Patch Alignment Map (`src/xai/cross_attn.py`)
-- [ ] **Task 2.3:** Temperature Scaling — Post-hoc Confidence Calibration with ECE metric (`src/xai/calibration.py`)
-- [ ] **Task 2.4:** MC Dropout Uncertainty — Predictive Entropy & Confidence Bounds (`src/xai/uncertainty.py`)
-- [ ] **Task 2.5:** Integrated XAI Pipeline — Single-call Explanation & Reliability Generator
-
----
-
-## Phase 3: Human Evaluation (মানবিক মূল্যায়ন)
-> *Q1 পেপারের অন্যতম প্রধান মানদণ্ড।*
-
-- [ ] **Task 3.1:** Protocol Design — ১০০ স্যাম্পল বাছাই ও মানদণ্ড গাইডলাইন (Fluency, Adequacy, Faithfulness)
-- [ ] **Task 3.2:** Annotator Recruitment & Setup — ৩ জন নেটিভ বাংলা স্পিকার
-- [ ] **Task 3.3:** Annotation Execution & Data Collection
-- [ ] **Task 3.4:** Inter-Annotator Agreement — Fleiss' Kappa / Krippendorff's Alpha
+- [ ] **Task 1.1** Ablation — Classification Only (λ_cap = 0) ⚡ Colab
+- [ ] **Task 1.2** Ablation — Caption Only (λ_cls = 0) ⚡ Colab
+- [ ] **Task 1.3** Ablation — No LoRA (Frozen Encoders) ⚡ Colab
+- [ ] **Task 1.4** Ablation — No Cross-Attention Decoder ⚡ Colab
+- [ ] **Task 1.5** Ablation — LoRA Rank Sensitivity (r=4, r=8, r=16) ⚡ Colab
+- [ ] **Task 1.6** Results Compilation — Ablation summary table
 
 ---
 
-## Phase 4: Paper Writing & Submission
-> *টার্গেট: IEEE Access (Q1) / ISCRAM 2027*
+## Phase 2: XAI Extension Modules
+> DRISHTI-XAI-এর নতুন components
 
-- [ ] **Task 4.1:** Paper Structure & Abstract Draft
-- [ ] **Task 4.2:** High-Resolution Figures & LaTeX Tables
-- [ ] **Task 4.3:** Full Manuscript Draft (IEEE Template)
-- [ ] **Task 4.4:** Supervisor Review & Iterative Polishing
-- [ ] **Task 4.5:** Final Submission & Open-Source Artifact Release
+- [ ] **Task 2.1** Grad-CAM — ViT attention layer visual explanation
+- [ ] **Task 2.2** Cross-Attention Visualization — Token-to-patch alignment
+- [ ] **Task 2.3** Temperature Scaling — Post-hoc confidence calibration
+- [ ] **Task 2.4** MC Dropout Uncertainty — Predictive entropy
+- [ ] **Task 2.5** Integrated XAI Pipeline — সব module একত্রিত
+
+---
+
+## Phase 3: Human Evaluation
+> মানবিক মূল্যায়ন — caption quality proof
+
+- [ ] **Task 3.1** Evaluation Protocol Design — ১০০ sample, annotation guidelines
+- [ ] **Task 3.2** Annotator Recruitment — ৩ জন Bengali speaker
+- [ ] **Task 3.3** Annotation Execution — Fluency, Adequacy, Faithfulness scoring
+- [ ] **Task 3.4** Inter-Annotator Agreement — Cohen's Kappa
+
+---
+
+## Phase 4: Thesis Writing & Paper Submission
+> NotebookLM workflow-এ চলবে — প্রতিটি section-এ আলাদা prompt পাবে
+
+- [ ] **Task 4.1** Paper Structure & Abstract Draft
+  - 🗒️ *NotebookLM prompt পাবে*
+- [ ] **Task 4.2** Figures & Tables — Architecture diagram, heatmaps, result tables
+- [ ] **Task 4.3** Full Draft — IEEE Access format
+  - 🗒️ *প্রতিটি section-এ NotebookLM prompt পাবে*
+- [ ] **Task 4.4** Internal Review & Revision
+- [ ] **Task 4.5** Submission → IEEE Access / ISCRAM 2027
 
 ---
 
 ### Legend
-- `[ ]` = অসম্পন্ন (Pending)
-- `[/]` = চলমান (In Progress)
-- `[x]` = সম্পন্ন (Completed)
-- ⚡ Colab = GPU প্রয়োজন (Google Colab স্ক্রিপ্ট সরবরাহ করা হবে)
+| Symbol | অর্থ |
+|--------|------|
+| `[ ]` | অসম্পন্ন |
+| `[/]` | চলমান |
+| `[x]` | সম্পন্ন ✅ |
+| ⚡ Colab | Google Colab-এ GPU দরকার |
+| 🗒️ | NotebookLM prompt দেওয়া হবে |
