@@ -24,6 +24,12 @@ The system fuses a **Vision Transformer (ViT-Base/16)** image encoder with a **B
 > **Thesis Title:** *DRISHTI-Bn: A Parameter-Efficient Multimodal Vision-Language 
 Framework for Simultaneous Flood Damage Classification and Bengali Caption Generation*
 
+> **Documentation:** A public-facing research summary is available at the
+> [portfolio research documentation page](https://jahidstm.lovable.app/research/drishti-bn).
+> It includes the current architecture, model-card, dataset, reproducibility,
+> ethics, and citation documentation. Final research claims should be checked
+> against the code and experiment records.
+
 ---
 
 ## 🏗️ Architecture
@@ -154,7 +160,7 @@ L_total = λ_cls · L_cls + λ_cap · L_cap
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/<your-username>/DRISHTI-Bn.git
+git clone https://github.com/jahidstm/DRISHTI-Bn.git
 cd DRISHTI-Bn
 
 python -m venv venv
