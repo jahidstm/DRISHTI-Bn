@@ -1,5 +1,5 @@
 # DRISHTI-XAI: Master Implementation Checklist
-> **Last Updated:** ১২ সেপ্টেম্বর ২০২৬
+> **Last Updated:** ২৩ সেপ্টেম্বর ২০২৬
 > **Branch:** `main` | **Target:** IEEE Access / ISCRAM 2027
 
 ---
@@ -20,9 +20,18 @@
   - Train=3004 / Val=375 / Test=376 | Class ratio identical | Zero overlap ✅
   - Commit: `0e36ed2`
 
-- [/] **Task 0.2** Extended Metrics Module — `src/metrics.py` নতুন module, `src/benchmark.py` refactor ← **চলমান**
-- [ ] **Task 0.3** Full Test Set Evaluation — v2 checkpoint দিয়ে proper benchmark ⚡ Colab
-- [ ] **Task 0.4** Baseline #1 — Random/Majority Classifier
+- [x] **Task 0.2** ~~Extended Metrics Module — `src/metrics.py` নতুন module, `src/benchmark.py` refactor~~ ✅
+  - BLEU (1-4), METEOR, ROUGE-L, BERTScore 
+  - `metrics.py` imported to `benchmark.py`
+  - Commit: `b82b135`
+- [x] **Task 0.3** ~~Full Test Set Evaluation — v2 checkpoint দিয়ে proper benchmark~~ ✅
+  - **[CLS] Macro F1: 77.95%** | Precision: 93.28% | Recall: 73.03%
+  - Per-class: Severe_Damage F1=92.53% ✅ | Humanitarian_Rescue F1=88.00% ✅ | **Affected_People F1=53.33% ⚠️ (class imbalance)**
+  - **[CAP] BLEU-4: 6.13** | METEOR: 0.32 | ROUGE-L: 0.56 | **BERTScore-F1: 60.35%**
+  - ⚠️ Key Finding: Captioning BLEU scores খুবই কম → beam search + training improvement দরকার
+- [x] **Task 0.4** ~~Baseline #1 — Random/Majority Classifier~~ ✅
+  - Majority F1=**24.89%** | Uniform Random F1=**29.21%** | Stratified Random F1=**39.95%**
+  - DisasterNet-v2 vs Best Baseline: **77.95% vs 39.95% (+38pp gain!)** ✅
 - [ ] **Task 0.5** Baseline #2 — ViT-Only (no text encoder)
 - [ ] **Task 0.6** Baseline #3 — BanglaBERT-Only (no image)
 - [ ] **Task 0.7** Baseline #4 — Full Fine-Tune (no LoRA) ⚡ Colab
