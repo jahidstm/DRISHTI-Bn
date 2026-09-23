@@ -73,7 +73,7 @@ class TextOnlyDataset(Dataset):
         self.max_len   = max_len
 
         # Detect caption column
-        for col in ['bangla_caption', 'caption_bn', 'caption', 'text']:
+        for col in ['bangla_caption', 'bengali_caption', 'caption_bn', 'caption', 'text']:
             if col in self.df.columns:
                 self.text_col = col
                 break
