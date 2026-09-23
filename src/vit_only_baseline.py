@@ -19,6 +19,7 @@ Expected runtime: ~10-12 min on T4 GPU (10 epochs, 376 test samples)
 
 import os
 import sys
+import random
 import numpy as np
 import pandas as pd
 from PIL import Image
@@ -33,7 +34,6 @@ from torchvision import transforms
 from transformers import ViTModel
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, precision_score, recall_score, confusion_matrix
-from peft import LoraConfig, get_peft_model
 
 # ── Config ────────────────────────────────────────────────────────────────────
 CSV_PATH    = '../data/processed/master_dataset_translated.csv'
@@ -45,6 +45,25 @@ EPOCHS      = 10
 BATCH_SIZE  = 32
 LR          = 2e-4
 DEVICE      = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+# ── Reproducibility ───────────────────────────────────────────────────────────
+def set_seed(seed: int = 42):
+    """Fix all random seeds for full reproducibility (standard academic practice)."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark     = False
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    print(f"[+] Random seed fixed: {seed} (deterministic mode ON)")
+
+def seed_worker(worker_id):
+    """Worker seed initialiser for DataLoader reproducibility."""
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
 
 
 # ── Dataset (Image-only, no text) ─────────────────────────────────────────────
@@ -185,9 +204,11 @@ def evaluate(model, loader):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
+    set_seed(RANDOM_SEED)   # ← deterministic reproducibility
+
     print(f"\n{'='*62}")
     print(f"  DRISHTI-XAI -- Task 0.5: ViT-Only Baseline (No Text)")
-    print(f"  Device: {DEVICE}")
+    print(f"  Device: {DEVICE}  |  Seed: {RANDOM_SEED}")
     print(f"{'='*62}\n")
 
     # ── Data ──────────────────────────────────────────────────────────────
@@ -196,8 +217,11 @@ def main():
 
     print(f"[+] Split: Train={len(train_idx)} | Val={len(val_idx)} | Test={len(test_idx)}")
 
+    g = torch.Generator()
+    g.manual_seed(RANDOM_SEED)
     train_loader = DataLoader(Subset(dataset, train_idx), batch_size=BATCH_SIZE,
-                              shuffle=True,  num_workers=2, pin_memory=True)
+                              shuffle=True, num_workers=2, pin_memory=True,
+                              worker_init_fn=seed_worker, generator=g)
     val_loader   = DataLoader(Subset(dataset, val_idx),   batch_size=BATCH_SIZE,
                               shuffle=False, num_workers=2, pin_memory=True)
     test_loader  = DataLoader(Subset(dataset, test_idx),  batch_size=BATCH_SIZE,
