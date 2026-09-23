@@ -92,14 +92,16 @@ class ViTOnlyClassifier(nn.Module):
         print("[+] Loading ViT encoder (google/vit-base-patch16-224-in21k)...")
         self.vit = ViTModel.from_pretrained("google/vit-base-patch16-224-in21k")
 
-        # Freeze all ViT layers, then unfreeze last 2 blocks + pooler
+        # Freeze all ViT layers first
         for param in self.vit.parameters():
             param.requires_grad = False
-        for layer in self.vit.encoder.layer[-2:]:
-            for param in layer.parameters():
+
+        # Unfreeze last 2 transformer blocks + pooler (by name matching)
+        for name, param in self.vit.named_parameters():
+            if ("encoder.layer.10" in name or
+                "encoder.layer.11" in name or
+                "pooler" in name):
                 param.requires_grad = True
-        for param in self.vit.pooler.parameters():
-            param.requires_grad = True
 
         trainable = sum(p.numel() for p in self.vit.parameters() if p.requires_grad)
         total     = sum(p.numel() for p in self.vit.parameters())
