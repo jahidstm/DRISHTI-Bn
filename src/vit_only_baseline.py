@@ -92,14 +92,18 @@ class ViTOnlyClassifier(nn.Module):
         print("[+] Loading ViT encoder (google/vit-base-patch16-224-in21k)...")
         self.vit = ViTModel.from_pretrained("google/vit-base-patch16-224-in21k")
 
-        lora_cfg = LoraConfig(
-            r=8, lora_alpha=16,
-            target_modules=["query", "value"],
-            lora_dropout=0.1, bias="none"
-        )
-        self.vit = get_peft_model(self.vit, lora_cfg)
-        trainable, total = self.vit.get_nb_trainable_parameters()
-        print(f"[+] LoRA injected — Trainable: {trainable:,} / {total:,} params "
+        # Freeze all ViT layers, then unfreeze last 2 blocks + pooler
+        for param in self.vit.parameters():
+            param.requires_grad = False
+        for layer in self.vit.encoder.layer[-2:]:
+            for param in layer.parameters():
+                param.requires_grad = True
+        for param in self.vit.pooler.parameters():
+            param.requires_grad = True
+
+        trainable = sum(p.numel() for p in self.vit.parameters() if p.requires_grad)
+        total     = sum(p.numel() for p in self.vit.parameters())
+        print(f"[+] Partial fine-tune — Trainable: {trainable:,} / {total:,} params "
               f"({100*trainable/total:.2f}%)")
 
         self.classifier = nn.Sequential(
