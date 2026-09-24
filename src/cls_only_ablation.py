@@ -142,6 +142,20 @@ def get_split_indices(csv_path, rs=42):
     return tr, vl, ts
 
 
+# ---------- LoRA target detection (works across HF model versions) ------------
+def _find_lora_targets(model, candidates):
+    """Return the subset of candidate names that actually exist as
+    named modules in *model*.  Raises if none are found."""
+    names = {name.split(".")[-1] for name, _ in model.named_modules()}
+    found = [c for c in candidates if c in names]
+    if not found:
+        raise ValueError(
+            f"None of {candidates} found in model. "
+            f"Available leaf names (sample): {list(names)[:20]}"
+        )
+    return found
+
+
 # ---------- Model (DisasterNet-v2 architecture, identical to train.py) -------
 import math
 
@@ -175,14 +189,21 @@ class DisasterNetAblation(nn.Module):
 
         # LoRA (same config as DisasterNet-v2)
         print("[+] Injecting LoRA adapters...")
+
+        # Detect actual attention module names in ViT
+        vit_target = _find_lora_targets(self.vision_encoder, ["query", "value", "q_proj", "v_proj"])
+        bert_target = _find_lora_targets(self.text_encoder,  ["query", "value", "q_proj", "v_proj"])
+        print(f"    ViT  LoRA targets : {vit_target}")
+        print(f"    BERT LoRA targets : {bert_target}")
+
         vit_lora = LoraConfig(
             r=8, lora_alpha=16,
-            target_modules=["query", "value"],
+            target_modules=vit_target,
             lora_dropout=0.1, bias="none"
         )
         bert_lora = LoraConfig(
             r=8, lora_alpha=16,
-            target_modules=["query", "value"],
+            target_modules=bert_target,
             lora_dropout=0.1, bias="none"
         )
         self.vision_encoder = get_peft_model(self.vision_encoder, vit_lora)
