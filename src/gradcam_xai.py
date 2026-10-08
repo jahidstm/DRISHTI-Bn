@@ -213,26 +213,60 @@ class ViTGradCAM:
         self._register_hooks()
 
     def _register_hooks(self):
-        # ViT-এর last transformer encoder layer-এর output
-        # PEFT wrapping: model.vision_encoder.base_model.model.vit.encoder.layer[-1]
+        """
+        ViT encoder-এর শেষ block খোঁজা — HuggingFace ViTModel-এ
+        path হলো: .encoder.layer[-1]  (NOT .vit.encoder.layer)
+        PEFT wrapping-এর কারণে কয়েকটি path try করা হচ্ছে।
+        """
+        last_block = None
+
+        # Path 1: PEFT → base_model → model → encoder (HF ViTModel সরাসরি)
         try:
-            # Try PEFT-wrapped model path
-            last_block = self.model.vision_encoder.base_model.model.vit.encoder.layer[-1]
+            last_block = (self.model.vision_encoder
+                          .base_model.model.encoder.layer[-1])
+            print("[+] Grad-CAM hook path: base_model.model.encoder.layer[-1]")
         except AttributeError:
+            pass
+
+        # Path 2: PEFT passthrough → encoder
+        if last_block is None:
             try:
-                last_block = self.model.vision_encoder.vit.encoder.layer[-1]
+                last_block = self.model.vision_encoder.encoder.layer[-1]
+                print("[+] Grad-CAM hook path: vision_encoder.encoder.layer[-1]")
             except AttributeError:
-                raise AttributeError(
-                    "Cannot locate ViT encoder layers. "
-                    "Check model structure with model.vision_encoder.named_modules()."
+                pass
+
+        # Path 3: Generic scan — named_modules() থেকে encoder blocks খোঁজা
+        if last_block is None:
+            encoder_blocks = [
+                m for name, m in self.model.vision_encoder.named_modules()
+                if "encoder.layer" in name and not any(
+                    sub in name for sub in
+                    ["attention", "intermediate", "output", "layernorm"]
                 )
+            ]
+            if encoder_blocks:
+                last_block = encoder_blocks[-1]
+                print(f"[+] Grad-CAM hook path: generic scan → found {len(encoder_blocks)} blocks, using last")
+
+        if last_block is None:
+            # Debug: print available top-level module names to help diagnose
+            top_names = [n for n, _ in self.model.vision_encoder.named_children()]
+            raise AttributeError(
+                f"Cannot locate ViT encoder layers. "
+                f"Top-level children of vision_encoder: {top_names}"
+            )
 
         def save_activation(module, input, output):
-            # output shape: [B, num_tokens, hidden_dim] = [B, 197, 768]
-            self.activations = output[0].detach() if isinstance(output, tuple) else output.detach()
+            # output: [B, num_tokens, hidden_dim] = [B, 197, 768]
+            self.activations = (output[0].detach()
+                                if isinstance(output, tuple)
+                                else output.detach())
 
         def save_gradient(module, grad_input, grad_output):
-            self.gradients = grad_output[0].detach() if isinstance(grad_output, tuple) else grad_output.detach()
+            self.gradients = (grad_output[0].detach()
+                              if isinstance(grad_output, tuple)
+                              else grad_output.detach())
 
         h1 = last_block.register_forward_hook(save_activation)
         h2 = last_block.register_full_backward_hook(save_gradient)
