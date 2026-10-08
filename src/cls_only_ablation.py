@@ -377,6 +377,8 @@ def main():
         if vf1 > best_f1:
             best_f1, best_ep = vf1, ep
             best_st = {k: v.cpu().clone() for k, v in model.state_dict().items()}
+            torch.save(best_st, "best_cls_only.pt")
+            print(f"     → Checkpoint saved: best_cls_only.pt (Val F1={vf1:.2f}%)")  
 
     print(f"\n[+] Best checkpoint: Epoch {best_ep} (Val Macro-F1={best_f1:.2f}%)")
     model.load_state_dict(best_st); model.to(DEVICE)

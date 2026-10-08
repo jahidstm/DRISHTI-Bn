@@ -292,8 +292,9 @@ class ViTGradCAM:
         # Weighted activation sum → scalar per patch → [196]
         cam = (patch_acts * weights.unsqueeze(1)).sum(dim=1)
 
-        # ReLU: keep only positive activations
-        cam = torch.relu(cam)
+        # abs(): positive AND negative gradients দুটোই heatmap-এ contribute করে
+        # (ReLU ব্যবহার করলে সব zero হয়ে যায় কিছু layer-এ)
+        cam = cam.abs()
 
         # Reshape to 14×14 patch grid
         side = int(math.sqrt(cam.shape[0]))   # 14 for ViT-Base/16
@@ -330,8 +331,12 @@ def save_gradcam_figure(img_vis_tensor, cam, pred_class, true_class,
     img_np = img_vis_tensor.permute(1, 2, 0).cpu().numpy()
     img_np = np.clip(img_np, 0, 1)
 
-    # Colormap
-    heatmap = cm.get_cmap('jet')(cam)[:, :, :3]  # [224, 224, 3]
+    # Colormap (matplotlib 3.7+ compatible)
+    try:
+        cmap = matplotlib.colormaps['jet']
+    except AttributeError:
+        cmap = cm.get_cmap('jet')  # fallback for older matplotlib
+    heatmap = cmap(cam)[:, :, :3]  # [224, 224, 3]
 
     # Overlay (alpha blend)
     alpha   = 0.45
@@ -411,6 +416,8 @@ def main():
     ap.add_argument("--split",        type=str, default="test",
                     choices=["train", "val", "test"],
                     help="Which split to visualize (default: test)")
+    ap.add_argument("--checkpoint",   type=str, default="best_cls_only.pt",
+                    help="Path to Task 1.1 trained checkpoint (default: best_cls_only.pt)")
     args = ap.parse_args()
 
     set_seed(RANDOM_SEED)
@@ -443,6 +450,19 @@ def main():
     model = DisasterNetAblation(num_classes=3).to(DEVICE)
     total_p = sum(p.numel() for p in model.parameters())
     print(f"[+] Model parameters: {total_p:,}")
+
+    # ── Load trained checkpoint ───────────────────────────────────────────────
+    ckpt_path = args.checkpoint
+    if os.path.isfile(ckpt_path):
+        print(f"[+] Loading checkpoint: {ckpt_path}")
+        ckpt = torch.load(ckpt_path, map_location=DEVICE)
+        model.load_state_dict(ckpt)
+        print(f"[+] Checkpoint loaded successfully ✓")
+    else:
+        print(f"[!] WARNING: Checkpoint '{ckpt_path}' not found!")
+        print(f"[!] Model is using RANDOM weights — predictions will be meaningless.")
+        print(f"[!] Run Task 1.1 first to generate 'best_cls_only.pt', then re-run.")
+        print(f"[!] Continuing anyway for pipeline testing...")
 
     # ── Init Grad-CAM engine
     gradcam = ViTGradCAM(model)
