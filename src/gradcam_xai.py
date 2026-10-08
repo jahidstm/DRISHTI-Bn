@@ -196,166 +196,130 @@ class ViTGradCAM:
     """
     Gradient-weighted Class Activation Map for Vision Transformer.
 
-    Strategy:
-      1. Forward pass-এ last ViT attention layer-এর output feature hook করা
-      2. Target class score-এর gradient সেই feature-এর সাপেক্ষে নেওয়া
-      3. Gradient × Feature → channel-wise average → 14×14 heatmap
-      4. Upsample to 224×224 → image-এ overlay
+    Strategy (retain_grad approach — most reliable):
+      1. Forward hook-এ activation tensor-এ retain_grad() call করা
+      2. backward() এর পরে activation.grad থেকে gradient নেওয়া
+         (register_full_backward_hook ব্যবহার না করে — PyTorch version issue এড়াতে)
+      3. Gradient × Activation → channel-wise avg → 14×14 heatmap → upsample
 
-    ViT-Base/16-এ: 197 tokens (1 CLS + 196 patches), patch_size=14x14
+    ViT-Base/16: 197 tokens (1 CLS + 196 patches), grid = 14×14
     """
 
     def __init__(self, model):
         self.model       = model
-        self.gradients   = None
-        self.activations = None
-        self._hooks      = []
-        self._register_hooks()
+        self._last_block = self._find_last_vit_block()
 
-    def _register_hooks(self):
-        """
-        isinstance(m, ViTLayer) দিয়ে সরাসরি ViT blocks খোঁজা।
-        PEFT-এর যেকোনো wrapping path-এ কাজ করবে কারণ ViTLayer class
-        PEFT দ্বারা কখনো replace হয় না — শুধু এর ভেতরের Linear layers হয়।
-        """
+    def _find_last_vit_block(self):
+        """isinstance scan — PEFT path-agnostic।"""
         from transformers.models.vit.modeling_vit import ViTLayer
-
-        last_block = None
-
-        # ─── সবচেয়ে robust: type দিয়ে scan করা ───────────────────────────
         vit_layers = [
-            m for _, m in self.model.vision_encoder.named_modules()
+            (n, m) for n, m in self.model.vision_encoder.named_modules()
             if isinstance(m, ViTLayer)
         ]
-
-        if vit_layers:
-            last_block = vit_layers[-1]
-            print(f"[+] Grad-CAM: found {len(vit_layers)} ViTLayer blocks "
-                  f"via isinstance scan → hooking last block (layer {len(vit_layers)-1})")
-
-        # ─── Fallback: named_modules-এ 'layer.11' দিয়ে খোঁজা ──────────────
-        if last_block is None:
-            for name, m in self.model.vision_encoder.named_modules():
-                # ViT-Base: 12 layers (0-11), ViT-Large: 24 layers (0-23)
-                if name.endswith("layer.11") or name.endswith("layer.23"):
-                    last_block = m
-                    print(f"[+] Grad-CAM: fallback path matched '{name}'")
-                    break
-
-        # ─── Final fallback: last encoder-like module with 768-dim output ─
-        if last_block is None:
-            candidates = []
-            for name, m in self.model.vision_encoder.named_modules():
-                if ("encoder" in name and "layer" in name
-                        and "attention" not in name
-                        and "intermediate" not in name
-                        and "output" not in name
-                        and "layernorm" not in name):
-                    candidates.append((name, m))
-            if candidates:
-                last_block = candidates[-1][1]
-                print(f"[+] Grad-CAM: last-resort fallback → '{candidates[-1][0]}'")
-
-        if last_block is None:
-            # 최후의 diagnostic: 실제 모듈 구조 출력
-            all_names = [n for n, _ in self.model.vision_encoder.named_modules()]
-            sample = all_names[:30]
+        if not vit_layers:
+            all_names = [n for n, _ in
+                         self.model.vision_encoder.named_modules()][:30]
             raise AttributeError(
-                f"Cannot locate any ViTLayer block.\n"
-                f"First 30 module names in vision_encoder:\n"
-                + "\n".join(f"  {n}" for n in sample)
+                "No ViTLayer found.\n"
+                "First 30 module names:\n" + "\n".join(f"  {n}" for n in all_names)
             )
-
-        def save_activation(module, input, output):
-            # output: [B, num_tokens, hidden_dim] = [B, 197, 768]
-            self.activations = (output[0].detach()
-                                if isinstance(output, tuple)
-                                else output.detach())
-
-        def save_gradient(module, grad_input, grad_output):
-            self.gradients = (grad_output[0].detach()
-                              if isinstance(grad_output, tuple)
-                              else grad_output.detach())
-
-        h1 = last_block.register_forward_hook(save_activation)
-        h2 = last_block.register_full_backward_hook(save_gradient)
-        self._hooks = [h1, h2]
-
-    def remove_hooks(self):
-        for h in self._hooks:
-            h.remove()
+        name, block = vit_layers[-1]
+        print(f"[+] Grad-CAM: {len(vit_layers)} ViTLayer blocks found → "
+              f"hooking last block: '{name}'")
+        return block
 
     def generate(self, pixel_values, input_ids, attention_mask, target_class=None):
         """
         Returns:
-            cam: np.ndarray of shape (224, 224), range [0, 1]
+            cam      : np.ndarray shape (224, 224), range [0, 1]
             pred_class: int
-            probs: np.ndarray of shape (num_classes,)
+            probs    : np.ndarray shape (num_classes,)
         """
         self.model.eval()
-        pixel_values = pixel_values.to(DEVICE)
-        input_ids    = input_ids.to(DEVICE)
+        pixel_values   = pixel_values.to(DEVICE)
+        input_ids      = input_ids.to(DEVICE)
         attention_mask = attention_mask.to(DEVICE)
 
-        # ─ Forward pass ──────────────────────────────────────────────────────
-        logits = self.model.forward_cls(pixel_values, input_ids, attention_mask)
-        probs  = torch.softmax(logits, dim=1).squeeze(0).cpu().detach().numpy()
+        # ── Hook: forward pass-এ activation capture + retain_grad() ──────────
+        captured = {}   # mutable dict so closure can write to it
 
-        pred_class = logits.argmax(dim=1).item()
-        if target_class is None:
-            target_class = pred_class
+        def _fwd_hook(module, inp, out):
+            # ViTLayer output: (hidden_states,) or (hidden_states, attn_weights)
+            act = out[0] if isinstance(out, tuple) else out
+            # retain_grad() allows .grad on non-leaf tensor after backward()
+            act.retain_grad()
+            captured["act"] = act
 
-        # ─ Backward pass ─────────────────────────────────────────────────────
-        self.model.zero_grad()
-        score = logits[0, target_class]
-        score.backward()
+        hook = self._last_block.register_forward_hook(_fwd_hook)
 
-        # ─ Compute CAM ───────────────────────────────────────────────────────
-        # gradients / activations: [num_tokens, hidden_dim] = [197, 768]
-        grads = self.gradients   # [197, 768]
-        acts  = self.activations # [197, 768]
+        try:
+            with torch.enable_grad():
+                # Forward
+                logits = self.model.forward_cls(
+                    pixel_values, input_ids, attention_mask)
+                probs      = torch.softmax(logits, dim=1).squeeze(0).detach().cpu().numpy()
+                pred_class = int(logits.argmax(dim=1).item())
+                tgt        = pred_class if target_class is None else target_class
 
-        if grads is None or acts is None:
+                # Backward
+                self.model.zero_grad()
+                logits[0, tgt].backward()
+        finally:
+            hook.remove()   # hook সবসময় remove হবে, error হলেও
+
+        # ── Verify capture ────────────────────────────────────────────────────
+        if "act" not in captured:
+            raise RuntimeError("Forward hook did not fire — check model call.")
+        act = captured["act"]        # [B, 197, 768]
+        if act.grad is None:
             raise RuntimeError(
-                "Grad-CAM hooks did not capture gradients/activations. "
-                "Ensure model is not in torch.no_grad() context."
+                "act.grad is None — retain_grad() did not work. "
+                "Make sure torch.enable_grad() wraps the forward+backward call."
             )
 
-        # Patch tokens only (exclude CLS token at index 0)
-        patch_grads = grads[1:, :]   # [196, 768]
-        patch_acts  = acts[1:, :]    # [196, 768]
+        # ── Compute Grad-CAM ──────────────────────────────────────────────────
+        # Remove batch dim → [197, 768]
+        grads = act.grad.squeeze(0)
+        acts  = act.detach().squeeze(0)
 
-        # Global average pooling over hidden dim → importance weights
-        weights = patch_grads.mean(dim=1)              # [196]
+        # Patch tokens only — skip CLS (index 0) → [196, 768]
+        patch_grads = grads[1:, :]
+        patch_acts  = acts[1:, :]
 
-        # Weighted sum of activations (channel dim)
-        cam = (patch_acts * weights.unsqueeze(1)).sum(dim=1)  # [196]
+        # Global avg pool over hidden dim → importance per patch → [196]
+        weights = patch_grads.mean(dim=1)
 
-        # ReLU: focus only on positive contributions
+        # Weighted activation sum → scalar per patch → [196]
+        cam = (patch_acts * weights.unsqueeze(1)).sum(dim=1)
+
+        # ReLU: keep only positive activations
         cam = torch.relu(cam)
 
-        # Reshape to 2D patch grid: 14×14 (for ViT-Base/16 with 224×224 input)
-        num_patches_side = int(math.sqrt(cam.shape[0]))  # 14
-        cam = cam.reshape(num_patches_side, num_patches_side)
+        # Reshape to 14×14 patch grid
+        side = int(math.sqrt(cam.shape[0]))   # 14 for ViT-Base/16
+        cam  = cam.reshape(side, side)
 
         # Normalize to [0, 1]
-        cam_min, cam_max = cam.min(), cam.max()
-        if cam_max - cam_min > 1e-8:
-            cam = (cam - cam_min) / (cam_max - cam_min)
+        c_min, c_max = cam.min(), cam.max()
+        if (c_max - c_min).item() > 1e-8:
+            cam = (cam - c_min) / (c_max - c_min)
         else:
             cam = torch.zeros_like(cam)
 
         cam_np = cam.cpu().numpy()
 
-        # Upsample to 224×224 using PIL
-        cam_img = Image.fromarray((cam_np * 255).astype(np.uint8)).resize(
-            (224, 224), Image.BILINEAR)
-        cam_upsampled = np.array(cam_img) / 255.0
+        # Upsample 14×14 → 224×224
+        cam_pil      = Image.fromarray((cam_np * 255).astype(np.uint8))
+        cam_upsampled = np.array(
+            cam_pil.resize((224, 224), Image.BILINEAR)) / 255.0
 
         return cam_upsampled, pred_class, probs
 
+    def remove_hooks(self):
+        pass   # hooks are registered/removed dynamically in generate()
 
 # ─── Visualization ───────────────────────────────────────────────────────────
+
 def save_gradcam_figure(img_vis_tensor, cam, pred_class, true_class,
                         probs, save_path, sample_idx):
     """
