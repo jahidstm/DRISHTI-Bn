@@ -214,47 +214,56 @@ class ViTGradCAM:
 
     def _register_hooks(self):
         """
-        ViT encoder-এর শেষ block খোঁজা — HuggingFace ViTModel-এ
-        path হলো: .encoder.layer[-1]  (NOT .vit.encoder.layer)
-        PEFT wrapping-এর কারণে কয়েকটি path try করা হচ্ছে।
+        isinstance(m, ViTLayer) দিয়ে সরাসরি ViT blocks খোঁজা।
+        PEFT-এর যেকোনো wrapping path-এ কাজ করবে কারণ ViTLayer class
+        PEFT দ্বারা কখনো replace হয় না — শুধু এর ভেতরের Linear layers হয়।
         """
+        from transformers.models.vit.modeling_vit import ViTLayer
+
         last_block = None
 
-        # Path 1: PEFT → base_model → model → encoder (HF ViTModel সরাসরি)
-        try:
-            last_block = (self.model.vision_encoder
-                          .base_model.model.encoder.layer[-1])
-            print("[+] Grad-CAM hook path: base_model.model.encoder.layer[-1]")
-        except AttributeError:
-            pass
+        # ─── সবচেয়ে robust: type দিয়ে scan করা ───────────────────────────
+        vit_layers = [
+            m for _, m in self.model.vision_encoder.named_modules()
+            if isinstance(m, ViTLayer)
+        ]
 
-        # Path 2: PEFT passthrough → encoder
-        if last_block is None:
-            try:
-                last_block = self.model.vision_encoder.encoder.layer[-1]
-                print("[+] Grad-CAM hook path: vision_encoder.encoder.layer[-1]")
-            except AttributeError:
-                pass
+        if vit_layers:
+            last_block = vit_layers[-1]
+            print(f"[+] Grad-CAM: found {len(vit_layers)} ViTLayer blocks "
+                  f"via isinstance scan → hooking last block (layer {len(vit_layers)-1})")
 
-        # Path 3: Generic scan — named_modules() থেকে encoder blocks খোঁজা
+        # ─── Fallback: named_modules-এ 'layer.11' দিয়ে খোঁজা ──────────────
         if last_block is None:
-            encoder_blocks = [
-                m for name, m in self.model.vision_encoder.named_modules()
-                if "encoder.layer" in name and not any(
-                    sub in name for sub in
-                    ["attention", "intermediate", "output", "layernorm"]
-                )
-            ]
-            if encoder_blocks:
-                last_block = encoder_blocks[-1]
-                print(f"[+] Grad-CAM hook path: generic scan → found {len(encoder_blocks)} blocks, using last")
+            for name, m in self.model.vision_encoder.named_modules():
+                # ViT-Base: 12 layers (0-11), ViT-Large: 24 layers (0-23)
+                if name.endswith("layer.11") or name.endswith("layer.23"):
+                    last_block = m
+                    print(f"[+] Grad-CAM: fallback path matched '{name}'")
+                    break
+
+        # ─── Final fallback: last encoder-like module with 768-dim output ─
+        if last_block is None:
+            candidates = []
+            for name, m in self.model.vision_encoder.named_modules():
+                if ("encoder" in name and "layer" in name
+                        and "attention" not in name
+                        and "intermediate" not in name
+                        and "output" not in name
+                        and "layernorm" not in name):
+                    candidates.append((name, m))
+            if candidates:
+                last_block = candidates[-1][1]
+                print(f"[+] Grad-CAM: last-resort fallback → '{candidates[-1][0]}'")
 
         if last_block is None:
-            # Debug: print available top-level module names to help diagnose
-            top_names = [n for n, _ in self.model.vision_encoder.named_children()]
+            # 최후의 diagnostic: 실제 모듈 구조 출력
+            all_names = [n for n, _ in self.model.vision_encoder.named_modules()]
+            sample = all_names[:30]
             raise AttributeError(
-                f"Cannot locate ViT encoder layers. "
-                f"Top-level children of vision_encoder: {top_names}"
+                f"Cannot locate any ViTLayer block.\n"
+                f"First 30 module names in vision_encoder:\n"
+                + "\n".join(f"  {n}" for n in sample)
             )
 
         def save_activation(module, input, output):
