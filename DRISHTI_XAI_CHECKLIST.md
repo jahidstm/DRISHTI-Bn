@@ -79,8 +79,13 @@
     - Next step: Task 2.2-te Cross-Attention / Integrated Gradients diye better explanation
   - Commit: `eb4549a`
 
-- [ ] **Task 2.2** Cross-Attention Visualization -- Token-to-patch alignment [Colab GPU needed]
-- [ ] **Task 2.3** Temperature Scaling -- Post-hoc confidence calibration [Colab GPU needed]
+- [x] **Task 2.2** ~~Cross-Attention Visualization -- Token-to-patch alignment~~ done
+  - Model: CLS-Only (Task 1.1 best, `best_cls_only.pt`)
+  - **Accuracy: 17/21 (81.0%)** (Severe: 7/7, Human: 7/7, Affected: 3/7)
+  - Finding: Spatial attention patterns are visible and meaningful (unlike Grad-CAM). Resolved Bengali font warnings in matplotlib.
+  - Output: `crossattn_outputs/` -> `crossattn_results.zip`
+  - Commit: `abb0b55`
+- [ ] **Task 2.3** Attention Rollout Visualization [Colab GPU needed]
 - [ ] **Task 2.4** MC Dropout Uncertainty -- Predictive entropy [Colab GPU needed]
 - [ ] **Task 2.5** Integrated XAI Pipeline -- All modules combined [Colab GPU needed]
 
