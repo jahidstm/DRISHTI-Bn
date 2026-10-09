@@ -299,9 +299,7 @@ def save_crossattn_figure(img_vis_tensor, cam, pred_class, true_class,
     title = (f"Sample #{sample_idx:03d} | "
              f"True: {LABEL_NAMES[true_class]} | "
              f"Pred: {LABEL_NAMES[pred_class]} ({status})")
-    if caption_text:
-        short  = caption_text[:70] + "..." if len(caption_text) > 70 else caption_text
-        title += f"\nCaption: \"{short}\""
+    # Bengali font warning avoid korar jonno caption remove kora holo
     fig.suptitle(title, fontsize=10, fontweight='bold', color=color, y=1.02)
 
     axes[0].imshow(img_np);        axes[0].set_title("Original Image", fontsize=9);   axes[0].axis('off')
@@ -443,10 +441,10 @@ def main():
     print(f"    for p in sorted(glob.glob('{args.output_dir}/*.png'))[:5]:")
     print("        display(Image(p))")
     print(f"\n[+] To backup to Drive:")
-    print(f"    import shutil")
+    print(f"    import shutil, os")
     print(f"    shutil.make_archive('crossattn_results', 'zip', '{args.output_dir}')")
-    print(f"    shutil.copy('crossattn_results.zip',")
-    print(f"        '/content/drive/MyDrive/DisasterNet/results/')")
+    print(f"    os.makedirs('/content/drive/MyDrive/DisasterNet/results', exist_ok=True)")
+    print(f"    shutil.copy('crossattn_results.zip', '/content/drive/MyDrive/DisasterNet/results/crossattn_results.zip')")
 
 
 if __name__ == "__main__":
