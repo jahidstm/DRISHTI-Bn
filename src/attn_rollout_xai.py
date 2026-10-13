@@ -154,7 +154,12 @@ class PositionalEncoding(nn.Module):
 class DisasterNetAblation(nn.Module):
     def __init__(self, num_classes=3, vocab_size=VOCAB_SIZE):
         super().__init__()
-        self.vision_encoder = ViTModel.from_pretrained("google/vit-base-patch16-224-in21k")
+        # attn_implementation="eager" is REQUIRED so that output_attentions=True works.
+        # Default "sdpa" (Flash Attention) does NOT return attention weights.
+        self.vision_encoder = ViTModel.from_pretrained(
+            "google/vit-base-patch16-224-in21k",
+            attn_implementation="eager"
+        )
         self.text_encoder   = AutoModel.from_pretrained(BERT_ID)
 
         vit_t  = _find_lora_targets(self.vision_encoder, ["query","value","q_proj","v_proj"])
