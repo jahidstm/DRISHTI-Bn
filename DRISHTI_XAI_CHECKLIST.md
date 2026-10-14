@@ -107,7 +107,16 @@
   - Output: `calibration_outputs/` -> `calibration_results.zip`
   - Commit: `6120de2`
 
-- [ ] **Task 2.5** Integrated XAI Pipeline -- All modules combined [Colab GPU needed]
+- [x] **Task 2.5** ~~Integrated XAI Pipeline -- All modules combined~~ done
+  - Script: `src/integrated_xai_pipeline.py` | Commit: `b80871f`
+  - **Accuracy: 81.0% (17/21)** | T* = 0.6669 | Split: test | Samples: 21
+  - Severe_Damage 6/7 | Humanitarian_Rescue 7/7 | **Affected_People 4/7 ⚠️**
+  - Output: `integrated_outputs/` (21 PNG + `combined_comparison.png` + 2 CSV)
+  - Key Finding: All 4 XAI methods unified in a single 3-row per-sample figure.
+    Cross-Attention remains the most spatially sharp; Rollout is smoother.
+    Affected_People improved to 4/7 (vs 3/7 in Tasks 2.1-2.3).
+
+> ✅ **Phase 2 COMPLETE!** All 5 XAI tasks done.
 
 ---
 
