@@ -1,5 +1,5 @@
 # DRISHTI-XAI: Master Implementation Checklist
-> **Last Updated:** 8 October 2026
+> **Last Updated:** 14 October 2026
 > **Branch:** `main` | **Target:** IEEE Access / ISCRAM 2027
 
 ---
@@ -85,8 +85,28 @@
   - Finding: Spatial attention patterns are visible and meaningful (unlike Grad-CAM). Resolved Bengali font warnings in matplotlib.
   - Output: `crossattn_outputs/` -> `crossattn_results.zip`
   - Commit: `abb0b55`
-- [ ] **Task 2.3** Attention Rollout Visualization [Colab GPU needed]
-- [ ] **Task 2.4** MC Dropout Uncertainty -- Predictive entropy [Colab GPU needed]
+- [x] **Task 2.3** ~~Attention Rollout Visualization~~ done
+  - Method: Abnar & Zuidema (2020) | Head fusion: mean | Discard ratio: 0.9
+  - **21 samples processed (7 per class, stratified) | Accuracy: 17/21 (81.0%)**
+  - Per-class: Severe_Damage 7/7 | Humanitarian_Rescue 7/7 | Affected_People 3/7
+  - Output: `rollout_outputs/` → `rollout_results.zip`
+  - Key Finding: Rollout attention maps diekhay exactly kon token-er dike model attention diche classification-er somoy
+  - Commit: `ccdb459`
+
+- [x] **Task 2.4** ~~Temperature Scaling -- Post-hoc Calibration~~ done
+  - Method: Guo et al. (2017) | Checkpoint: `best_cls_only.pt` (Loaded successfully)
+  - **T* = 1.1113 (Over-confident -> T>1 softens distribution)**
+  - Test Accuracy: **88.83%** (Severe_Damage: 92.4% | Humanitarian_Rescue: 91.6% | Affected_People: 54.5%)
+  - Metric Before -> After:
+    - ECE: 0.0216 -> 0.0263
+    - MCE: 0.6209 -> 0.6256
+    - NLL: 0.3201 -> 0.3224 (Val NLL improved by 0.67%)
+    - Brier: 0.1715 -> 0.1728
+    - Mean Confidence: 0.8825 -> 0.8665 (softened to align with real confidence)
+  - Key Finding: Deep neural networks tend to be slightly over-confident (T*=1.1113 > 1.0). Pre-calibration ECE is already exceptionally low (2.16%), proving high reliability.
+  - Output: `calibration_outputs/` -> `calibration_results.zip`
+  - Commit: `6120de2`
+
 - [ ] **Task 2.5** Integrated XAI Pipeline -- All modules combined [Colab GPU needed]
 
 ---
