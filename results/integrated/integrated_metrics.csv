@@ -1,0 +1,5 @@
+task,method,accuracy,T_star,finding
+2.1,Grad-CAM,80.95238095238095,N/A,Dark heatmap; ViT global attn lacks spatial localization
+2.2,Cross-Attention,80.95238095238095,N/A,Spatially sharp; best visual alignment method
+2.3,Attn Rollout,80.95238095238095,N/A,"Smoother, diffuse; tracks 12-layer attention flow"
+2.4,Temp. Scaling,80.95238095238095,0.6669,T*=0.6669>1 (over-confident); ECE=2.16% (excellent)
