@@ -89,7 +89,21 @@ class MultimodalDataset(Dataset):
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
         ])
-        self.df["label_id"] = self.df["label"].map(LABEL_MAP)
+        # Detect caption column
+        for col in ["translated_caption", "bangla_caption",
+                    "bengali_caption", "caption_bn", "caption", "text"]:
+            if col in self.df.columns:
+                self.text_col = col; break
+        else:
+            raise ValueError("No caption column found in CSV.")
+        # Detect label column
+        for lcol in ["macro_label", "label", "category", "class"]:
+            if lcol in self.df.columns:
+                self.label_col = lcol; break
+        else:
+            raise ValueError("No label column found in CSV.")
+        self.df[self.text_col]  = self.df[self.text_col].fillna("").astype(str)
+        self.df["label_id"]     = self.df[self.label_col].map(LABEL_MAP)
 
     def __len__(self):
         return len(self.df)
@@ -101,7 +115,7 @@ class MultimodalDataset(Dataset):
         raw_img  = transforms.ToTensor()(image.resize((224, 224)))
         image    = self.transform(image)
         enc = self.tokenizer(
-            str(row["translated_caption"]),
+            row[self.text_col],
             max_length=self.max_len, padding="max_length",
             truncation=True, return_tensors="pt"
         )
@@ -505,7 +519,7 @@ def main():
     per_cls = {i: [] for i in range(3)}
     for gi in idx_test:
         lbl = full_ds.df.iloc[gi]["label_id"]
-        per_cls[lbl].append(gi)
+        per_cls[int(lbl)].append(gi)
 
     rng = random.Random(RANDOM_SEED)
     selected = []
