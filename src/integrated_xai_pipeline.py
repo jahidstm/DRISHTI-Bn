@@ -221,32 +221,54 @@ def build_model(checkpoint_path):
 class GradCAMExtractor:
     def __init__(self, model):
         self.model = model
-        self.acts  = None
-        self.grads = None
-        # vision_encoder is PEFT-wrapped ViTModel
-        target = model.vision_encoder.base_model.model.encoder.layer[-1].output
-        self._fwd = target.register_forward_hook(
-            lambda m, i, o: setattr(self, 'acts', o.detach()))
-        self._bwd = target.register_full_backward_hook(
-            lambda m, gi, go: setattr(self, 'grads', go[0].detach()))
+        # Scan all submodules for ViTLayer -- PEFT-path agnostic
+        from transformers.models.vit.modeling_vit import ViTLayer
+        vit_layers = [(n, m) for n, m in model.vision_encoder.named_modules()
+                      if isinstance(m, ViTLayer)]
+        if not vit_layers:
+            names = [n for n, _ in model.vision_encoder.named_modules()][:20]
+            raise AttributeError(f"No ViTLayer found. Modules: {names}")
+        self._last_block = vit_layers[-1][1]
+        print(f"[+] Grad-CAM: {len(vit_layers)} ViTLayers found, "
+              f"hooking last: '{vit_layers[-1][0]}'")
 
     def remove(self):
-        self._fwd.remove(); self._bwd.remove()
+        pass   # hooks registered/removed per compute() call
 
     def compute(self, image, input_ids, attn_mask, target_class):
-        self.model.zero_grad()
-        img    = image.unsqueeze(0).to(DEVICE).requires_grad_(True)
-        ids    = input_ids.unsqueeze(0).to(DEVICE)
-        msk    = attn_mask.unsqueeze(0).to(DEVICE)
-        logits = self.model.forward_cls(img, ids, msk)
-        logits[0, target_class].backward()
-        acts  = self.acts[0, 1:, :]    # (196, 768) drop CLS token
-        grads = self.grads[0, 1:, :]   # (196, 768)
-        cam   = F.relu((acts * grads.mean(dim=0)).sum(dim=-1))
-        cam   = cam.reshape(VIT_GRID, VIT_GRID).cpu().numpy()
-        cam  -= cam.min()
+        self.model.eval()
+        captured = {}
+
+        def _fwd_hook(module, inp, out):
+            act = out[0] if isinstance(out, tuple) else out
+            act.retain_grad()
+            captured["act"] = act
+
+        hook = self._last_block.register_forward_hook(_fwd_hook)
+        try:
+            with torch.enable_grad():
+                logits = self.model.forward_cls(
+                    image.unsqueeze(0).to(DEVICE),
+                    input_ids.unsqueeze(0).to(DEVICE),
+                    attn_mask.unsqueeze(0).to(DEVICE))
+                self.model.zero_grad()
+                logits[0, target_class].backward()
+        finally:
+            hook.remove()
+
+        if "act" not in captured or captured["act"].grad is None:
+            return np.zeros((VIT_GRID, VIT_GRID))
+
+        act    = captured["act"].detach().squeeze(0)    # (197, 768)
+        grads  = captured["act"].grad.squeeze(0)        # (197, 768)
+        acts_p = act[1:, :];  grads_p = grads[1:, :]   # (196, 768) drop CLS
+        weights = grads_p.mean(dim=1)                   # (196,)
+        cam = (acts_p * weights.unsqueeze(1)).sum(dim=1).abs().cpu().numpy()
+        cam = cam.reshape(VIT_GRID, VIT_GRID)
+        cam -= cam.min()
         if cam.max() > 0: cam /= cam.max()
         return cam
+
 
 
 # ── XAI Method 2: Cross-Attention ─────────────────────────────────────────────
