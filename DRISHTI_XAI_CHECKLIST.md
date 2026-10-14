@@ -35,34 +35,74 @@
   - DisasterNet-v2 vs Best Baseline: **77.95% vs 39.95% (+38pp gain!)**
 
 - [x] **Task 0.5** ~~Baseline #2 -- ViT-Only (no text encoder)~~ done
-  - **Macro F1: 78.64%** | Precision: 79.04% | Recall: 78.38%
-  - Per-class: Severe_Damage F1=87.17% | Humanitarian_Rescue F1=83.90% | **Affected_People F1=64.84%**
-  - Finding: Image alone besh bhalo kaj kore (78.64%)
+  - **Macro F1: 78.64%** | P=79.23% | R=78.48% | Seed=42 (deterministic)
+  - Per-class: Severe_Damage F1=90.37% | Humanitarian_Rescue F1=84.25% | **Affected_People F1=61.29%**
+  - Key Finding: ViT-Only (78.64%) > DisasterNet-v2 (77.95%) — text encoder contribution: -0.69pp
+  - Commit: `6ea44d5`
 
 - [x] **Task 0.6** ~~Baseline #3 -- BanglaBERT-Only (no image)~~ done
-  - **Macro F1: 43.02%** | Text-only model onek durbol
-  - Finding: Visual features chara classification onek kothin (-35.62pp vs ViT-Only)
+  - **Macro F1: 43.02%** | P=41.44% | R=44.83% | Seed=42
+  - Per-class: Severe_Damage F1=73.60% | Humanitarian_Rescue F1=55.46% | **Affected_People F1=0.00% ⚠️** (সম্পূর্ণ ব্যর্থ)
+  - Key Finding: Image contribution: ViT-Only (78.64%) − BERT-Only (43.02%) = **+35.62pp** 🔑
+  - Commit: `b719a24`
 
-- [ ] **Task 0.7** Baseline #4 -- Full Fine-Tune (no LoRA) [Colab GPU needed]
-- [ ] **Task 0.8** Baseline #5 -- CrisisViT SOTA comparison [Colab GPU needed]
+- [x] **Task 0.7** ~~Baseline #4 -- Full Fine-Tune (no LoRA)~~ done
+  - **Macro F1: 74.19%** | P=73.43% | R=75.09% | Seed=42 | AMP=True
+  - Per-class: Severe_Damage F1=91.36% | Humanitarian_Rescue F1=82.64% | **Affected_People F1=48.57% ⚠️**
+  - Key Finding: Full FT (74.19%) < LoRA (83.21%) — **-9.02pp** | LoRA regularizes better for 3004 train samples
+  - Commit: `d7430d3`
+
+- [x] **Task 0.8** ~~Baseline #5 -- CrisisViT SOTA comparison~~ done
+  - Backbone: **ViT-Large/16** (304M params) | Last 4 blocks unfrozen (0.34% trainable)
+  - **Macro F1: 78.15%** | P=81.35% | R=76.00% | Seed=42 | AMP=True
+  - Per-class: Severe_Damage F1=91.27% | Humanitarian_Rescue F1=83.54% | **Affected_People F1=59.65%**
+  - Key Finding: CrisisViT-style (78.15%) < CLS+LoRA (83.21%) — **-5.06pp** | LoRA wins
+  - Commit: `0bb9860`
+
+> ✅ **Phase 0 COMPLETE!** All 8 tasks done.
 
 ---
 
 ## Phase 1: Ablation Study
 > Kon component kotkhani contribute korche ta porimap kora
 
-- [x] **Task 1.1** ~~Ablation -- Classification Only (lambda_cap = 0)~~ done
-  - **Macro F1: 80.79%** | Precision: 83.03% | Recall: 79.52%
-  - Per-class: Severe_Damage F1=93.45% | Humanitarian_Rescue F1=86.85% | **Affected_People F1=62.07%**
-  - Best checkpoint: Epoch 3 (Val F1=78.36%) -> saved as `best_cls_only.pt`
-  - Key Finding: lambda_cap=0 (captioning OFF) korle F1 **+2.84pp** bare -> captioning loss classification ke hurt kore
-  - Commit: `eb4549a`
+- [x] **Task 1.1** ~~Ablation -- Classification Only (λ_cap = 0)~~ done
+  - Script: `src/cls_only_ablation.py` | Commit: `6478fe5`
+  - **Macro F1: 83.21%** | P=85.33% | R=81.84% | Best Epoch=3
+  - Per-class: Severe_Damage F1=93.93% | Humanitarian_Rescue F1=87.90% | **Affected_People F1=67.80%** 🏆
+  - Trainable params: 589,824 / 197,005,824 **(0.30%)** — highly parameter-efficient
+  - Key Finding: CLS-Only (83.21%) > DisasterNet-v2 (77.95%) → **+5.26pp** | Caption loss HURTS classification
+  - Best checkpoint: `best_cls_only.pt`
 
-- [ ] **Task 1.2** Ablation -- Caption Only (lambda_cls = 0) [Colab GPU needed]
-- [ ] **Task 1.3** Ablation -- No LoRA (Frozen Encoders) [Colab GPU needed]
-- [ ] **Task 1.4** Ablation -- No Cross-Attention Decoder [Colab GPU needed]
-- [ ] **Task 1.5** Ablation -- LoRA Rank Sensitivity (r=4, r=8, r=16) [Colab GPU needed]
-- [ ] **Task 1.6** Results Compilation -- Ablation summary table
+- [x] **Task 1.2** ~~Ablation -- Caption Only (λ_cls = 0)~~ done
+  - Script: `src/caption_only_ablation.py` | Commit: `dfa823c`
+  - **Macro F1: 16.90%** | P=24.17% | R=32.12% | Best Epoch=10
+  - Per-class: Severe_Damage F1=4.24% | Humanitarian_Rescue F1=46.47% | **Affected_People F1=0.00%**
+  - Model collapsed: 219/224 Severe_Damage predicted as Humanitarian_Rescue
+  - Key Finding: CAP-Only (16.90%) << Stratified Random (39.95%) — **worse than random!**
+
+- [x] **Task 1.3** ~~Ablation -- No LoRA (Frozen Encoders)~~ done
+  - Script: `src/no_lora_ablation.py` | Commit: `6d841b7`
+  - **Macro F1: 77.74%** | P=78.39% | R=77.37% | Best Epoch=4
+  - Per-class: Severe_Damage F1=91.61% | Humanitarian_Rescue F1=83.53% | **Affected_People F1=58.06%**
+  - Trainable params: 0 / 196,416,000 (0.00%) — only classifier head trained
+  - Key Finding: No-LoRA (77.74%) vs CLS+LoRA (83.21%) → **LoRA contributes +5.47pp** 🔑
+
+- [x] **Task 1.4** ~~Ablation -- No Cross-Attention (Self-Attention Only Decoder)~~ done
+  - Script: `src/no_crossattn_ablation.py` | Commit: `c29913a`
+  - **Macro F1: 81.88%** | P=83.82% | R=80.68% | Best Epoch=3
+  - Per-class: Severe_Damage F1=93.69% | Humanitarian_Rescue F1=87.55% | **Affected_People F1=64.41%**
+  - Key Finding: Self-Attn-only (81.88%) vs Cross-Attn (83.21%) → **Cross-attn contributes +1.33pp** 🔑
+
+- [x] **Task 1.5** ~~Ablation -- LoRA Rank Sensitivity (r=4 vs r=8 vs r=16)~~ done
+  - Script: `src/lora_rank_ablation.py` | Commit: `e3f8ac9`
+  - **r=4: F1=79.41%** | r=8: F1=81.47% | r=16: F1=79.14%
+  - Key Finding: r=8 is optimal — r=16 overfits, r=4 underfits. Performance spread: 2.33pp
+
+- [x] **Task 1.6** ~~Results Compilation -- Ablation summary table + analysis~~ done
+  - Full summary in `ablation_summary.md`
+
+> ✅ **Phase 1 COMPLETE!** All 6 ablation tasks done.
 
 ---
 
