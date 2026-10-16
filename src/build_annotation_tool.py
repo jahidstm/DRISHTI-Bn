@@ -53,7 +53,25 @@ def img_to_b64(img_path, max_side=400):
         return ""
 
 
-def generate_model_captions(samples_df):
+def find_model_path(custom_path=None):
+    candidates = []
+    if custom_path:
+        candidates.append(custom_path)
+    candidates.extend([
+        os.path.join(REPO_ROOT, "models", "disasternet_multitask_v2.pth"),
+        os.path.join(PROJECT_ROOT, "models", "disasternet_multitask_v2.pth"),
+        "/content/drive/MyDrive/DisasterNet/models/disasternet_multitask_v2.pth",
+        "/content/drive/MyDrive/models/disasternet_multitask_v2.pth",
+        "/content/disasternet_multitask_v2.pth",
+        os.path.join(REPO_ROOT, "src", "disasternet_multitask_v2.pth"),
+    ])
+    for p in candidates:
+        if p and os.path.exists(p):
+            return p
+    return None
+
+
+def generate_model_captions(samples_df, model_path=None):
     try:
         import torch
         sys.path.insert(0, SCRIPT_DIR)
@@ -65,12 +83,14 @@ def generate_model_captions(samples_df):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"  [+] Device: {device}")
 
-    if not os.path.exists(MODEL_PATH):
-        print(f"  [!] Model not found: {MODEL_PATH}")
+    resolved_path = find_model_path(model_path)
+    if not resolved_path:
+        print(f"  [!] Model checkpoint not found in standard paths.")
+        print(f"      Checked: {model_path or os.path.join(REPO_ROOT, 'models', 'disasternet_multitask_v2.pth')}")
         return ["[Checkpoint not found]"] * len(samples_df)
 
-    print(f"  [+] Loading model from {MODEL_PATH} ...")
-    predictor = DisasterNetPredictor(model_path=MODEL_PATH, device=device)
+    print(f"  [+] Loading model from {resolved_path} ...")
+    predictor = DisasterNetPredictor(model_path=resolved_path, device=device)
 
     captions = []
     total = len(samples_df)
@@ -301,7 +321,9 @@ init();upd();
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gen_captions", action="store_true",
-                    help="Generate model captions using disasternet_multitask_v2.pth")
+                    help="Generate model captions using trained multitask model")
+    ap.add_argument("--model_path", type=str, default=None,
+                    help="Path to trained model checkpoint (.pth)")
     ap.add_argument("--max_side", type=int, default=420,
                     help="Max pixel side for embedded images (default 420)")
     args = ap.parse_args()
@@ -328,7 +350,7 @@ def main():
     # 3. Model captions
     if args.gen_captions:
         print("[3/4] Generating model captions ...")
-        model_caps = generate_model_captions(samples)
+        model_caps = generate_model_captions(samples, model_path=args.model_path)
     else:
         model_caps = ["[মডেল ক্যাপশন — Colab-এ --gen_captions দিয়ে রান করুন]"] * len(samples)
         print("[3/4] Skipping model caption generation.")
@@ -338,6 +360,7 @@ def main():
     # 4. Build per-annotator HTML
     print("\n[4/4] Building HTML annotation tools ...")
     annotators = ["Annotator_1", "Annotator_2", "Annotator_3"]
+    generated_files = []
 
     for ann_id in annotators:
         rng = random.Random(hash(ann_id))
@@ -373,14 +396,25 @@ def main():
             f.write(html)
         size_mb = os.path.getsize(out) / (1024 * 1024)
         print(f"  [{ann_id}] {out}  ({size_mb:.1f} MB)")
+        generated_files.append((out, f"annotation_tool_{ann_id}.html"))
+
+    # Create zip bundle for convenient 1-click download
+    import zipfile
+    zip_path = os.path.join(OUT_DIR, "annotation_tools_all.zip")
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for full_p, arc_name in generated_files:
+            zf.write(full_p, arcname=arc_name)
+    zip_mb = os.path.getsize(zip_path) / (1024 * 1024)
+    print(f"\n[+] Created zip bundle: {zip_path} ({zip_mb:.1f} MB)")
 
     print(f"""
+======================================================================
 Done! Files saved to: {OUT_DIR}/
-  annotation_tool_Annotator_1.html  -> বন্ধু ১ কে দিন
-  annotation_tool_Annotator_2.html  -> বন্ধু ২ কে দিন
-  annotation_tool_Annotator_3.html  -> বন্ধু ৩ কে দিন
-
-বন্ধুরা শুধু HTML ফাইলটি Chrome/Edge-এ খুলবে -> রেটিং দেবে -> CSV ডাউনলোড করবে
+  - annotation_tool_Annotator_1.html  -> বন্ধু ১ কে দিন
+  - annotation_tool_Annotator_2.html  -> বন্ধু ২ কে দিন
+  - annotation_tool_Annotator_3.html  -> বন্ধু ৩ কে দিন
+  - annotation_tools_all.zip          -> এক ক্লিকে ৩টি ফাইল ডাউনলোড
+======================================================================
 """)
 
 
