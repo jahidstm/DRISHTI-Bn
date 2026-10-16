@@ -163,7 +163,13 @@
 ## Phase 3: Human Evaluation
 > Manobik mullayon -- caption quality proof
 
-- [ ] **Task 3.1** Evaluation Protocol Design -- 100 sample, annotation guidelines
+- [x] **Task 3.1** ~~Evaluation Protocol Design -- 100 sample selection, annotation guidelines~~ done
+  - Script: `src/human_eval_prep.py` | Commit: `1cf25e1`
+  - IAA Script: `src/human_eval_iaa.py` (Krippendorff's Alpha + Cohen's Kappa)
+  - Guidelines: `docs/annotation_guidelines_bn.md` (Bangla annotator guide)
+  - Sample: **100 stratified** from test set (Severe_Damage: 60 | Humanitarian_Rescue: 32 | Affected_People: 8)
+  - Metrics: Fluency / Adequacy / Faithfulness (1–5 scale) | Blind evaluation (A vs B)
+  - Output: `human_eval_outputs/` (human_eval_samples.csv + annotation_sheet.csv)
 - [ ] **Task 3.2** Annotator Recruitment -- 3 Bengali speakers
 - [ ] **Task 3.3** Annotation Execution -- Fluency, Adequacy, Faithfulness scoring
 - [ ] **Task 3.4** Inter-Annotator Agreement -- Cohen's Kappa
