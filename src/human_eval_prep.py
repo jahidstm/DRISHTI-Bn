@@ -46,11 +46,14 @@ SAMPLE_PER_CLASS = {
     "Affected_People":      8,
 }
 
-# ── Paths (Colab-compatible) ───────────────────────────────────────────────────
-REPO_ROOT = "/content/DRISHTI-Bn"
+# ── Paths (Auto-detect Local vs Colab) ──────────────────────────────────────────
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+REPO_ROOT = "/content/DRISHTI-Bn" if os.path.exists("/content/DRISHTI-Bn") else PROJECT_ROOT
 CSV_PATH  = os.path.join(REPO_ROOT, "data/processed/master_dataset_translated.csv")
 IMG_DIR   = os.path.join(REPO_ROOT, "data/processed")
 CKPT_DIR  = os.path.join(REPO_ROOT, "src")
+
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -215,12 +218,13 @@ def main():
     # ── 1. Load data ───────────────────────────────────────────────────────────
     test_df   = get_test_df(CSV_PATH)
     selected  = stratified_sample_100(test_df)
-    tokenizer = AutoTokenizer.from_pretrained("csebuetnlp/banglabert")
-    transform = build_image_transform()
 
     # ── 2. (Optional) Generate model captions ─────────────────────────────────
     model_captions = []
     if args.caption_gen:
+        tokenizer = AutoTokenizer.from_pretrained("csebuetnlp/banglabert")
+        transform = build_image_transform()
+
         print("\n[+] Building model for caption generation...")
         model = build_model(device)
         ckpt_path = os.path.join(CKPT_DIR, args.checkpoint)
