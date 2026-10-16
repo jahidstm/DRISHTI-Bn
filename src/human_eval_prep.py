@@ -311,12 +311,14 @@ Next steps:
     try:
         import shutil
         from google.colab import files
-        zip_path = f"/content/DRISHTI-Bn/human_eval_outputs"
-        shutil.make_archive("/content/human_eval_task31", "zip", zip_path)
-        files.download("/content/human_eval_task31.zip")
-        print("[+] Downloaded: human_eval_task31.zip")
-    except ImportError:
-        print("[!] Not in Colab — skip download step.")
+        zip_path = os.path.abspath(args.output_dir)
+        archive_name = os.path.join(os.path.dirname(zip_path), "human_eval_task31")
+        shutil.make_archive(archive_name, "zip", zip_path)
+        files.download(f"{archive_name}.zip")
+        print(f"[+] Downloaded: {archive_name}.zip")
+    except Exception as e:
+        print(f"[!] Auto-download skipped or failed ({e}). Output saved in: {args.output_dir}/")
+
 
 
 if __name__ == "__main__":
