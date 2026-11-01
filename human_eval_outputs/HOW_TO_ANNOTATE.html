@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRISHTI-Bn — Annotation Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --card2: #22263a;
+    --acc: #7c6af7; --acc2: #e879f9; --grn: #4ade80;
+    --yel: #fbbf24; --red: #f87171;
+    --txt: #e2e8f0; --mut: #94a3b8; --bdr: #2d3248;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--txt); font-family: 'Hind Siliguri', 'Inter', sans-serif; min-height: 100vh; padding: 24px 16px 60px; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+
+  /* Header */
+  .hdr { text-align: center; padding: 32px 24px 24px; }
+  .hdr h1 { font-size: 1.6rem; font-weight: 700; background: linear-gradient(135deg, var(--acc), var(--acc2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+  .hdr p { color: var(--mut); font-size: 0.9rem; line-height: 1.6; }
+
+  /* Section card */
+  .card { background: var(--card); border: 1px solid var(--bdr); border-radius: 16px; padding: 22px 24px; margin-bottom: 16px; }
+  .card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card p, .card li { font-size: 0.88rem; line-height: 1.85; color: #cbd5e1; }
+  .card ul { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 12px; }
+  .step { background: var(--card2); border-radius: 12px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .step-num { background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff; font-weight: 700; font-size: 0.85rem; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-body { font-size: 0.87rem; line-height: 1.8; color: #cbd5e1; }
+  .step-body strong { color: var(--txt); }
+
+  /* Rating grid */
+  .criteria-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+  @media (max-width: 600px) { .criteria-grid { grid-template-columns: 1fr; } }
+  .crit { background: var(--card2); border-radius: 12px; padding: 14px; }
+  .crit-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 8px; }
+  .crit-desc { font-size: 0.8rem; color: var(--mut); line-height: 1.7; }
+  .blue { color: #93c5fd; } .green { color: var(--grn); } .red { color: var(--red); }
+
+  /* Scale table */
+  .scale { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.82rem; }
+  .scale th { padding: 8px 10px; text-align: left; background: var(--card2); color: var(--mut); font-weight: 600; border-bottom: 1px solid var(--bdr); }
+  .scale td { padding: 8px 10px; border-bottom: 1px solid var(--bdr); line-height: 1.6; vertical-align: top; }
+  .scale tr:last-child td { border-bottom: none; }
+  .num { font-weight: 700; font-size: 1rem; color: var(--acc); }
+
+  /* Example box */
+  .ex-box { background: var(--card2); border-radius: 12px; padding: 16px; margin-top: 12px; }
+  .ex-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 580px) { .ex-row { grid-template-columns: 1fr; } }
+  .ex-caption { padding: 10px 12px; border-radius: 8px; font-size: 0.83rem; line-height: 1.7; }
+  .ex-a { background: rgba(74,222,128,.08); border: 1px solid rgba(74,222,128,.25); }
+  .ex-b { background: rgba(124,106,247,.08); border: 1px solid rgba(124,106,247,.25); }
+  .ex-label { font-size: 0.68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
+  .la { color: var(--grn); } .lb { color: var(--acc); }
+
+  /* Alert */
+  .alert { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.3); border-radius: 10px; padding: 12px 16px; font-size: 0.84rem; color: #fde68a; line-height: 1.7; margin-top: 12px; }
+  .alert strong { color: var(--yel); }
+
+  /* Files */
+  .file-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+  .file-item { background: var(--card2); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .file-name { font-weight: 600; font-size: 0.85rem; color: var(--acc); font-family: monospace; }
+  .file-desc { font-size: 0.8rem; color: var(--mut); }
+
+  /* CTA */
+  .cta { text-align: center; margin-top: 28px; padding: 24px; background: linear-gradient(135deg, rgba(124,106,247,.1), rgba(232,121,249,.1)); border: 1px solid rgba(124,106,247,.3); border-radius: 16px; }
+  .cta p { color: var(--mut); font-size: 0.85rem; margin-bottom: 16px; line-height: 1.7; }
+  .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { padding: 11px 24px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; font-family: inherit; text-decoration: none; display: inline-block; }
+  .btn-1 { background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff; }
+  .btn-2 { background: linear-gradient(135deg, #1e293b, #334155); color: var(--txt); border: 1px solid var(--bdr); }
+  .btn-3 { background: linear-gradient(135deg, #1e293b, #334155); color: var(--txt); border: 1px solid var(--bdr); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="hdr">
+    <h1>🎯 DRISHTI-Bn Annotation Guide</h1>
+    <p>এই পেজটা একবার মনোযোগ দিয়ে পড়ো।<br>তারপর তোমার নিজের annotation file খুলে কাজ শুরু করো।</p>
+  </div>
+
+  <!-- What is this? -->
+  <div class="card">
+    <h2>📌 এটা কী এবং তুমি কেন করছ?</h2>
+    <p>
+      DRISHTI-Bn একটা AI সিস্টেম যেটা দুর্যোগের ছবি দেখে <strong>বাংলায় caption (বর্ণনা)</strong> তৈরি করে।
+      এখন আমাদের জানতে হবে — AI-এর লেখা caption কতটা ভালো?
+    </p>
+    <br>
+    <p>
+      তোমাকে <strong>১০০টি দুর্যোগের ছবি</strong> দেখানো হবে। প্রতিটি ছবির সাথে <strong>২টি বাংলা caption</strong> থাকবে:
+      <strong style="color: #4ade80;">Caption A</strong> এবং <strong style="color: #a78bfa;">Caption B</strong> —
+      একটা মানুষের লেখা, একটা AI-এর তৈরি। <strong>তোমাকে জানানো হবে না কোনটা কোনটা।</strong>
+      তুমি শুধু নিজের বিবেচনায় নম্বর দেবে।
+    </p>
+  </div>
+
+  <!-- Step by step -->
+  <div class="card">
+    <h2>🪜 কীভাবে করতে হবে — ধাপে ধাপে</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">১</div>
+        <div class="step-body">
+          <strong>তোমার নিজের HTML ফাইলটা খোলো</strong> (নিচে কোন ফাইল তোমার সেটা দেখো)।
+          Browser-এ double click করলেই খুলবে — কোনো internet লাগবে না।
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">২</div>
+        <div class="step-body">
+          একটা করে sample আসবে। প্রথমে <strong>ছবিটা ভালো করে দেখো</strong> — ছবিতে কী হচ্ছে বোঝার চেষ্টা করো।
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">৩</div>
+        <div class="step-body">
+          <strong>Caption A পড়ো, তারপর Caption B পড়ো।</strong>
+          প্রতিটার জন্য ৩টা বিষয়ে <strong>১ থেকে ৫</strong> নম্বর দাও।
+          (Fluency, Adequacy, Faithfulness — নিচে বিস্তারিত আছে)
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">৪</div>
+        <div class="step-body">
+          শেষে বলো <strong>কোন caption বেশি ভালো</strong> — A, B, নাকি Equal।
+          চাইলে একটা ছোট comment-ও লিখতে পারো (optional)।
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">৫</div>
+        <div class="step-body">
+          <strong>"পরবর্তী →"</strong> চেপে সামনে যাও। ১০০টা শেষ হলে
+          <strong>"✓ সম্পন্ন হয়েছে"</strong> বাটনে ক্লিক করো।
+          একটা <strong>CSV ফাইল automatically download</strong> হবে। সেই ফাইলটা আমাকে পাঠাও।
+        </div>
+      </div>
+    </div>
+    <div class="alert">
+      <strong>⚠️ মনে রাখো:</strong> সব ৬টা নম্বর না দিলে পরের sample-এ যেতে পারবে না।
+      প্রতিটা নম্বর স্বাধীনভাবে দাও — Caption A-কে ভালো নম্বর দিলেই B-কে খারাপ দিতে হবে না।
+    </div>
+  </div>
+
+  <!-- Criteria -->
+  <div class="card">
+    <h2>⭐ ৩টা বিষয়ে নম্বর দিতে হবে</h2>
+    <div class="criteria-grid">
+      <div class="crit">
+        <div class="crit-title blue">🔵 Fluency</div>
+        <div class="crit-desc">
+          বাংলাটা কি স্বাভাবিক শোনাচ্ছে?<br>
+          একজন সাধারণ মানুষ কি এভাবে লিখত?<br><br>
+          <strong>ছবি দেখার দরকার নেই।</strong><br>
+          শুধু ভাষাটা কেমন সেটা দেখো।
+        </div>
+      </div>
+      <div class="crit">
+        <div class="crit-title green">🟢 Adequacy</div>
+        <div class="crit-desc">
+          ছবিতে যা আছে, caption-এ কি সেই তথ্য আছে?<br><br>
+          Caption কি ছবির মূল বিষয় ধরতে পেরেছে?<br>
+          কোনো গুরুত্বপূর্ণ বিষয় বাদ পড়েছে কি?
+        </div>
+      </div>
+      <div class="crit">
+        <div class="crit-title red">🔴 Faithfulness</div>
+        <div class="crit-desc">
+          Caption-এ কি এমন কিছু বলা হয়েছে যা ছবিতে <em>নেই</em> বা <em>ভুল</em>?<br><br>
+          ছবিতে যা দেখছ তার সাথে caption কি সত্য?
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating scale -->
+  <div class="card">
+    <h2>🔢 নম্বরের মানে কী?</h2>
+    <table class="scale">
+      <thead>
+        <tr>
+          <th>নম্বর</th>
+          <th>Fluency (ভাষা)</th>
+          <th>Adequacy (তথ্য)</th>
+          <th>Faithfulness (সত্যতা)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="num">5</span></td>
+          <td>নিখুঁত স্বাভাবিক বাংলা</td>
+          <td>ছবির সব কিছু আছে</td>
+          <td>সম্পূর্ণ সত্য, কোনো ভুল নেই</td>
+        </tr>
+        <tr>
+          <td><span class="num">4</span></td>
+          <td>ভালো, সামান্য জড়তা</td>
+          <td>বেশিরভাগ আছে, একটু কম</td>
+          <td>প্রায় ঠিক, সামান্য অনুমান</td>
+        </tr>
+        <tr>
+          <td><span class="num">3</span></td>
+          <td>মোটামুটি, কিছু সমস্যা</td>
+          <td>মূল ঘটনা আছে, বিস্তারিত নেই</td>
+          <td>কিছু ঠিক, কিছু সন্দেহজনক</td>
+        </tr>
+        <tr>
+          <td><span class="num">2</span></td>
+          <td>পড়তে কষ্ট হচ্ছে</td>
+          <td>ছবির সাথে কম মিল</td>
+          <td>উল্লেখযোগ্য ভুল তথ্য</td>
+        </tr>
+        <tr>
+          <td><span class="num">1</span></td>
+          <td>বাংলাই মনে হচ্ছে না</td>
+          <td>ছবির সাথে কোনো মিল নেই</td>
+          <td>বেশিরভাগই মিথ্যা বা ভুল</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Example -->
+  <div class="card">
+    <h2>💡 একটা উদাহরণ দেখো</h2>
+    <p style="font-size:0.85rem; color:var(--mut); margin-bottom:12px;">ধরো একটা বন্যার ছবি আছে — মানুষ নৌকায় করে পানির মধ্যে যাচ্ছে।</p>
+    <div class="ex-box">
+      <div class="ex-row">
+        <div class="ex-caption ex-a">
+          <div class="ex-label la">Caption A</div>
+          বন্যায় আক্রান্ত পরিবারগুলো নৌকায় করে নিরাপদ স্থানে সরে যাচ্ছে।
+        </div>
+        <div class="ex-caption ex-b">
+          <div class="ex-label lb">Caption B</div>
+          মানুষ পানি নৌকা করে যাচ্ছে বন্যা হয়েছে এলাকায় সাহায্য দরকার।
+        </div>
+      </div>
+      <br>
+      <p style="font-size:0.82rem; color:var(--mut); line-height:1.8;">
+        👉 <strong style="color:#e2e8f0;">Caption A:</strong> Fluency=<strong>5</strong>, Adequacy=<strong>5</strong>, Faithfulness=<strong>5</strong> &nbsp;|&nbsp;
+        <strong style="color:#e2e8f0;">Caption B:</strong> Fluency=<strong>2</strong>, Adequacy=<strong>3</strong>, Faithfulness=<strong>3</strong> &nbsp;|&nbsp;
+        Preference: <strong>A</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- Files -->
+  <div class="card">
+    <h2>📂 কোন ফাইলটা তোমার?</h2>
+    <div class="file-list">
+      <div class="file-item">
+        <div>
+          <div class="file-name">annotation_tool_Annotator_1.html</div>
+          <div class="file-desc">👤 বন্ধু ১-এর ফাইল</div>
+        </div>
+        <span style="font-size:0.75rem; color:var(--mut);">double click করে খোলো</span>
+      </div>
+      <div class="file-item">
+        <div>
+          <div class="file-name">annotation_tool_Annotator_2.html</div>
+          <div class="file-desc">👤 বন্ধু ২-এর ফাইল</div>
+        </div>
+        <span style="font-size:0.75rem; color:var(--mut);">double click করে খোলো</span>
+      </div>
+      <div class="file-item">
+        <div>
+          <div class="file-name">annotation_tool_Annotator_3.html</div>
+          <div class="file-desc">👤 বন্ধু ৩-এর ফাইল</div>
+        </div>
+        <span style="font-size:0.75rem; color:var(--mut);">double click করে খোলো</span>
+      </div>
+    </div>
+    <div class="alert" style="margin-top:16px;">
+      <strong>📤 শেষ করার পর:</strong> ১০০টা annotation complete করো → "✓ সম্পন্ন হয়েছে" চাপো →
+      একটা <code style="background:rgba(255,255,255,.1); padding:1px 6px; border-radius:4px;">annotator_X_responses.csv</code>
+      ফাইল download হবে → সেটা Jahid-কে পাঠাও।
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <p>এই guide টা বুঝে গেলে তোমার নিজের ফাইলটা খুলে শুরু করো।<br>
+    কোনো সমস্যা হলে Jahid-কে জিজ্ঞেস করো।</p>
+    <div class="btn-row">
+      <a href="annotation_tool_Annotator_1.html" class="btn btn-1">👤 Annotator 1 শুরু করো</a>
+      <a href="annotation_tool_Annotator_2.html" class="btn btn-2">👤 Annotator 2 শুরু করো</a>
+      <a href="annotation_tool_Annotator_3.html" class="btn btn-3">👤 Annotator 3 শুরু করো</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
+
