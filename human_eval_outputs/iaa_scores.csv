@@ -1,0 +1,7 @@
+﻿metric,description,krippendorff_alpha,mean_cohen_kappa,agreement_level
+fluency_A,Fluency      (Model Caption),-0.1207,0.0135,Slight
+adequacy_A,Adequacy     (Model Caption),-0.0708,-0.0174,Poor
+faithfulness_A,Faithfulness (Model Caption),-0.1245,-0.0544,Poor
+fluency_B,Fluency      (Ground Truth),-0.0335,0.0038,Slight
+adequacy_B,Adequacy     (Ground Truth),0.0276,0.0359,Slight
+faithfulness_B,Faithfulness (Ground Truth),0.0106,0.0163,Slight

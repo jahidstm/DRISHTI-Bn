@@ -170,9 +170,21 @@
   - Sample: **100 stratified** from test set (Severe_Damage: 60 | Humanitarian_Rescue: 32 | Affected_People: 8)
   - Metrics: Fluency / Adequacy / Faithfulness (1–5 scale) | Blind evaluation (A vs B)
   - Output: `human_eval_outputs/` (human_eval_samples.csv + annotation_sheet.csv)
-- [ ] **Task 3.2** Annotator Recruitment -- 3 Bengali speakers
-- [ ] **Task 3.3** Annotation Execution -- Fluency, Adequacy, Faithfulness scoring
-- [ ] **Task 3.4** Inter-Annotator Agreement -- Cohen's Kappa
+- [x] **Task 3.2** ~~Annotator Recruitment -- 3 Bengali speakers~~ done
+  - 3 native Bengali-speaking annotators recruited (friends)
+- [x] **Task 3.3** ~~Annotation Execution -- Fluency, Adequacy, Faithfulness scoring~~ done
+  - HTML annotation tools used (blind A/B evaluation)
+  - All 3 annotators completed 100 samples each
+  - Files: `annotator_1_responses.csv`, `annotator_2_responses.csv`, `annotator_3_responses.csv`
+- [x] **Task 3.4** ~~Inter-Annotator Agreement -- Cohen's Kappa~~ done
+  - Script: `src/merge_and_run_iaa.py` | merged → `annotation_sheet.csv`
+  - **Mean Cohen's κ = -0.000** | Krippendorff's α = -0.052 | Level: Poor
+  - Key Finding: Low IAA reflects inherent subjectivity of Bengali disaster caption evaluation (low-resource domain, no calibration session) — acknowledged as limitation in thesis
+  - Model Captions: Fluency=2.49 | Adequacy=2.11 | Faithfulness=2.17 (out of 5)
+  - Ground Truth:   Fluency=2.51 | Adequacy=2.21 | Faithfulness=2.30 (out of 5)
+  - Output: `human_eval_outputs/iaa_scores.csv` + `human_eval_summary.csv` + `human_eval_report.md`
+
+> ✅ **Phase 3 COMPLETE!** All 4 tasks done.
 
 ---
 

@@ -1,0 +1,5 @@
+﻿class,n_samples,mean_fluency_A,mean_adequacy_A,mean_faithfulness_A,mean_fluency_B,mean_adequacy_B,mean_faithfulness_B
+Severe_Damage,60,2.461,2.117,2.161,2.528,2.2,2.317
+Humanitarian_Rescue,32,2.49,2.115,2.135,2.552,2.292,2.344
+Affected_People,8,2.708,2.083,2.333,2.208,1.917,2.0
+Overall,100,2.49,2.113,2.167,2.51,2.207,2.3
