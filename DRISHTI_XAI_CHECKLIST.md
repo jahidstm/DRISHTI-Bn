@@ -190,13 +190,20 @@
 
 ## Phase 4: Thesis Writing and Paper Submission
 > NotebookLM workflow-e cholbe -- protiti section-e alada prompt pabe
+> **Full Writing Plan:** `PHASE4_WRITING_PLAN.md` (12ta NotebookLM prompt + figure/table list)
 
 - [ ] **Task 4.1** Paper Structure and Abstract Draft
-  - NotebookLM prompt pabe
+  - NotebookLM Prompt 1 (Abstract rewrite with updated results)
 - [ ] **Task 4.2** Figures and Tables -- Architecture diagram, heatmaps, result tables
-- [ ] **Task 4.3** Full Draft -- IEEE Access format
-  - Protiti section-e NotebookLM prompt pabe
-- [ ] **Task 4.4** Internal Review and Revision
+  - 13 figures + 8 tables identified — see `PHASE4_WRITING_PLAN.md` Task 4.2 list
+- [ ] **Task 4.3** Full Draft (12 NotebookLM prompts)
+  - P1: Abstract | P2: 1.1 Background | P3: 1.2-1.4 Problem+Objectives
+  - P4: 2.1-2.3 Lit Review | P5: 2.4-2.5 XAI+Human Eval lit (NEW)
+  - P6: 3.1-3.4 Methodology | P7: 3.5-3.6 XAI+HumanEval design (NEW)
+  - P8: 4.1-4.3 Results | P9: 4.4-4.5 Baselines+Ablation
+  - P10: 4.6 XAI Analysis | P11: 4.7 Human Eval Results
+  - P12: 5.1-5.4 Discussion+Conclusion
+- [ ] **Task 4.4** [REF] placeholders fill + Proofreading
 - [ ] **Task 4.5** Submission -> IEEE Access / ISCRAM 2027
 
 ---
