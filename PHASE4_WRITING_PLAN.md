@@ -23,6 +23,42 @@ NotebookLM-এ prompt দেওয়ার আগে নিচের ফাই�
 
 ---
 
+## ⚠️ DIU Department Requirements (থিসিস লেখার আগে মনে রাখো)
+
+> **Updated:** 10 November 2026 — DIU SWE Thesis Template ও Guidelines PDF বিশ্লেষণ করে নেওয়া হয়েছে।
+
+### Citation Style: APA (IEEE নয়!)
+DIU কোনো citation style enforce করে না, তবে **APA format** সবচেয়ে accepted। একবার যেটা বেছে নেবে সেটা consistently follow করতে হবে।
+
+| ফরম্যাট | In-text | Reference List |
+|---------|---------|---------------|
+| **APA (Recommended)** | `(Alam et al., 2018)` | `Alam, F., et al. (2018). CrisisMMD. ICWSM.` |
+| ❌ IEEE (avoid) | `[1]` | `[1] F. Alam et al., "CrisisMMD"...` |
+
+> **মনে রাখো:** `[REF]` placeholder fill করার সময় সবসময় **APA in-text** format ব্যবহার করবে।
+
+### Word Count Limit
+- **Bachelor Thesis:** সর্বোচ্চ **৩০,০০০ শব্দ** (মোট)
+- Unnecessarily prolong করবে না — Department guideline বলে: *"DON'T WRITE DEFINITIONS AND DON'T PROLONG THE DISCUSSION UNNECESSARILY"*
+
+### Formatting (Word-এ কাজ করার সময় apply করবে)
+| Setting | Value |
+|---------|-------|
+| Font | Times New Roman, 12pt |
+| Line Spacing | 1.5 (body text) |
+| Left Margin | 4.0 cm |
+| Other Margins | 2.5 cm each |
+| Paper | A4, 80gm, white |
+| **Figure caption** | ছবির **নিচে** |
+| **Table caption** | টেবিলের **উপরে** |
+
+### Plagiarism Limit
+- Total: ≤ **40%** similarity
+- Single source: < **3%** from any one source
+- DIU Library-তে plagiarism check করাতে হবে (প্রথম ২ বার ফ্রি)
+
+---
+
 ## Part B: Thesis Structure Overview
 
 ### ☑ = Existing (update needed) | 🆕 = New section | ✍️ = Full rewrite
@@ -959,6 +995,23 @@ FORMATTING:
 
 ## Part D: Writing Progress Tracker
 
+### 📋 Front Matter (Main Content লেখার আগে/পরে করবে)
+
+| # | Section | Notes | Status |
+|---|---------|-------|--------|
+| FM1 | **Title Page** | Template থেকে fill করবে | ⬜ |
+| FM2 | **Supervisor's Declaration** | Supervisor-এর sign লাগবে | ⬜ |
+| FM3 | **Student's Declaration** | নিজে sign করবে | ⬜ |
+| FM4 | **Acknowledgements** | ছোট — 1 paragraph, ধন্যবাদ জানানো | ⬜ |
+| FM5 | **Dedication** | Optional কিন্তু required — 1-2 line | ⬜ |
+| FM6 | **Abstract** | (Prompt P0 দিয়ে লেখা হবে) | ⬜ |
+| FM7 | **Table of Contents** | Word-এ auto-generate হবে | ⬜ |
+| FM8 | **List of Tables** | Word-এ auto-generate হবে | ⬜ |
+| FM9 | **List of Figures** | Word-এ auto-generate হবে | ⬜ |
+| FM10 | **List of Abbreviations** | DRISHTI-Bn, ViT, LoRA, XAI, etc. | ⬜ |
+
+### 📝 Main Content (NotebookLM Prompts)
+
 | # | Prompt | Section | Type | Status |
 |---|--------|---------|------|--------|
 | P0 | Abstract | Abstract | ☑ Update | ⬜ |
@@ -988,12 +1041,25 @@ FORMATTING:
 | P5.2 | Chapter 5.2 | Limitations | ✍️ Rewrite | ⬜ |
 | P5.3 | Chapter 5.3 | Future Work | ✍️ Rewrite | ⬜ |
 | P5.4 | Chapter 5.4 | Conclusion | ✍️ Rewrite | ⬜ |
-| — | Figures/Tables | Insert all placeholders | — | ⬜ |
-| — | [REF] | Fill all reference placeholders | — | ⬜ |
-| — | Proofread | Final review | — | ⬜ |
+
+### 🔧 Final Steps (সব লেখা শেষ হওয়ার পর)
+
+| # | Task | Notes | Status |
+|---|------|-------|--------|
+| F1 | Figures & Tables insert | সব `[PLACEHOLDER]` জায়গায় আসল figure/table বসাও | ⬜ |
+| F2 | [REF] fill করো | APA in-text format: `(Author, Year)` | ⬜ |
+| F3 | Reference List তৈরি | APA format, alphabetical order | ⬜ |
+| F4 | DIU Template-এ format apply | Font, margin, line spacing, caption position | ⬜ |
+| F5 | Table of Contents auto-generate | Word heading styles ঠিক করে auto TOC | ⬜ |
+| F6 | List of Figures/Tables auto-generate | Word-এ automatically হবে | ⬜ |
+| F7 | Plagiarism check | DIU Library — সর্বোচ্চ ৪০%, single source < ৩% | ⬜ |
+| F8 | Supervisor review | Sir-কে draft পাঠাও | ⬜ |
+| F9 | Final revision | Corrections করো | ⬜ |
+| F10 | Print & bind | 2 hard copies, black buckram binding, gold text | ⬜ |
 
 ---
 
-> **শুরু করো Prompt 0 (Abstract) দিয়ে → তারপর 1.1 → 1.2 → ক্রমানুসারে শেষ পর্যন্ত।**
-> **প্রতিটি prompt-এর output NotebookLM থেকে কপি করে Word-এ paste করো।**
+> **শুরু করো Prompt P0 (Abstract) দিয়ে → তারপর P1.1 → P1.2 → ক্রমানুসারে P5.4 পর্যন্ত।**
+> **প্রতিটি prompt-এর output NotebookLM থেকে কপি করে DIU Template Word file-এ paste করো।**
+> **[REF] fill করার সময় APA format ব্যবহার করো: `(Author, Year)`**
 > **তুমিই author — AI শুধু writing assistant।**
