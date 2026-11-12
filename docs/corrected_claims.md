@@ -15,8 +15,31 @@
 - **সমস্যা:** এগুলো এসেছে `disasternet_multitask_v2.pth` (২৫ জুন) থেকে, যা train হয়েছিল λ_cap = 0.2, unshifted teacher forcing আর seed ছাড়া 80/20 split দিয়ে। Test set-এর আনুমানিক ~300/376 sample মডেল training-এ দেখেছে। (প্রমাণ: `results/defense_fixes/phase0/checkpoint_audit.md`)
 - **করণীয়:** Phase 3B-এর নতুন মডেলের সংখ্যা দিয়ে প্রতিস্থাপন। ততদিন এই সংখ্যাগুলো কোথাও লেখা যাবে না।
 
-### C2. Human evaluation-এর model caption — ⏳ Phase 3B (সিদ্ধান্ত 3B.4)
-- **সমস্যা:** ১০০টা model caption v2 থেকে, অর্থাৎ C1-এর একই সমস্যা।
+### C2. Human evaluation — রিপোর্ট করা সব score ভুল ছিল (un-blinding bug) — ✅ সংশোধিত / ⏳ 3B.4
+- **পুরনো দাবি:** Model: fluency 2.49, adequacy 2.11, faithfulness 2.17 · GT: 2.51, 2.21, 2.30 → "model captions score closely to ground truth"।
+- **Bug:** `build_annotation_tool.py` প্রতিটা sample-এ GT আর model caption এলোমেলোভাবে A/B-তে বসিয়েছিল (প্রতি annotator-এ ~৫০টা অদলবদল), কিন্তু `merge_and_run_iaa.py` সব row-এ A = model, B = GT ধরে নিয়েছিল। তাই "model" আর "GT" দুটো সংখ্যাই ছিল দুইয়ের প্রায় সমান মিশ্রণ — এ কারণেই দুটো প্রায় এক দেখাচ্ছিল। IAA-ও ভুল ছিল, কারণ একই "A" column-এ বিভিন্ন annotator আলাদা caption দেখেছিলেন।
+- **সংশোধন:** আসল assignment প্রতিটা annotator-এর HTML tool-এ (`"hA": "gt"/"model"`) সংরক্ষিত ছিল। [src/human_eval_unblind.py](../src/human_eval_unblind.py) সেটা পড়ে, ৩০০টা row-এর caption text মিলিয়ে যাচাই করে (সব মেলে), তারপর আবার হিসাব করে। ফল: `results/defense_fixes/phase1/human_eval_unblinded/`।
+- **সঠিক ফল (১০০ sample × ৩ annotator, 1–5 scale):**
+
+  | Dimension | Model | Ground Truth | পার্থক্য | Wilcoxon p |
+  |-----------|-------|--------------|----------|------------|
+  | Fluency | **1.58** | **3.42** | 1.83 | 2.1 × 10⁻¹⁷ |
+  | Adequacy | **1.24** | **3.08** | 1.84 | 9.7 × 10⁻¹⁸ |
+  | Faithfulness | **1.23** | **3.23** | 2.00 | 1.8 × 10⁻¹⁷ |
+
+  | Class | Model (F / A / Fa) | GT (F / A / Fa) |
+  |-------|--------------------|-----------------|
+  | Severe_Damage (60) | 1.63 / 1.28 / 1.29 | 3.36 / 3.04 / 3.18 |
+  | Humanitarian_Rescue (32) | 1.53 / 1.21 / 1.16 | 3.51 / 3.20 / 3.32 |
+  | Affected_People (8) | 1.46 / 1.08 / 1.08 | 3.46 / 2.92 / 3.25 |
+
+  - **Preference:** ২৩৭টা মতামতের মধ্যে GT পছন্দ ২২৫ বার (94.9%), model ১২ বার; ৬৩টা খালি।
+  - তিনজন annotator-ই আলাদাভাবে GT-কে model-এর চেয়ে স্পষ্টভাবে বেশি দিয়েছেন (যেমন adequacy: 2.30 বনাম 1.26, 3.92 বনাম 1.28, 3.02 বনাম 1.18)।
+- **অর্থ:** Model-এর caption মানুষের চোখে খুব দুর্বল (১–৫ স্কেলে ~১.২–১.৬)। Generated caption-এ বাংলা-ইংরেজি মেশানো অর্থহীন শব্দ দেখা যায়। এটা লুকানো যাবে না; সৎভাবে লিখতে হবে।
+- **নতুন লেখা (English):**
+  > "Human judges rated the generated captions substantially lower than the reference texts on all three dimensions (fluency 1.58 vs. 3.42, adequacy 1.24 vs. 3.08, faithfulness 1.23 vs. 3.23; Wilcoxon p < 10⁻¹⁶), and preferred the reference in 94.9% of judgements. The caption decoder therefore does not yet produce usable Bengali descriptions; its value in this work lies in the multi-task and explainability analysis rather than in caption quality."
+- ⏳ **৩B.4-এর সিদ্ধান্ত বাকি:** এই ১০০টা model caption পুরনো v2 checkpoint থেকে (C1)। Phase 3B-এর নতুন মডেলের caption ভালো হলে human eval আবার করা যেতে পারে।
+- **পুরনো সমস্যা (C1-এর):** ১০০টা model caption v2 থেকে, অর্থাৎ C1-এর একই সমস্যা।
 - **দুই বিকল্প:** (ক) আগের ফল রেখে limitation হিসেবে লেখা; (খ) নতুন মডেলের caption দিয়ে আবার human eval।
 - **(ক) বেছে নিলে লেখা (English):**
   > "The human evaluation was conducted on captions from an earlier multi-task checkpoint trained before the final data split was fixed; a portion of the evaluated samples may therefore have been seen during training. The scores should be read as an upper bound on caption quality."
@@ -101,22 +124,27 @@
   - English text-এর 100%-এ আর Bengali text-এর 97.3%-এ URL (`https://t.co/...`) আছে
 - **নতুন লেখা (English):**
   > "The Bengali reference texts are machine translations of the original tweets accompanying each image, not purpose-written image descriptions. They frequently contain information not visible in the image (locations, organisations, URLs). This explains the modest BLEU scores and the low human ratings of the references themselves (2.21–2.51/5)."
-- ✅ **Human verification নিশ্চিত (তোমার উত্তর, 2026-11-12):** ৩ জন মানুষ অনুবাদ যাচাই করেছিলেন। দাবিটা রাখা যাবে। অনুবাদ মডেল: `monirbishal/en-bn-nmt` (notebook অনুযায়ী)।
-  - Writing-এর সময় যা লিখতে হবে: কতগুলো অনুবাদ যাচাই হয়েছিল (সব, নাকি একটা অংশ), কী ধরনের ভুল ঠিক করা হয়েছিল, verifier-রা কারা (যেমন native Bengali speaker)। এই তথ্য তখন তোমার কাছ থেকে নেব।
-  - সতর্কতা: যাচাইয়ের পরেও 97.3% Bengali text-এ URL থেকে গেছে, অর্থাৎ verification-এ URL সরানো হয়নি। তাই লেখায় বলতে হবে verification ছিল **অনুবাদের মান** যাচাই, text পরিষ্কার করা নয়।
+- ❓ **"Human verification" — প্রমাণ মেলেনি (2026-11-12):** তুমি জানিয়েছ যাচাইয়ের ফল `annotator_1/2/3_responses.csv`-এ আছে। কিন্তু এই ফাইলগুলো **caption-এর human evaluation** (২ নভেম্বর, ১০০টা test sample, model বনাম GT caption-কে fluency/adequacy/faithfulness দেওয়া), পুরো dataset-এর ৩,৭৫৫টা অনুবাদ যাচাই নয়।
+  - Dataset-এ যাচাই না হওয়ার লক্ষণ: **333টা (8.9%) "Bengali" text-এ বাংলা অক্ষর ৩০%-এরও কম** — অর্থাৎ অনুবাদই হয়নি, ইংরেজি থেকে গেছে (যেমন `"E. Coli As as 135 times Secure Limit in Hustan Houses…"`)। আর 97.3%-এ URL রয়ে গেছে।
+  - **যা সৎভাবে বলা যায় (English):**
+    > "Translation quality was assessed on a subset: in the human evaluation, three native Bengali speakers rated 100 translated reference texts at 3.42/5 for fluency and 3.08/5 for adequacy. A further 8.9% of the corpus was left untranslated by the NMT system (`monirbishal/en-bn-nmt`)."
+  - ❓ June-এ preprocessing-এর সময় আলাদা কোনো যাচাই হয়ে থাকলে (কে, কতগুলো, কী ঠিক করেছিলেন) জানাবে — তাহলে সেটাও লেখা যাবে। না হলে "machine-translated + human verification" দাবি বাদ।
 
-### C11. Human eval-এর IAA (κ ≈ 0) — ✅
-- **তথ্য:** Annotator-দের গড় score অনেক আলাদা (caption A ও B মিলিয়ে গড়):
+### C11. Human eval-এর IAA — ✅ (C2-এর bug ঠিক করে আবার হিসাব)
+- **পুরনো দাবি:** Mean κ ≈ −0.000, α = −0.052 (ভুলভাবে align করা rating-এর ওপর)।
+- **সঠিক হিসাব:**
 
-  | Annotator | Fluency | Adequacy | Faithfulness |
-  |-----------|---------|----------|--------------|
-  | 1 | 1.77 | 1.78 | 1.86 |
-  | 2 | 2.68 | 2.60 | 2.74 |
-  | 3 | 3.06 | 2.10 | 2.10 |
+  | কীভাবে মাপা | Krippendorff's α | Cohen's κ | Weighted κ (quadratic) |
+  |-------------|------------------|-----------|------------------------|
+  | Model caption-এর ভেতরে | ≈ −0.04 | ≈ −0.01 | ≈ 0.04 |
+  | GT caption-এর ভেতরে | ≈ 0.03 | ≈ 0.04 | ≈ 0.14 |
+  | **দুটো একসঙ্গে (২০০ item)** | **0.38** | **0.15** | **0.40** |
 
+  (প্রতিটা সারি তিন dimension-এর গড়; পুরো table: `iaa_scores_unblinded.csv`)
+- **ব্যাখ্যা:** Annotator-রা কোন caption ভালো আর কোনটা খারাপ, সেটায় মোটামুটি একমত (pooled α ≈ 0.38, fair agreement)। কিন্তু একই ধরনের caption-এর ভেতরে সূক্ষ্ম পার্থক্যে একমত নন। Model caption-এর score প্রায় সবই ১-এর কাছে, তাই সেখানে একমত হওয়ার মতো variance-ই কম।
+- Annotator-দের scale ব্যবহারে বড় পার্থক্য আছে (GT fluency: 2.37 / 4.04 / 3.84), calibration session হয়নি, annotator ছিলেন বন্ধু — limitation।
 - **নতুন লেখা (English):**
-  > "Inter-annotator agreement was near chance (mean Cohen's κ ≈ 0.00, Krippendorff's α = −0.052). Annotators differed systematically in their use of the scale (mean fluency from 1.77 to 3.06), and no calibration session was held beforehand. The human scores should therefore be treated as indicative only."
-- Annotator যে বন্ধু ছিলেন, সেটাও limitation-এ উল্লেখ।
+  > "Agreement on the pooled set of 200 captions was fair (Krippendorff's α = 0.38, quadratic-weighted κ = 0.40), indicating that annotators consistently distinguished reference texts from generated captions. Agreement within each caption type was near chance, reflecting the narrow score range of the generated captions and systematic differences in how annotators used the scale; no calibration session was held."
 
 ### C12. Figure 4.1 (confusion matrix) — ⏳ Phase 2 / 3B
 - **সমস্যা:** Matrix-টা v2 মডেলের (77.95%), সেরা মডেলের (83.21%) নয়; আর C1 অনুযায়ী v2-এর সংখ্যা ব্যবহারযোগ্যই নয়।
@@ -169,7 +197,9 @@
 1. ⏳ **Data leakage:** একই tweet-এর একাধিক ছবি train ও test-এ ভাগ হয়েছিল — 376টার মধ্যে 80টা (21.3%) test sample-এর হুবহু একই text train-এ আছে। (Phase 3-এর পর: grouped split-এর ফল দিয়ে প্রতিস্থাপন বা পাশে রাখা।)
 2. ⏳ **Single-seed ফল / run-to-run variance (~1.7pp)।** (Phase 3-এর পর mean ± std।)
 3. ✅ Reference text হলো tweet-এর মেশিন অনুবাদ, ছবির বর্ণনা নয় (C10)।
-4. ✅ Human eval-এ IAA প্রায় শূন্য, calibration session ছাড়া, annotator বন্ধু (C11)।
+4. ✅ Human eval: ৩ জন annotator (বন্ধু), calibration session ছাড়া; ধরন অনুযায়ী আলাদা করে মাপলে IAA প্রায় শূন্য, একসঙ্গে মাপলে fair (α = 0.38) (C11)। মূল un-blinding bug ঠিক করা হয়েছে (C2)।
+9. ✅ Caption generation দুর্বল: মানুষের rating model 1.2–1.6/5 বনাম reference 3.1–3.4/5 (C2)।
+10. ✅ Corpus-এর 8.9% text অনুবাদ হয়নি (ইংরেজি থেকে গেছে) (C10)।
 5. ✅ Class imbalance: Affected_People মাত্র 330টা (8.8%) — সব মডেলে এই class-এর F1 সবচেয়ে কম।
 6. ✅ Temperature scaling-এ উন্নতি হয়নি; validation set ছোট (C8)।
 7. ⏳ Human eval-এর model caption পুরনো checkpoint থেকে (C2, যদি বিকল্প (ক))।

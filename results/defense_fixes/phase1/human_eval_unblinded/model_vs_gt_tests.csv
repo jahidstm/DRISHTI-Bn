@@ -1,0 +1,4 @@
+﻿dimension,model_mean,gt_mean,diff_gt_minus_model,wilcoxon_p
+fluency,1.583,3.417,1.833,2.146538806505052e-17
+adequacy,1.24,3.08,1.84,9.672297608282418e-18
+faithfulness,1.233,3.233,2.0,1.772660841908403e-17

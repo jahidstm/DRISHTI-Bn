@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ; বর্তমান phase: **Phase 3** (Colab-এ চালানোর অপেক্ষায়)
+> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ; বর্তমান: **Phase 1** (২টা উত্তর বাকি) · **Phase 3** (Colab-এ চালানোর অপেক্ষায়)
 
 ---
 
@@ -27,7 +27,7 @@
 | ক্রম | Phase | বিষয় | কোথায় চলবে | আনুমানিক সময় | Status |
 |------|-------|------|-------------|---------------|--------|
 | 1 | 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | ✅ শেষ |
-| 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | ✅ শেষ |
+| 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | 🟡 প্রায় শেষ (১টা প্রশ্ন + ১টা অনুমতি বাকি) |
 | 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | 🟡 Colab-এ চালানো বাকি |
 | 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~2 ঘণ্টা | ⬜ বাকি |
 | 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
@@ -81,10 +81,14 @@
 - [x] **1.14 (নতুন) "CrisisViT (SOTA)" লেবেল** → C14
 - [x] **1.15 (নতুন) "First …" দাবি** → C15 (*BanglaMM-Disaster*, *BiCap* আগে থেকেই আছে)
 - [x] **1.16 (নতুন) Dataset "flood-only" নয়** → C16: 95.2% hurricane (Harvey/Irma/Maria), মাত্র 4.8% (180টা) Sri Lanka flood
-- [x] **1.17 তোমার উত্তর:** অনুবাদ ৩ জন মানুষ যাচাই করেছিলেন → দাবি থাকবে (C10); Title-এ আপাতত "Flood" থাকবে, supervisor-এর সঙ্গে কথা বলে চূড়ান্ত (C16)।
+- [x] **1.17 তোমার উত্তর:** Title-এ আপাতত "Flood" থাকবে, supervisor-এর সঙ্গে কথা বলে চূড়ান্ত (C16)। অনুবাদ যাচাই → 1.19 দেখো।
 - [x] **1.18 (নতুন) ViT-Only ও CrisisViT baseline-এ শুধু pooler train হয়েছিল** → C17 (Phase 3-এ আবার চালানো হচ্ছে)
+- [x] **1.19 (নতুন) Human eval-এর un-blinding bug ঠিক করা** → C2, C11। HTML tool A/B এলোমেলো করেছিল, merge script সব row-এ A = model ধরেছিল। [src/human_eval_unblind.py](src/human_eval_unblind.py) HTML থেকে আসল assignment পড়ে (৩০০ row-এর caption text যাচাই করা) আবার হিসাব করেছে → model 1.58 / 1.24 / 1.23 বনাম GT 3.42 / 3.08 / 3.23 (p < 10⁻¹⁶); GT পছন্দ 94.9%; pooled α = 0.38।
+- [ ] **1.20 তোমার উত্তর/অনুমতি লাগবে:**
+  - (ক) `annotator_*_responses.csv` আসলে caption-এর human eval, অনুবাদ যাচাই নয়। June-এ আলাদা কোনো অনুবাদ যাচাই হয়েছিল কি? (C10)
+  - (খ) CLAUDE.md-এর Human Evaluation অংশের পুরনো (ভুল) সংখ্যা সংশোধিত সংখ্যা দিয়ে বদলানোর অনুমতি।
 
-**শেষ হওয়ার শর্ত:** ✅ পূরণ হয়েছে।
+**শেষ হওয়ার শর্ত:** 1.20-এর দুটো উত্তর।
 
 ---
 
@@ -208,6 +212,7 @@
 | তারিখ | Phase/Task | ফল (সংক্ষেপে) | সংরক্ষিত ফাইল |
 |-------|-----------|---------------|---------------|
 | 2026-11-12 | 0.7 | একমাত্র multi-task checkpoint v2 (২৫ জুন) সব fix-এর আগের; test set-এর ~300/376 training-এ দেখা (আনুমানিক)। `best_cls_only.pt`-এর decoder untrained (std 0.02084 ≈ init) — নিশ্চিত। | `results/defense_fixes/phase0/checkpoint_audit.md` |
+| 2026-11-12 | 1.19 | Human eval সঠিকভাবে un-blind: model 1.58/1.24/1.23 বনাম GT 3.42/3.08/3.23 (fluency/adequacy/faithfulness), Wilcoxon p < 10⁻¹⁶; GT পছন্দ 225/237; IAA pooled α 0.38, within-type ≈ 0 | `results/defense_fixes/phase1/human_eval_unblinded/` |
 | 2026-11-12 | 1.18 | পুরনো ViT unfreeze নিয়ম transformers 5.x-এ মাত্র 590,592 param (pooler) unfreeze করে, ঠিক নিয়মে 14,766,336; CrisisViT-এর 0.34% = ViT-L pooler | `docs/corrected_claims.md` (C17) |
 | 2026-11-12 | 3.1 | Grouped split লোকালি যাচাই: 3,189 group; 3,005 / 375 / 375; overlap 0 | `colab/phase3_grouped_split_seeds.py` |
 | 2026-11-12 | 1.16 | Dataset-এর event ভাগ: Harvey 1,416 · Maria 1,149 · Irma 1,010 · Sri Lanka floods 180 → 95.2% hurricane | `docs/corrected_claims.md` (C16) |
@@ -222,4 +227,5 @@
 | 2026-11-12 | 0 (আংশিক) | 0.1 বাদ (draft ইচ্ছাকৃতভাবে মোছা), 0.2–0.6 শেষ, 0.7-এর Colab script তৈরি | `c380372` |
 | 2026-11-12 | 0 ✅ | 0.7 checkpoint audit শেষ; Phase 3B (multi-task retrain) বাধ্যতামূলক হিসেবে যোগ, phase-এর ক্রম বদল | `47db4f5` |
 | 2026-11-12 | 1 (প্রায়) | `docs/corrected_claims.md` তৈরি (C1–C16 + Limitations); নতুন ফল: dataset-এর 95.2% hurricane; PHASE4_WRITING_PLAN.md বাদ | `df140a8` |
-| 2026-11-12 | 1 ✅ · 3 (script) | তোমার দুটো উত্তর যোগ; C17 (baseline-এ শুধু pooler train) যোগ; Phase 3 Colab script তৈরি ও split লোকালি যাচাই | (এই commit) |
+| 2026-11-12 | 1 ✅ · 3 (script) | তোমার দুটো উত্তর যোগ; C17 (baseline-এ শুধু pooler train) যোগ; Phase 3 Colab script তৈরি ও split লোকালি যাচাই | `cf8d45b` |
+| 2026-11-12 | 1 (আবার খোলা) | Human eval un-blinding bug ধরা ও ঠিক করা (C2, C11); অনুবাদ যাচাইয়ের দাবির প্রমাণ মেলেনি (C10) | (এই commit) |

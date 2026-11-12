@@ -1,0 +1,5 @@
+﻿class,n_samples,model_fluency,model_adequacy,model_faithfulness,gt_fluency,gt_adequacy,gt_faithfulness
+Severe_Damage,60,1.628,1.278,1.294,3.361,3.039,3.183
+Humanitarian_Rescue,32,1.531,1.208,1.156,3.51,3.198,3.323
+Affected_People,8,1.458,1.083,1.083,3.458,2.917,3.25
+Overall,100,1.583,1.24,1.233,3.417,3.08,3.233
