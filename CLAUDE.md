@@ -20,48 +20,65 @@
 
 ## Actual Experiment Results (NEVER change these numbers)
 
-### Classification (Test set, n=376, `best_cls_only.pt`)
-| Metric | CLS-Only (Best) | Multi-Task |
-|--------|----------------|------------|
-| Macro F1 | **83.21%** | 77.95% |
-| Precision | 85.33% | 93.28% |
-| Recall | 81.84% | 73.03% |
+> Numbers below were updated on 2026-11-12 with the user's approval (DEFENSE_FIX_PLAN decisions 3.5 and 3B.5).
+> Main results use the **leakage-free grouped split** (no tweet / identical caption shared across train/val/test;
+> train 3007 / val 373 / **test 375**). How to phrase each claim: `docs/corrected_claims.md`.
+> Old numbers from the original un-grouped split (test n=376) were inflated by leakage and are listed only as "superseded".
 
-**Per-class (multi-task):** Severe_Damage=92.53%, Humanitarian_Rescue=88.00%, Affected_People=53.33%
+### Classification — main result (grouped split, test n=375)
+| Model | Seeds | Macro F1 | Precision | Recall | Trainable |
+|-------|-------|----------|-----------|--------|-----------|
+| **DRISHTI-Bn CLS-Only (LoRA r=8)** | 42, 123, 2024 | **75.69 ± 1.33%** | 77.09 ± 1.31% | 74.93 ± 1.59% | 1.38M (≈0.70%) |
+| Multi-Task v3, image + original tweet | 42 | 77.29% | 79.03% | 76.12% | 74.79M |
+| Multi-Task v3, image + generated caption (image-only) | 42 | 73.63% | 76.77% | 72.12% | 74.79M |
 
-**Confusion matrix:** SD [223,1,0] | HR [20,99,0] | AP [15,6,12]
+**CLS-Only per-class F1 (mean of 3 seeds):** Severe_Damage=93.28% | Humanitarian_Rescue=88.31% | Affected_People=45.48 ± 4.63%
 
-### Caption Generation (Test set, n=376, Beam Width=3)
-| Metric | Score |
-|--------|-------|
-| BLEU-1 | 24.85 |
-| BLEU-2 | 14.20 |
-| BLEU-3 | 8.95 |
-| BLEU-4 | 6.13 |
-| METEOR | 0.32 |
-| ROUGE-L | 0.56 |
-| BERTScore-F1 | **60.35%** ← (NOT 60.65%) |
+**Multi-Task v3 per-class F1:** (tweet) SD 92.00 / HR 87.24 / AP 52.63 · (generated caption) SD 92.51 / HR 86.07 / AP 42.31
 
-### Baselines
-| Model | Macro F1 |
-|-------|----------|
-| Stratified Random | 39.95% |
-| BanglaBERT-Only | 43.02% |
-| Full Fine-Tune | 74.19% |
-| CrisisViT (SOTA, ViT-Large) | 78.15% |
-| ViT-Only | 78.64% |
-| **DRISHTI-Bn (Ours)** | **83.21%** |
+**Multi-Task v3 confusion (rows SD, HR, AP):** tweet [207,10,7] [10,106,3] [9,8,15] · generated [210,10,4] [9,105,5] [11,10,11]
 
-### Ablation Study
-| Config | Macro F1 |
-|--------|----------|
-| Caption-Only | 16.90% |
-| No-LoRA | 77.74% |
-| LoRA r=4 | 79.41% |
-| LoRA r=16 | 79.14% |
-| r=8 Multi-Task | 81.47% |
-| No-CrossAttn | 81.88% |
-| **CLS-Only (Best)** | **83.21%** |
+Multi-task 77.29% is a single seed within CLS-Only seed variance — do NOT claim multi-task improves classification.
+Image-only 73.63% ≈ ViT-Only — the generated caption adds no information beyond the image.
+
+Superseded (original split, leakage): CLS-Only 83.21% · Multi-Task v2 77.95% (P 93.28, R 73.03).
+
+### Caption Generation (Multi-Task v3, grouped test n=375, Beam Width=3, sacreBLEU 2.6.0)
+| Metric | Raw references | Clean (no URL/RT/@/#) |
+|--------|----------------|------------------------|
+| Corpus BLEU | 14.38 | 0.11 |
+| chrF | 14.19 | 8.46 |
+| BERTScore-F1 (mBERT) | 69.66% | **62.27%** (URLs removed) |
+
+Reference points (same refs, chrF raw / clean): random train tweet 21.58 / 11.93 · constant tweet 20.46 / 15.19 → the model scores BELOW both.
+Generated captions imitate tweets (96.8% contain URL fragments, 99.2% hashtags) — they are not image descriptions (C18).
+
+Superseded (v2, leakage + unshifted teacher forcing, non-standard BLEU): BLEU-1..4 24.85/14.20/8.95/6.13, METEOR 0.32, ROUGE-L 0.56, BERTScore 60.35%.
+
+### Baselines (grouped split, test n=375)
+| Model | Seeds | Macro F1 | Trainable |
+|-------|-------|----------|-----------|
+| ViT-Only (last 2 blocks + pooler) | 3 | 73.27 ± 0.39% | 15.16M |
+| CrisisViT-style (our re-implementation, ViT-L, last 4 blocks + pooler) | 1 | 75.87% | 51.96M |
+| **DRISHTI-Bn CLS-Only** | 3 | **75.69 ± 1.33%** | **1.38M** |
+
+Claim: matches the ViT-Large baseline with 38× fewer trainable parameters — NOT "beats SOTA".
+
+Original split only (not re-run; label as such): Stratified Random 39.95% · BanglaBERT-Only 43.02% · Full Fine-Tune 74.19%.
+Superseded (pooler-only bug, C17): ViT-Only 78.64% · CrisisViT 78.15%.
+
+### Ablation Study (original un-grouped split, single seed — NOT re-run)
+| Config | Macro F1 | Note |
+|--------|----------|------|
+| Caption-Only | 16.90% | untrained classifier head (C6) — exclude or footnote |
+| No-LoRA | 77.74% | |
+| LoRA r=4 | 79.41% | |
+| LoRA r=16 | 79.14% | |
+| LoRA r=8 (rank ablation run) | 81.47% | was mislabelled "r=8 Multi-Task" (C5) |
+| No-CrossAttn | 81.88% | difference = run-to-run variance (C4) |
+| CLS-Only | 83.21% | same config as r=8 above → ~1.7pp variance |
+
+Differences < ~2.5pp are within seed variance (grouped split CLS-Only range 74.83–77.22%).
 
 ### Calibration
 - T* = 1.1113 | ECE before = 2.16%
@@ -71,6 +88,8 @@
 - Overall: 17/21 = **81%** | SD: 7/7 | HR: 7/7 | AP: 3/7
 
 ### Human Evaluation (100 samples, 3 annotators, blind A/B)
+> ⚠️ The numbers below come from a merge bug (A/B swap ignored) and are WRONG — see `docs/corrected_claims.md` C2/C11.
+> Replacing them here is pending the user's permission (DEFENSE_FIX_PLAN 1.20). Captions were from v2, not v3 (decision 3B.4 = keep, as limitation).
 | Dimension | Model | Ground Truth |
 |-----------|-------|--------------|
 | Fluency | 2.49/5 | 2.51/5 |
@@ -87,7 +106,8 @@
 | File | Purpose |
 |------|---------|
 | `DEFENSE_FIX_PLAN.md` | **Active:** phase-by-phase pre-defense fix plan (update after each phase, then commit + push) |
-| `PHASE4_WRITING_PLAN.md` | Writing plan & section prompts (writing starts after fix plan is done) |
+| `docs/corrected_claims.md` | **Reference for writing:** how each claim must be phrased, what is dropped, limitations |
+| `PHASE4_WRITING_PLAN.md` | Old writing plan — **ignored** (new prompts will be built from `docs/corrected_claims.md`) |
 | `Thesis Writing/` | DIU guidelines, SWE thesis template, defense slide templates |
 | `DRISHTI_XAI_CHECKLIST.md` | XAI task checklist |
 | `test_set_indices.csv` | Test set sample indices |
@@ -100,9 +120,9 @@
 | `figure_3_1_architecture.png` | DRISHTI-Bn architecture |
 | `figure_2_1_lora.png` | LoRA injection diagram |
 | `figure_3_3_xai_pipeline.png` | XAI pipeline flowchart |
-| `figure_4_1_confusion_matrix.png` | Confusion matrix (n=376) |
-| `figure_4_2_baseline_comparison.png` | Baseline bar chart |
-| `figure_4_3_ablation_study.png` | Ablation bar chart |
+| `figure_4_1_confusion_matrix.png` | Confusion matrix (n=376) — ⚠️ from v2, superseded; new: `results/defense_fixes/phase3b/phase3b_confusion_matrix.png` |
+| `figure_4_2_baseline_comparison.png` | Baseline bar chart — ⚠️ old numbers, must be redrawn (Phase 5) |
+| `figure_4_3_ablation_study.png` | Ablation bar chart — ⚠️ original split; relabel per C4–C6 (Phase 5) |
 | `figure_4_4_gradcam_examples.png` | Grad-CAM (samples 003,012,016) |
 | `figure_4_5_crossattn_examples.png` | Cross-Attention examples |
 | `figure_4_6_rollout_examples.png` | Attention Rollout examples |
@@ -112,8 +132,8 @@
 ---
 
 ## Model & Dataset Info
-- **Model:** ViT-Base/16 + BanglaBERT + LoRA (r=8, α=16, 0.30% trainable params)
-- **Dataset:** CrisisMMD-derived Bengali flood corpus, 3755 samples, 80/10/10 split
+- **Model:** ViT-Base/16 + BanglaBERT + LoRA (r=8, α=16; LoRA = 0.30% of encoder params; CLS-Only trains 1,379,331 ≈ 0.70% incl. head; Multi-Task v3 trains 74.79M incl. decoder + ViT pooler)
+- **Dataset:** CrisisMMD-derived Bengali flood corpus, 3755 samples (95.2% hurricane: Harvey/Maria/Irma + Sri Lanka floods, C16), tweet-grouped 80/10/10 split (`results/defense_fixes/phase3/grouped_split.csv`); checkpoints on Drive: `models/cls_only_grouped_s42.pt`, `models/drishti_multitask_v3.pt`
 - **Hardware:** Single NVIDIA T4 GPU (16GB VRAM), Colab Pro
 - **Google Drive folder:** `My Drive > DisasterNet` (src/ NOT uploaded to Drive)
 - **Thesis draft:** old drafts (`DRISHTI_Bn_Thesis_Final_Working_Draft.docx`, `..._v1.txt`) were intentionally deleted (pre-results work). A fresh draft will be written in the DIU template after `DEFENSE_FIX_PLAN.md` is complete.

@@ -58,6 +58,29 @@ GEN: RT @ HurricanMaria : # Harvey ' র পর, কিন্তু হ্যা
 GEN: # Hurrican Harvey ত্রাণের জন্য দান করা হয়েছে । https : / t. co / cCSPRMA
 ```
 
+## 3B.6 — Standard metrics (local, `src/caption_metrics_v3.py`, sacreBLEU 2.6.0)
+"clean" = URLs, RT/আরটি, @mentions and '#' removed from both sides. BLEU-1..4 here are sacreBLEU n-gram precisions; BLEU = corpus BLEU-4 with brevity penalty (BP).
+
+| System | Refs | BLEU | BLEU-1 | BLEU-2 | BLEU-3 | BLEU-4 | BP | chrF | chrF++ |
+|--------|------|------|--------|--------|--------|--------|----|------|--------|
+| **DRISHTI-Bn v3** | raw | 14.38 | 47.70 | 37.03 | 25.14 | 14.26 | 0.51 | **14.19** | 11.74 |
+| **DRISHTI-Bn v3** | clean | 0.11 | 7.10 | 0.65 | 0.02 | 0.01 | 0.56 | **8.46** | 7.00 |
+| Random train tweet (seed 42) | raw | 32.12 | 40.41 | 34.17 | 30.34 | 26.27 | 0.99 | 21.58 | 16.66 |
+| Random train tweet (seed 42) | clean | 0.25 | 3.16 | 0.31 | 0.13 | 0.03 | 1.00 | 11.93 | 9.33 |
+| Constant (most frequent train tweet) | raw | 24.15 | 35.32 | 31.56 | 28.29 | 24.75 | 0.81 | 20.46 | 15.52 |
+| Constant (most frequent train tweet) | clean | 0.05 | 1.37 | 0.08 | 0.01 | 0.01 | 1.00 | 15.19 | 11.60 |
+
+Diversity (`distinct-n` = unique n-grams / all n-grams):
+| | unique | top-1 share | distinct-1 | distinct-2 | mean words |
+|---|---|---|---|---|---|
+| generated, raw | 321/375 | 2.1% | 0.059 | 0.089 | 15.4 |
+| generated, clean | **124/375** | 7.5% | 0.033 | 0.071 | 7.3 |
+| references, clean | 320/375 | 1.1% | 0.493 | 0.793 | 10.6 |
+
+Boilerplate in generated captions: URL fragment 96.8% · hashtag 99.2% · @mention 31.7% · RT 30.1% · names ≥ 2 different hurricanes 34.4%.
+
+**3B.6 conclusion:** almost all n-gram overlap comes from tweet boilerplate (clean BLEU 0.11). On chrF the model scores **below both trivial baselines** — a random training tweet (21.58 raw / 11.93 clean) and one constant tweet repeated for every image (20.46 / 15.19). Without boilerplate only 124 distinct captions remain, with ~15× lower bigram diversity than the references. The caption branch therefore shows no measurable image-grounded generation ability.
+
 ## Findings
 1. **Captions are tweet imitations, not image descriptions.** The decoder learned the surface style of the references (machine-translated tweets, C10): hashtags, `RT @handle`, fake `t.co` URLs, and mixed-up event names (Harvey/Maria/Irma in one sentence). Content barely depends on the image or the class.
 2. **BERTScore is inflated by shared tweet boilerplate.** Removing URLs drops it from 69.66 to 62.27. BERTScore with mBERT gives ~60+ even for unrelated Bengali sentences (no baseline rescaling for `bn`), so it should not be presented as evidence of caption quality.

@@ -10,7 +10,7 @@
 
 ## A. যে সংখ্যা এখন ব্যবহার করা যাবে না
 
-### C1. Multi-task মডেলের সব সংখ্যা — ✅ Phase 3B-এ প্রতিস্থাপিত (caption metric-এর একাংশ ⏳ 3B.6)
+### C1. Multi-task মডেলের সব সংখ্যা — ✅ Phase 3B-এ প্রতিস্থাপিত
 - **পুরনো দাবি:** Multi-task Macro F1 77.95% (P 93.28%, R 73.03%), per-class F1, confusion matrix (Figure 4.1), BLEU-1..4 = 24.85/14.20/8.95/6.13, METEOR 0.32, ROUGE-L 0.56, BERTScore-F1 60.35%; "λ_cap = 0.5"।
 - **সমস্যা:** এগুলো এসেছে `disasternet_multitask_v2.pth` (২৫ জুন) থেকে, যা train হয়েছিল λ_cap = 0.2, unshifted teacher forcing আর seed ছাড়া 80/20 split দিয়ে। Test set-এর আনুমানিক ~300/376 sample মডেল training-এ দেখেছে। (প্রমাণ: `results/defense_fixes/phase0/checkpoint_audit.md`)
 - **পুরনো সংখ্যা কোথাও লেখা যাবে না।** নতুন মডেল `drishti_multitask_v3.pt` (λ_cap = 0.5, right-shifted, grouped split, seed 42, epoch 4)। পূর্ণ ফল: [results/defense_fixes/phase3b/phase3b_results.md](../results/defense_fixes/phase3b/phase3b_results.md)
@@ -28,10 +28,23 @@
 - **নতুন লেখা (English):**
   > "When the original tweet is available, the multi-task model reaches 77.29% Macro F1 (single seed), within the seed variation of the classification-only model (75.69 ± 1.33%). In an image-only setting, where the classifier receives the model's own generated caption, Macro F1 is 73.63%, on par with the image-only ViT baseline (73.27 ± 0.39%): the generated text adds no information beyond the image."
 - **Caption metric (v3, beam 3, ×100):** BERTScore-F1 69.66 (URL বাদে 62.27); `metrics.py`-র BLEU-1..4 = 7.42 / 6.82 / 6.80 / 6.93, METEOR 1.10, ROUGE-L 1.80।
-  - ⚠️ `metrics.py`-র BLEU non-standard (sentence-level, +1 smoothing, গড়) — তাই BLEU-1..4 প্রায় সমান। ⏳ 3B.6-এ sacreBLEU + chrF দিয়ে আবার হিসাব; সেই সংখ্যাই থিসিসে যাবে।
+  - ⚠️ `metrics.py`-র BLEU non-standard (sentence-level, +1 smoothing, গড়) — তাই BLEU-1..4 প্রায় সমান। **থিসিসে এই BLEU/METEOR/ROUGE-L ব্যবহার হবে না।**
+  - ✅ **3B.6-এর standard metric (sacreBLEU 2.6.0) — থিসিসে এগুলোই যাবে:**
+
+    | System | BLEU (raw) | chrF (raw) | BLEU (clean) | chrF (clean) |
+    |--------|-----------|-----------|--------------|--------------|
+    | **DRISHTI-Bn v3** | 14.38 | **14.19** | 0.11 | **8.46** |
+    | Random train tweet | 32.12 | 21.58 | 0.25 | 11.93 |
+    | Constant (একটাই tweet সব ছবিতে) | 24.15 | 20.46 | 0.05 | 15.19 |
+
+    (clean = URL, RT, @mention, # বাদ। BERTScore-F1: raw 69.66, URL বাদে 62.27।)
+  - **অর্থ:** মডেল chrF-এ দুটো তুচ্ছ baseline-এর চেয়েও কম। n-gram মিলের প্রায় সবটাই boilerplate থেকে (clean BLEU 0.11)। Boilerplate বাদ দিলে মাত্র ১২৪টা আলাদা caption থাকে।
+  - **নতুন লেখা (English):**
+    > "On standard metrics the generated captions reach corpus BLEU 14.38 and chrF 14.19 (sacreBLEU), but almost all n-gram overlap comes from tweet boilerplate: after removing URLs, mentions and hashtags, BLEU falls to 0.11 and chrF to 8.46. Two trivial references — a random training tweet (chrF 21.58) and a single constant tweet repeated for every image (chrF 20.46) — score higher. The caption branch therefore does not demonstrate image-grounded Bengali generation."
   - ⚠️ BERTScore-এর বড় অংশ tweet-এর boilerplate (URL, hashtag, "RT @") মেলার কারণে; mBERT-এ `bn`-এর baseline rescaling নেই, তাই অসম্পর্কিত বাক্যেও ~60। Caption quality-র প্রমাণ হিসেবে উপস্থাপন করা যাবে না।
 
 ### C18. Generated "caption" আসলে tweet-এর অনুকরণ — ✅ (Phase 3B)
+- **পরিমাপ (3B.6):** generated caption-এর 96.8%-এ URL-এর টুকরো, 99.2%-এ hashtag, 31.7%-এ @mention; 34.4%-এ দুই বা তার বেশি আলাদা hurricane-এর নাম একসঙ্গে। Boilerplate বাদে আলাদা caption ১২৪/৩৭৫; distinct-2 0.071 (reference-এ 0.793)।
 - **পর্যবেক্ষণ:** v3-এর caption ছবির বর্ণনা নয়, translated tweet-এর ধাঁচ: hashtag, `RT @handle`, বানানো `t.co` URL, এক বাক্যে Harvey/Maria/Irma মিশিয়ে ফেলা (যেমন "RT @ HurricanMaria : # Harvey ' র পর, কিন্তু হ্যারিকেন মারিয়া https : / t. co / qPSLCVYR")। সব class-এর caption প্রায় একই রকম। ৩৭৫টার মধ্যে ৩২১টা আলাদা, কিন্তু পার্থক্যের বড় অংশ URL-এর এলোমেলো অক্ষরে।
 - **কারণ:** Reference text নিজেই tweet-এর মেশিন অনুবাদ (C10), তাই decoder সেটাই শিখেছে। Validation caption loss epoch 5-এর পর ~4.07-এ আটকে থাকে (perplexity ≈ 59), train loss নামতেই থাকে → decoder overfit।
 - **নতুন লেখা (English):**
@@ -61,11 +74,11 @@
 - **অর্থ:** Model-এর caption মানুষের চোখে খুব দুর্বল (১–৫ স্কেলে ~১.২–১.৬)। Generated caption-এ বাংলা-ইংরেজি মেশানো অর্থহীন শব্দ দেখা যায়। এটা লুকানো যাবে না; সৎভাবে লিখতে হবে।
 - **নতুন লেখা (English):**
   > "Human judges rated the generated captions substantially lower than the reference texts on all three dimensions (fluency 1.58 vs. 3.42, adequacy 1.24 vs. 3.08, faithfulness 1.23 vs. 3.23; Wilcoxon p < 10⁻¹⁶), and preferred the reference in 94.9% of judgements. The caption decoder therefore does not yet produce usable Bengali descriptions; its value in this work lies in the multi-task and explainability analysis rather than in caption quality."
-- ⏳ **৩B.4-এর সিদ্ধান্ত বাকি:** এই ১০০টা model caption পুরনো v2 checkpoint থেকে (C1)। Phase 3B-এর v3 caption-ও tweet-অনুকরণ (C18), তাই আবার করলেও ফল সম্ভবত একই রকম খারাপ আসবে — কিন্তু থিসিসের মডেল এখন v3, তাই v2-এর caption-এর মূল্যায়ন রাখলে অমিল থাকে।
+- ✅ **৩B.4-এর সিদ্ধান্ত (2026-11-12): বিকল্প (ক)।** জমার ১৫ দিন বাকি, তাই human eval আবার করা হবে না। AI দিয়ে annotator-এর form পূরণ করা যাবে না — সেটা মানুষের মূল্যায়ন হিসেবে উপস্থাপন করলে বানানো তথ্য হবে। নিচের (ক)-এর লেখা ব্যবহার হবে; সঙ্গে বলা হবে যে v3-এর caption-এর মান automatic metric দিয়ে মাপা হয়েছে (C1, C18) এবং সেটাও একই দুর্বলতা দেখায়।
 - **পুরনো সমস্যা (C1-এর):** ১০০টা model caption v2 থেকে, অর্থাৎ C1-এর একই সমস্যা।
 - **দুই বিকল্প:** (ক) আগের ফল রেখে limitation হিসেবে লেখা; (খ) নতুন মডেলের caption দিয়ে আবার human eval।
 - **(ক) বেছে নিলে লেখা (English):**
-  > "The human evaluation was conducted on captions from an earlier multi-task checkpoint trained before the final data split was fixed; a portion of the evaluated samples may therefore have been seen during training. The scores should be read as an upper bound on caption quality."
+  > "The human evaluation was conducted on captions from an earlier multi-task checkpoint trained before the final data split was fixed; a portion of the evaluated samples may therefore have been seen during training. The scores should be read as an upper bound on caption quality. Captions from the final model were assessed with automatic metrics only (Section X), which point to the same weakness."
 
 ---
 
@@ -239,5 +252,5 @@
 10. ✅ Corpus-এর 8.9% text অনুবাদ হয়নি (ইংরেজি থেকে গেছে) (C10)।
 5. ✅ Class imbalance: Affected_People মাত্র 330টা (8.8%) — সব মডেলে এই class-এর F1 সবচেয়ে কম।
 6. ✅ Temperature scaling-এ উন্নতি হয়নি; validation set ছোট (C8)।
-7. ⏳ Human eval-এর model caption পুরনো checkpoint থেকে (C2, যদি বিকল্প (ক))।
+7. ✅ Human eval-এর model caption পুরনো checkpoint (v2) থেকে; চূড়ান্ত মডেল (v3) শুধু automatic metric দিয়ে মাপা (C2, ৩B.4 = ক)।
 8. ✅ Dataset-এর 95.2% ছবি যুক্তরাষ্ট্র ও ক্যারিবিয়ানের hurricane থেকে, বাকি 4.8% Sri Lanka-র বন্যা; বাংলাদেশের নিজস্ব কোনো ছবি নেই (C16)। বাংলাদেশের বন্যায় generalization যাচাই করা হয়নি।
