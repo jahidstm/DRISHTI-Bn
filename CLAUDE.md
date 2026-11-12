@@ -80,12 +80,35 @@ Superseded (pooler-only bug, C17): ViT-Only 78.64% · CrisisViT 78.15%.
 
 Differences < ~2.5pp are within seed variance (grouped split CLS-Only range 74.83–77.22%).
 
-### Calibration
-- T* = 1.1113 | ECE before = 2.16%
-- Mean confidence: 88.25% → 86.65%
+### Text ablation (Phase 2, CLS-Only seed 42, grouped test n=375)
+Original tweet 74.83% · v3 generated caption 76.41% · placeholder "বন্যা পরিস্থিতি" 76.52% · another sample's tweet 76.63% (96.5% same predictions) · empty text 61.95% (out-of-distribution)
+→ the classifier is effectively **image-driven**; never claim "text and image are complementary" (C19).
 
-### XAI (21 samples, 7/class)
-- Overall: 17/21 = **81%** | SD: 7/7 | HR: 7/7 | AP: 3/7
+### Calibration (CLS-Only seed 42; T* fitted on grouped val n=373; grouped test n=375; 10 bins)
+| Metric | Before TS | After TS (T* = 1.1349) |
+|--------|-----------|------------------------|
+| ECE | **2.57%** | 2.99% |
+| MCE | 19.06% | 20.60% |
+| NLL | 0.3223 | 0.3228 |
+| Brier | 0.1681 | 0.1688 |
+| Mean confidence | 88.84% | 87.03% |
+| Accuracy | 88.27% | 88.27% |
+
+Already well calibrated; temperature scaling gives no improvement. Superseded: T* = 1.1113 / 0.6669, ECE 2.16% (old split, old model).
+
+### XAI (Phase 4, CLS-Only seed 42 + v3 decoder)
+**Qualitative samples:** 21 random grouped-test images (7/class, seed 42, not cherry-picked) → 15/21 classified correctly | SD 6/7 | HR 7/7 | AP 2/7 (errors: mean confidence 0.58 vs 0.89). Never call this "XAI accuracy".
+
+**Faithfulness — deletion test (all 375 test images; drop in predicted-class probability, accuracy before = 88.27%):**
+| Method | Top 10% removed | Top 25% | Top 50% | Accuracy after 50% |
+|--------|-----------------|---------|---------|--------------------|
+| **Grad-CAM** | **6.92 pp** | **14.27 pp** | **21.27 pp** | **73.87%** |
+| Attention Rollout | 0.85 pp | 3.26 pp | 7.35 pp | 81.60% |
+| Random | 0.34 pp | 1.57 pp | 4.16 pp | 86.93% |
+
+Top-10% patch IoU: Grad-CAM vs Rollout 0.148 (2.7× chance) · Grad-CAM vs v3 cross-attention 0.059 (≈ chance 0.054) → cross-attention is auxiliary (explains caption generation only).
+Grad-CAM hooks the INPUT of the last ViT block (old code hooked the output → zero gradient → blank maps, C20).
+Superseded: 17/21 = 81% "XAI accuracy" (old split; samples partly seen in training).
 
 ### Human Evaluation (100 samples, 3 annotators, blind A/B — correctly un-blinded)
 > Corrected 2026-11-12 with the user's approval (DEFENSE_FIX_PLAN 1.20). Source: `src/human_eval_unblind.py` →
@@ -120,13 +143,36 @@ Bengali texts are **machine translations** of the CrisisMMD tweets (`monirbishal
 | `PHASE4_WRITING_PLAN.md` | Old writing plan — **ignored** (new prompts will be built from `docs/corrected_claims.md`) |
 | `Thesis Writing/` | DIU guidelines, SWE thesis template, defense slide templates |
 | `DRISHTI_XAI_CHECKLIST.md` | XAI task checklist |
-| `test_set_indices.csv` | Test set sample indices |
+| `test_set_indices_grouped.csv` | Grouped (leakage-free) test set, n=375 — use this |
+| `test_set_indices.csv` | Old un-grouped test set (n=376) — superseded |
+| `docs/defense_qa.md` | Likely defense questions + answers |
 | `human_eval_outputs/human_eval_report.md` | Human eval full report |
 | `human_eval_outputs/iaa_scores.csv` | IAA scores |
 
-## Generated Figures (all in project root)
+## Generated Figures (all in project root) — use the `_grouped` / new versions in the thesis
 | File | Content |
 |------|---------|
+| `figure_1_1_flood_stats.png` | Flood statistics (introduction) |
+| `figure_1_2_system_pipeline.png` | System pipeline (introduction) |
+| `figure_2_1_lora.png` | LoRA injection diagram |
+| `figure_3_1_architecture.png` | DRISHTI-Bn architecture |
+| `figure_3_3_xai_pipeline.png` | XAI pipeline flowchart |
+| `figure_4_1_confusion_matrix_grouped.png` | **Fig 4.1** — CLS-Only seed 42, grouped test n=375, Macro F1 74.83% |
+| `figure_4_2_baseline_comparison_grouped.png` | **Fig 4.2** — baselines on grouped split (mean ± std) |
+| `figure_4_3_ablation_original_split.png` | **Fig 4.3** — ablation (original split, single seed, relabelled per C4–C6) |
+| `figure_4_4_gradcam_grouped.png` | **Fig 4.4** — fixed Grad-CAM (first random sample per class) |
+| `figure_4_5_crossattn_grouped.png` | **Fig 4.5** — v3 decoder cross-attention (auxiliary) |
+| `figure_4_6_rollout_grouped.png` | **Fig 4.6** — Attention Rollout |
+| `figure_4_7_integrated_xai_grouped.png` | **Fig 4.7** — Grad-CAM / Rollout / cross-attention side by side |
+| `figure_4_8_calibration_diagram_grouped.png` | **Fig 4.8** — reliability diagram, T* = 1.1349 |
+| `figure_4_9_faithfulness_deletion.png` | **Fig 4.9** — deletion-test curves (Grad-CAM / Rollout / Random) |
+| `results/defense_fixes/phase3b/phase3b_confusion_matrix.png` | Multi-task v3 confusion matrices (tweet vs generated caption) |
+
+Superseded (do NOT use): `figure_4_1_confusion_matrix.png` (v2), `figure_4_2_baseline_comparison.png`, `figure_4_3_ablation_study.png`,
+`figure_4_4_gradcam_examples.png` (blank Grad-CAM), `figure_4_5_crossattn_examples.png` (untrained decoder),
+`figure_4_6_rollout_examples.png`, `figure_4_7_integrated_xai.png`, `figure_4_8_calibration_diagram.png` — kept under `figures_superseded/`.
+
+------|---------|
 | `figure_3_1_architecture.png` | DRISHTI-Bn architecture |
 | `figure_2_1_lora.png` | LoRA injection diagram |
 | `figure_3_3_xai_pipeline.png` | XAI pipeline flowchart |

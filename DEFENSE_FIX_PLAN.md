@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 ✅ · Phase 3 ✅ · Phase 3B ✅ · Phase 2 ✅ · Phase 4 ✅ (figure download বাকি) · পরের: **Phase 5** (local)
+> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 ✅ · Phase 3 ✅ · Phase 3B ✅ · Phase 2 ✅ · Phase 4 ✅ · Phase 5 ✅ (৫.৭ তোমার) → **পরের: নতুন writing prompt দিয়ে থিসিস লেখা**
 
 ---
 
@@ -32,7 +32,7 @@
 | 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~45–60 মিনিট | ✅ শেষ |
 | 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~10 মিনিট | ✅ শেষ |
 | 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ✅ শেষ |
-| 7 | 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ⬜ বাকি |
+| 7 | 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ✅ শেষ |
 | ➡️ | — | **এরপর:** DIU নির্দেশনা অনুযায়ী নতুন thesis draft লেখা | Google Docs (DIU template) | — | ⬜ plan শেষে |
 
 > ⚠️ **ক্রম বদলেছে (Phase 0.7-এর পর):** একমাত্র multi-task checkpoint (v2) সব fix-এর আগের, আর test set-এর আনুমানিক ~300/376 sample সে training-এ দেখেছে। তাই আগের ঐচ্ছিক Phase 6 এখন বাধ্যতামূলক **Phase 3B**, আর Phase 2 ও 4 এর ওপর নির্ভরশীল। বিস্তারিত: [results/defense_fixes/phase0/checkpoint_audit.md](results/defense_fixes/phase0/checkpoint_audit.md)
@@ -215,18 +215,15 @@
 
 ## Phase 5 — চূড়ান্ত সমন্বয় (Local)
 
-- [/] **5.1 CLAUDE.md-এর সংখ্যা update** (শুধু তোমার অনুমোদিত নতুন সংখ্যা)। ✅ অনুমোদিত অংশ 2026-11-12-এ করা হয়েছে (classification, baseline, ablation-এর চিহ্ন, multi-task v3, caption metric, parameter, figure-এর সতর্কতা)। বাকি: human eval (১.২০), Phase 4-এর পর calibration/XAI। খসড়া:
-  - ✅ অনুমোদিত (৩.৫): Classification মূল সংখ্যা → CLS-Only **75.69 ± 1.33%** (grouped split, ৩ seed, test n = 375); P 77.09 ± 1.31, R 74.93 ± 1.59; পুরনো 83.21% "original un-grouped split (leakage)" চিহ্নসহ পাশে।
-  - ✅ অনুমোদিত (৩.৫-এর অংশ): Baseline table → ViT-Only 73.27 ± 0.39 · CrisisViT-style 75.87 (1 seed); "SOTA" বাদ; বাকি baseline আর ablation "original split" চিহ্নসহ।
-  - ✅ Trainable parameter → 1,379,331 (≈0.70%) (C9) — ঘটনাগত সংশোধন।
-  - ⏳ অনুমতি বাকি (১.২০): Human eval → model 1.58 / 1.24 / 1.23 বনাম GT 3.42 / 3.08 / 3.23; IAA pooled α 0.38 (C2, C11)।
-  - ⏳ Phase 3B-এর পর: multi-task classification, BLEU/METEOR/ROUGE-L/BERTScore, confusion matrix (3B.5)।
-  - ⏳ Phase 4-এর পর: calibration (T*, ECE after = 2.63%), XAI।
-- [ ] **5.2 [README.md](README.md) পুনর্লিখন।** পুরনো 66.67% F1, BLEU-4 5.14, 80/20 split, 0.1% সরিয়ে বর্তমান ফল।
-- [ ] **5.3 [DRISHTI_XAI_CHECKLIST.md](DRISHTI_XAI_CHECKLIST.md)-এ সংশোধিত দাবি প্রতিফলিত করা।** (`PHASE4_WRITING_PLAN.md` বাদ — writing prompt নতুন করে বানানো হবে।)
-- [ ] **5.4 Demo ([app.py](app.py)) নিয়ে সিদ্ধান্ত।** এখন পুরনো v2 checkpoint চালায়। Phase 2-এর পর পরামর্শ: classification-এর জন্য `cls_only_grouped_s42.pt` + placeholder text (76.52%, tweet ছাড়াই), caption-এর জন্য v3 (শুধু প্রদর্শনের জন্য, দুর্বলতা স্বীকার করে)। বিকল্প: (ক) যেমন আছে রেখে ডিফেন্সে স্পষ্ট বলা, (খ) caption-এর জন্য multi-task + classification-এর জন্য CLS-only checkpoint।
-- [ ] **5.5 সব figure-এর তালিকা মিলিয়ে দেখা** (CLAUDE.md-এর figure table বনাম root-এ আসল ফাইল)।
-- [ ] **5.6 ডিফেন্সের সম্ভাব্য প্রশ্ন ও উত্তরের তালিকা** (leakage, fair comparison, IAA, calibration, caption-এর মান)।
+- [x] **5.1 CLAUDE.md-এর সংখ্যা update** — তোমার অনুমোদনে সব অংশ বসানো: classification (75.69 ± 1.33%), baseline, ablation-এর চিহ্ন, multi-task v3, caption metric (sacreBLEU/chrF/BERTScore), human eval (1.58/1.24/1.23 বনাম 3.42/3.08/3.23, α 0.38), অনুবাদ (machine-translated), text ablation, calibration (T* 1.1349, ECE 2.57→2.99%), XAI (15/21 + faithfulness), figure table। পুরনো সংখ্যা "superseded" চিহ্নসহ।
+- [x] **5.2 [README.md](README.md) পুনর্লিখন** — সব পুরনো সংখ্যা (66.67%, BLEU-4 5.14, 80/20, ~0.1%, "first", "human verification", flood-only) সরিয়ে grouped split-এর ফল, সৎ limitation, Colab reproduction table। MIT badge বাদ (LICENSE ফাইল নেই)।
+- [x] **5.3 [DRISHTI_XAI_CHECKLIST.md](DRISHTI_XAI_CHECKLIST.md)** — শুরুতে "SUPERSEDED — historical record only" সতর্কবার্তা।
+- [x] **5.4 Demo ([app.py](app.py)) — তোমার সিদ্ধান্ত (খ):** classification = `cls_only_grouped_s42.pt` + placeholder "বন্যা পরিস্থিতি"; text = v3 decoder (অপরিবর্তিত output, সতর্কবার্তাসহ); নতুন Grad-CAM overlay। লোকালি random weight দিয়ে চালিয়ে যাচাই (~১২ সেকেন্ড/ছবি, CPU)।
+  - ⚠️ **ধরা পড়েছে:** পুরনো `app.py`-তে caption **hardcoded** ছিল ("বন্যার পানিতে নিমজ্জিত ঘরবাড়ি…", comment: "Hardcoded for thesis screenshot"), আর `docs/demo_screenshot.png` (README-তে public) সেই বানানো caption দেখাচ্ছিল। Code থেকে সরানো হয়েছে; screenshot `figures_superseded/demo_screenshot_HARDCODED_CAPTION_do_not_use.png`-এ — থিসিস বা slide-এ কখনো ব্যবহার করা যাবে না।
+  - 📥 Demo চালাতে Drive থেকে `models/cls_only_grouped_s42.pt` আর `models/drishti_multitask_v3.pt` laptop-এর `models/`-এ নামাতে হবে (`.gitignore`-এ, GitHub-এ যাবে না)।
+- [x] **5.5 Figure মিলানো** — নতুন: 4.1 / 4.4–4.8 (`_grouped`), 4.2 (`figure_4_2_baseline_comparison_grouped.png`), 4.3 (`figure_4_3_ablation_original_split.png`), **4.9 নতুন** (`figure_4_9_faithfulness_deletion.png`) — [src/make_phase5_figures.py](src/make_phase5_figures.py)। পুরনো ৮টা figure আর ২টা demo screenshot `figures_superseded/`-এ। CLAUDE.md-এর figure table আপডেট।
+- [x] **5.6 Defense প্রশ্নোত্তর** → [docs/defense_qa.md](docs/defense_qa.md) (২৪টা প্রশ্ন: data/leakage, multimodality, text generation, XAI/calibration, অবদান)।
+- [ ] **5.7 (তোমার কাজ) portfolio পেজ** — README-র পুরনো link (`jahidstm.lovable.app/research/drishti-bn`) সরানো হয়েছে; ওই পেজে পুরনো সংখ্যা বা hardcoded screenshot থাকলে নিজে update করবে।
 
 **শেষ হওয়ার শর্ত:** repo, CLAUDE.md, README আর থিসিসে একই সংখ্যা; demo-র অবস্থা জানা।
 
@@ -269,4 +266,5 @@
 | 2026-11-12 | 1 ✅ · 2 (script) | ১.২০-এর উত্তর: human eval-এর সঠিক সংখ্যা CLAUDE.md-এ, "human-verified translation" দাবি বাদ; Phase 2 Colab script তৈরি | `9da91da` |
 | 2026-11-12 | 2 ✅ | Phase 2-এর ফল সংরক্ষণ; নতুন C19 (classifier text প্রায় ব্যবহার করে না), C13 চূড়ান্ত; demo-র পরামর্শ 5.4-এ | `8b629b2` |
 | 2026-11-12 | 4 (script) | T*-এর অমিলের কারণ (integrated pipeline-এর নিজস্ব split) আর পুরনো Grad-CAM-এর শূন্য-gradient bug ধরা; Phase 4 Colab script (calibration, ঠিক Grad-CAM, Rollout, v3 cross-attention, faithfulness test) | `6f55911` |
-| 2026-11-12 | 4 ✅ | Phase 4-এর ফল: T* = 1.1349, ECE 2.57→2.99%; ঠিক করা Grad-CAM faithful (random-এর ~২০ গুণ), Rollout দুর্বল, cross-attention ≈ random; C3, C7, C8, C20 চূড়ান্ত | (এই commit) |
+| 2026-11-12 | 4 ✅ | Phase 4-এর ফল: T* = 1.1349, ECE 2.57→2.99%; ঠিক করা Grad-CAM faithful (random-এর ~২০ গুণ), Rollout দুর্বল, cross-attention ≈ random; C3, C7, C8, C20 চূড়ান্ত | `59ae7a2` |
+| 2026-11-12 | 5 ✅ | CLAUDE.md চূড়ান্ত; README পুনর্লিখন; demo নতুন (CLS-only + v3 + Grad-CAM, hardcoded caption সরানো); Figure 4.2 / 4.3 / 4.9; পুরনো figure `figures_superseded/`-এ; defense Q&A | (এই commit) |

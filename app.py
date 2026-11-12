@@ -4,20 +4,51 @@ import os
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
-# Add src to path so we can import evaluate
+# Add src to path so we can import evaluate / cls_only_ablation
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 import gradio as gr
+import numpy as np
+import torch
+import torch.nn.functional as F
+import matplotlib.cm as mpl_cm
+from transformers.models.vit.modeling_vit import ViTLayer
 from evaluate import DisasterNetPredictor
+import cls_only_ablation as C
 
 # ─────────────────────────────────────────────────────────────
-# 1.  Boot the model (once, at startup)
+# 1.  Boot the models (once, at startup)
+#     Classification : CLS-Only, seed 42, grouped split. Macro F1 74.83% with the tweet and
+#                      76.52% with the placeholder below - the model is image-driven (Phase 2).
+#     Text           : multi-task v3 decoder (experimental; imitates tweet style, Phase 3B).
+#     Both checkpoints: Google Drive  My Drive > DisasterNet > models/  ->  local models/
 # ─────────────────────────────────────────────────────────────
-MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'disasternet_multitask_v2.pth')
-predictor  = DisasterNetPredictor(model_path=MODEL_PATH)
+HERE        = os.path.dirname(os.path.abspath(__file__))
+CLS_CKPT    = os.path.join(HERE, 'models', 'cls_only_grouped_s42.pt')
+CAP_CKPT    = os.path.join(HERE, 'models', 'drishti_multitask_v3.pt')
+PLACEHOLDER = "বন্যা পরিস্থিতি"   # fixed text input: no tweet is available in an image-only demo
+
+for _p in (CLS_CKPT, CAP_CKPT):
+    if not os.path.exists(_p) and not os.environ.get("DRISHTI_ALLOW_RANDOM"):
+        raise FileNotFoundError(f"{_p} not found. Download it from Google Drive "
+                                f"(My Drive > DisasterNet > models/) into the local models/ folder.")
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+C.DEVICE = DEVICE
+
+cls_model = C.DisasterNetAblation(num_classes=3).to(DEVICE)
+if os.path.exists(CLS_CKPT):
+    cls_model.load_state_dict(torch.load(CLS_CKPT, map_location=DEVICE), strict=True)
+cls_model.eval()
+VIT_LAYERS = [m for m in cls_model.vision_encoder.modules() if isinstance(m, ViTLayer)]
+
+predictor = DisasterNetPredictor(model_path=CAP_CKPT, device=DEVICE)   # v3 decoder + tokenizer + transform
+tok = predictor.tokenizer
+_ph = tok(PLACEHOLDER, padding="max_length", max_length=C.MAX_LEN, truncation=True, return_tensors="pt")
+PH_IDS, PH_MASK = _ph["input_ids"].to(DEVICE), _ph["attention_mask"].to(DEVICE)
 
 # ─────────────────────────────────────────────────────────────
-# 2.  Inference function called by Gradio
+# 2.  Inference functions
 # ─────────────────────────────────────────────────────────────
 LABELS = [
     "Severe Damage  |  মারাত্মক ক্ষয়ক্ষতি",
@@ -25,46 +56,84 @@ LABELS = [
     "Affected People  |  ক্ষতিগ্রস্ত মানুষ",
 ]
 EMOJI = ["🔴", "🟡", "🟠"]
-COLOR = ["#FF4444", "#FFB800", "#FF7700"]
+MEAN, STD = np.array([0.485, 0.456, 0.406]), np.array([0.229, 0.224, 0.225])
+
+
+def classify_with_gradcam(pv):
+    """CLS-Only prediction + Grad-CAM on the input of the last ViT block (thesis method,
+    Phase 4). The last block's output patch tokens have zero gradient, so they cannot be used."""
+    cap = {}
+    def hook(mod, inp, out):
+        a = out[0] if isinstance(out, tuple) else out
+        a.retain_grad(); cap["a"] = a
+    h = VIT_LAYERS[-2].register_forward_hook(hook)
+    try:
+        with torch.enable_grad():
+            cls_model.zero_grad(set_to_none=True)
+            logits = cls_model.forward_cls(pv, PH_IDS, PH_MASK)
+            pred = int(logits[0].argmax())
+            logits[0, pred].backward()
+    finally:
+        h.remove()
+    probs = F.softmax(logits[0].detach().float(), 0).cpu().numpy()
+    A, G = cap["a"][0, 1:].detach(), cap["a"].grad[0, 1:]
+    cam = torch.relu((A * G.mean(0)).sum(1)).view(1, 1, 14, 14)
+    cam = F.interpolate(cam, size=(224, 224), mode="bilinear", align_corners=False)[0, 0].cpu().numpy()
+    cam = (cam - cam.min()) / (cam.max() - cam.min() + 1e-8)
+    img = np.clip(pv[0].permute(1, 2, 0).cpu().numpy() * STD + MEAN, 0, 1)
+    overlay = 0.55 * img + 0.45 * mpl_cm.jet(cam)[..., :3]
+    return pred, probs, (overlay * 255).astype(np.uint8)
+
+
+@torch.no_grad()
+def generate_caption(pv, beam_width):
+    """Same beam search as evaluate.DisasterNetPredictor.generate_caption, but the ViT memory
+    is computed once (much faster on CPU). Verified identical output in Phase 3B."""
+    m = predictor.model
+    CLS_ID, SEP, PAD = tok.cls_token_id, tok.sep_token_id, tok.pad_token_id
+    memory = m.vision_encoder(pixel_values=pv).last_hidden_state
+    def next_logits(seq):
+        ids = torch.tensor([seq], device=DEVICE)
+        out = m.caption_decoder(tgt=m.pos_encoder(m.decoder_embedding(ids)), memory=memory,
+                                tgt_mask=m.generate_causal_mask(len(seq), DEVICE))
+        return m.vocab_projector(out)[:, -1, :].float()
+    beams = [([CLS_ID], 0.0)]
+    for _ in range(40):
+        cand, finished = [], True
+        for seq, sc in beams:
+            if seq[-1] == SEP:
+                cand.append((seq, sc)); continue
+            finished = False
+            lg = next_logits(seq)
+            lg[:, CLS_ID] = -float("inf"); lg[:, PAD] = -float("inf")
+            for t in set(seq):
+                lg[:, t] = lg[:, t] * 2.0 if lg[:, t] < 0 else lg[:, t] / 2.0
+            lg[:, seq[-1]] = -float("inf")
+            for i in range(len(seq) - 1):
+                if seq[i] == seq[-1]:
+                    lg[:, seq[i + 1]] = -float("inf")
+            lp = torch.log_softmax(lg[0], -1)
+            tp, ti = torch.topk(lp, beam_width)
+            cand += [(seq + [ti[k].item()], sc + tp[k].item()) for k in range(beam_width)]
+        if finished:
+            break
+        beams = sorted(cand, key=lambda x: x[1] / (len(x[0]) ** 0.7), reverse=True)[:beam_width]
+    return tok.decode(beams[0][0], skip_special_tokens=True).strip()
+
 
 def analyze_image(pil_image, beam_width):
     if pil_image is None:
-        return (
-            "⚠️ Please upload a disaster image.",
-            {},
-            "—",
-            "—",
-        )
+        return "⚠️ Please upload a disaster image.", {}, "—", None, "—"
+    pv = predictor.transform(pil_image.convert("RGB")).unsqueeze(0).to(DEVICE)
 
-    import torch
-    pixel_values = predictor.transform(pil_image.convert("RGB")).unsqueeze(0).to(predictor.device)
+    # Task 1: classification (image + fixed placeholder text) + Grad-CAM explanation
+    idx, probs, heatmap = classify_with_gradcam(pv)
 
-    # Task 2: Caption
-    caption = predictor.generate_caption(pixel_values, beam_width=int(beam_width))
+    # Task 2: text from the v3 decoder - shown exactly as generated, never edited
+    caption = generate_caption(pv, int(beam_width))
 
-    # Task 1: Classify
-    cat_raw, conf, all_probs = predictor.classify_damage(pixel_values, caption)
-
-    # Map to clean label
-    if 'Severe' in cat_raw:
-        idx = 0
-    elif 'Humanitarian' in cat_raw:
-        idx = 1
-    else:
-        idx = 2
-
-    label_display = f"{EMOJI[idx]}  {LABELS[idx]}"
-    conf_display  = f"{conf:.2f}%"
-
-    prob_dict = {
-        LABELS[0]: float(all_probs[0]),
-        LABELS[1]: float(all_probs[1]),
-        LABELS[2]: float(all_probs[2]),
-    }
-    # Hardcoded for thesis screenshot
-    cap_display = "বন্যার পানিতে নিমজ্জিত ঘরবাড়ি, নিরাপদ আশ্রয়ের সন্ধানে মানুষ।"
-
-    return label_display, prob_dict, conf_display, cap_display
+    prob_dict = {LABELS[i]: float(probs[i]) for i in range(3)}
+    return f"{EMOJI[idx]}  {LABELS[idx]}", prob_dict, f"{probs[idx] * 100:.2f}%", heatmap, caption
 
 
 # ─────────────────────────────────────────────────────────────
@@ -229,8 +298,8 @@ BANNER_HTML = """
 <div id="header-banner">
   <p id="banner-title">🛰️ DRISHTI-Bn</p>
   <p id="banner-sub">
-    <b>Multi-Task Multimodal AI</b> for Disaster Severity Assessment &amp; Bengali Caption Generation<br>
-    Vision Transformer (ViT-Base) &nbsp;+&nbsp; BanglaBERT &nbsp;+&nbsp; LoRA &nbsp;+&nbsp; Cross-Attention Decoder
+    Explainable disaster-image severity classification &amp; experimental Bengali text generation<br>
+    ViT-Base/16 &nbsp;+&nbsp; BanglaBERT &nbsp;+&nbsp; LoRA (r = 8) &nbsp;|&nbsp; Grad-CAM explanation
   </p>
 </div>
 """
@@ -281,9 +350,16 @@ with gr.Blocks(title="DRISHTI-Bn Demo") as demo:
                 elem_id="prob-chart",
             )
 
-            gr.Markdown("### 🌐 Task 2 — Bengali Caption (বাংলা ক্যাপশন)")
+            gr.Markdown("### 🔥 Grad-CAM — image regions behind the prediction")
+            cam_out = gr.Image(label="Grad-CAM overlay (red = strongest evidence)", height=260,
+                               interactive=False)
+
+            gr.Markdown("### 🌐 Task 2 — Bengali text generation (experimental)")
+            gr.Markdown("⚠️ *The decoder was trained on machine-translated tweets, so it imitates tweet style "
+                        "(hashtags, mentions, URL fragments) rather than describing the image. "
+                        "Output is shown unedited.*")
             caption_out = gr.Textbox(
-                label="Generated Bengali Caption",
+                label="Generated Bengali text (unedited model output)",
                 elem_id="caption-result",
                 interactive=False,
                 lines=3,
@@ -293,16 +369,17 @@ with gr.Blocks(title="DRISHTI-Bn Demo") as demo:
     with gr.Accordion("📖  How to Use  |  কীভাবে ব্যবহার করবেন", open=False):
         gr.Markdown("""
 **English:**
-1. Upload any disaster-related image (flood, earthquake, cyclone, rescue operation, etc.)
-2. Choose beam width — higher values produce better (but slower) Bengali captions
-3. Click **Analyze Disaster Scene** and wait ~10-30 seconds for CPU inference
+1. Upload a disaster image (the model was trained on hurricane/flood images from CrisisMMD)
+2. Choose the beam width for text generation (1 = greedy)
+3. Click **Analyze Disaster Scene**. Classification uses the image plus a fixed placeholder text,
+   because no tweet is available here; this does not lower accuracy (the model is image-driven).
 
 **বাংলা:**
-1. যেকোনো দুর্যোগ-সম্পর্কিত ছবি আপলোড করুন (বন্যা, ভূমিকম্প, ঘূর্ণিঝড়, উদ্ধারকাজ ইত্যাদি)
-2. Beam Width বেছে নিন — বেশি মান = আরও নিখুঁত বাংলা ক্যাপশন (তবে একটু ধীর)
-3. **Analyze** বোতামে ক্লিক করুন — CPU-তে ১০–৩০ সেকেন্ড অপেক্ষা করুন
+1. দুর্যোগের একটি ছবি আপলোড করুন (মডেলটি CrisisMMD-এর ঘূর্ণিঝড়/বন্যার ছবিতে প্রশিক্ষিত)
+2. লেখা তৈরির জন্য Beam Width বেছে নিন (1 = greedy)
+3. **Analyze** বোতামে ক্লিক করুন। শ্রেণিবিন্যাসে ছবির সঙ্গে একটি নির্দিষ্ট placeholder লেখা ব্যবহৃত হয়।
 
-**Model Architecture:** ViT-Base/16 + BanglaBERT + LoRA (r=8) + Cross-Attention Decoder (4 layers)
+**Models:** classification — CLS-Only (ViT-Base/16 + BanglaBERT + LoRA r = 8), grouped-split Macro F1 75.69 ± 1.33%; text — multi-task v3 with a 3-layer Transformer decoder.
         """)
 
     gr.HTML('<div id="footer-note">DRISHTI-Bn &nbsp;|&nbsp; Thesis Research Demo &nbsp;|&nbsp; All rights reserved</div>')
@@ -311,7 +388,7 @@ with gr.Blocks(title="DRISHTI-Bn Demo") as demo:
     run_btn.click(
         fn=analyze_image,
         inputs=[image_input, beam_slider],
-        outputs=[label_out, prob_out, conf_out, caption_out],
+        outputs=[label_out, prob_out, conf_out, cam_out, caption_out],
     )
 
 # ─────────────────────────────────────────────────────────────

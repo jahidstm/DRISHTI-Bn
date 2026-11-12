@@ -2,6 +2,12 @@
 > **Last Updated:** 14 October 2026
 > **Branch:** `main` | **Target:** IEEE Access / ISCRAM 2027
 
+> ⚠️ **SUPERSEDED (2026-11-12) — historical record only.** The numbers and XAI conclusions below
+> predate the pre-defense corrections: data leakage (83.21% → 75.69 ± 1.33%), blank Grad-CAM
+> (hook bug), cross-attention from an untrained decoder, mismatched T*, mis-merged human evaluation.
+> Use [`CLAUDE.md`](CLAUDE.md), [`docs/corrected_claims.md`](docs/corrected_claims.md) and
+> [`DEFENSE_FIX_PLAN.md`](DEFENSE_FIX_PLAN.md) instead. Do not quote anything below in the thesis.
+
 ---
 
 ## Warning: Important Writing Rule

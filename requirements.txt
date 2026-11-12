@@ -12,3 +12,7 @@ scikit-learn
 nltk
 rouge-score
 bert-score
+scipy
+pillow
+sacrebleu
+gradio
