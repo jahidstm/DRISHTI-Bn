@@ -122,7 +122,9 @@
 
 **Script:** [colab/phase3_grouped_split_seeds.py](colab/phase3_grouped_split_seeds.py) — এক cell-এ পুরোটা। Disconnect হলে আবার চালালে শেষ হওয়া run বাদ দিয়ে বাকিগুলো চলবে।
 
-- [x] **3.1 Tweet/caption-grouped stratified split** (80/10/10, `StratifiedGroupKFold`, union-find দিয়ে একই tweet বা হুবহু একই caption এক group-এ)। Laptop-এ যাচাই: 3,755 sample → 3,189 group; train 3,005 · val 375 · test 375; tweet ও caption overlap = 0; class অনুপাত আগের মতোই।
+- [x] **3.1 Tweet/caption-grouped, class-balanced split** (80/10/10; union-find দিয়ে একই tweet বা হুবহু একই caption এক group-এ; `GroupShuffleSplit`-এর ২০০টা চেষ্টা থেকে যেটার class অনুপাত পুরো dataset-এর সবচেয়ে কাছে)। যাচাই: 3,755 sample → 3,189 group; train 3,007 · val 373 · test 375; class অনুপাত তিনটাতেই ≈ 59.7 / 31.6 / 8.8%; tweet ও caption overlap = 0।
+  - প্রথম চেষ্টায় (`StratifiedGroupKFold`) test-এ class অনুপাত বাঁকা ছিল (Severe 52% বনাম train 60%) আর Colab-এ `torchao` 0.10 / peft-এর অমিলে crash হয়েছিল (কোনো training হয়নি) → দুটোই script-এ ঠিক করা হয়েছে।
+  - Resume করলে Drive-এ সেভ করা `grouped_split.csv` আবার ব্যবহার হয়, তাই মাঝপথে split বদলাবে না। **পরের সব phase এই ফাইল থেকেই split নেবে।**
 - [ ] **3.2 🖥️ CLS-only (r = 8) ৩টা seed-এ (42, 123, 2024)** → mean ± std Macro F1। Seed 42-এর checkpoint Drive-এ `models/cls_only_grouped_s42.pt` (Phase 2/4-এ লাগবে)।
 - [ ] **3.3 🖥️ ViT-Only baseline ৩টা seed-এ, ঠিক unfreeze নিয়মে** (শেষ ২টা block + pooler = 14.77M parameter)।
 - [ ] **3.4 🖥️ CrisisViT-style baseline seed 42-এ, ঠিক unfreeze নিয়মে** (ViT-Large-এর শেষ ৪টা block + pooler)। সময় থাকলে script-এ `CRISISVIT_SEEDS`-এ 123, 2024 যোগ।
@@ -228,4 +230,5 @@
 | 2026-11-12 | 0 ✅ | 0.7 checkpoint audit শেষ; Phase 3B (multi-task retrain) বাধ্যতামূলক হিসেবে যোগ, phase-এর ক্রম বদল | `47db4f5` |
 | 2026-11-12 | 1 (প্রায়) | `docs/corrected_claims.md` তৈরি (C1–C16 + Limitations); নতুন ফল: dataset-এর 95.2% hurricane; PHASE4_WRITING_PLAN.md বাদ | `df140a8` |
 | 2026-11-12 | 1 ✅ · 3 (script) | তোমার দুটো উত্তর যোগ; C17 (baseline-এ শুধু pooler train) যোগ; Phase 3 Colab script তৈরি ও split লোকালি যাচাই | `cf8d45b` |
-| 2026-11-12 | 1 (আবার খোলা) | Human eval un-blinding bug ধরা ও ঠিক করা (C2, C11); অনুবাদ যাচাইয়ের দাবির প্রমাণ মেলেনি (C10) | (এই commit) |
+| 2026-11-12 | 1 (আবার খোলা) | Human eval un-blinding bug ধরা ও ঠিক করা (C2, C11); অনুবাদ যাচাইয়ের দাবির প্রমাণ মেলেনি (C10) | `c5a21d2` |
+| 2026-11-12 | 3 (script fix) | Colab-এ torchao crash ঠিক; split-এ class-balance উন্নত; resume-এ saved split ব্যবহার | (এই commit) |

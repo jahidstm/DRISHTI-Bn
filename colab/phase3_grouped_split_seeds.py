@@ -18,10 +18,25 @@
 # Paste back to Claude: everything from "PHASE 3 FINAL SUMMARY" down.
 # =====================================================================
 
+import os, re, sys, glob, json, time, shutil, zipfile, subprocess
+import importlib.metadata as md
+
+# ---- 0. Colab env fix: Colab ships torchao 0.10, which recent peft rejects.
+#         We do not use torchao, so remove it before peft is imported.
+try:
+    _tv = md.version('torchao')
+    if tuple(int(x) for x in _tv.split('.')[:2]) < (0, 16):
+        subprocess.run([sys.executable, '-m', 'pip', 'uninstall', '-y', '-q', 'torchao'], check=True)
+        print(f'[+] Removed incompatible torchao {_tv}')
+        if 'peft' in sys.modules:
+            raise SystemExit('>>> peft was already imported in this session. '
+                             'Runtime -> Restart session, then run this cell again. <<<')
+except md.PackageNotFoundError:
+    pass
+
 from google.colab import drive
 drive.mount('/content/drive')
 
-import os, re, sys, glob, json, time, shutil, zipfile, subprocess
 import numpy as np, pandas as pd
 
 DRIVE_ROOT = '/content/drive/MyDrive/DisasterNet'
@@ -66,8 +81,8 @@ missing = [p for p in df.image_path if not os.path.exists(os.path.join(DATA_DIR,
 assert not missing, f'{len(missing)} images missing, e.g. {missing[:3]}'
 print(f'[+] Dataset: {len(df)} rows, all images present')
 
-# ---- 3. Grouped stratified split -------------------------------------
-from sklearn.model_selection import StratifiedGroupKFold
+# ---- 3. Grouped, class-balanced split --------------------------------
+from sklearn.model_selection import GroupShuffleSplit
 
 LABEL_NAMES = ['Severe_Damage', 'Humanitarian_Rescue', 'Affected_People']
 y        = df.macro_label.map({n: i for i, n in enumerate(LABEL_NAMES)}).values
@@ -93,11 +108,34 @@ groups = np.array([find(i) for i in range(len(df))])
 print(f'[+] {len(df)} samples -> {len(set(groups))} leakage groups')
 
 idx = np.arange(len(df))
-outer = StratifiedGroupKFold(n_splits=10, shuffle=True, random_state=42)
-rest, test_idx = next(outer.split(idx, y, groups))
-inner = StratifiedGroupKFold(n_splits=9, shuffle=True, random_state=42)
-tr_rel, va_rel = next(inner.split(rest, y[rest], groups[rest]))
-train_idx, val_idx = rest[tr_rel], rest[va_rel]
+SPLIT_CSV = f'{OUT_DIR}/grouped_split.csv'
+RESULTS_CSV = f'{OUT_DIR}/phase3_seed_results.csv'
+
+if os.path.exists(SPLIT_CSV) and os.path.exists(RESULTS_CSV):
+    # Resuming: reuse the exact split the finished runs were trained on
+    saved = pd.read_csv(SPLIT_CSV)
+    assert (saved.image_path.values == df.image_path.values).all(), 'dataset order changed'
+    train_idx, val_idx, test_idx = (np.where(saved.split.values == s)[0] for s in ('train', 'val', 'test'))
+    print('[+] Resuming: loaded existing grouped_split.csv')
+else:
+    # Try 200 group-level shuffles and keep the one whose class mix and size
+    # are closest to the full dataset (deterministic: fixed random_state range).
+    P = np.bincount(y, minlength=3) / len(y)
+    def score(ii, target):
+        return np.abs(np.bincount(y[ii], minlength=3) / len(ii) - P).max() + abs(len(ii) - target) / target
+    def pick(pool, n_target):
+        best = None
+        for rs in range(200):
+            a, b = next(GroupShuffleSplit(1, test_size=n_target / len(pool), random_state=rs)
+                        .split(pool, groups=groups[pool]))
+            sc = score(pool[b], n_target)
+            if best is None or sc < best[0]:
+                best = (sc, rs, pool[a], pool[b])
+        return best[1], best[2], best[3]
+    n10 = round(0.1 * len(df))
+    rs_test, rest, test_idx = pick(idx, n10)
+    rs_val, train_idx, val_idx = pick(rest, n10)
+    print(f'[+] Split chosen: random_state test={rs_test}, val={rs_val}')
 
 def overlap(a, b, arr): return len(set(arr[a]) & set(arr[b]))
 for name, arr in [('group', groups), ('tweet', tweet_id), ('caption', caption)]:
@@ -109,7 +147,7 @@ split_col = np.empty(len(df), dtype=object)
 split_col[train_idx], split_col[val_idx], split_col[test_idx] = 'train', 'val', 'test'
 split_df = pd.DataFrame({'index': idx, 'image_path': df.image_path, 'macro_label': df.macro_label,
                          'tweet_id': tweet_id, 'group': groups, 'split': split_col})
-split_df.to_csv(f'{OUT_DIR}/grouped_split.csv', index=False)
+split_df.to_csv(SPLIT_CSV, index=False)
 split_df[split_df.split == 'test'].to_csv(f'{OUT_DIR}/test_set_indices_grouped.csv', index=False)
 
 print(f'\n  {"split":<6}{"n":>6}  ' + '  '.join(f'{n[:12]:>12}' for n in LABEL_NAMES))
@@ -127,7 +165,6 @@ import vit_only_baseline as V          # Task 0.5 dataset / loops
 
 DEVICE = C.DEVICE
 assert DEVICE.type == 'cuda', 'Switch the Colab runtime to GPU (T4)'
-RESULTS_CSV = f'{OUT_DIR}/phase3_seed_results.csv'
 CSV_PATH = f'{DATA_DIR}/{CSV_NAME}'
 
 def done_runs():
