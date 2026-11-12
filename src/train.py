@@ -25,7 +25,9 @@ def train_multitask_model():
     print(f"\n[+] Dual-Engine Ignition. Hardware: {device}")
 
     # 2. Load Data & Architecture
-    train_loader, val_loader = get_dataloaders(CSV_PATH, IMG_DIR, batch_size=BATCH_SIZE)
+    # get_dataloaders returns (train, val, test) since the stratified 80/10/10 split;
+    # the test loader is never touched during training.
+    train_loader, val_loader, _ = get_dataloaders(CSV_PATH, IMG_DIR, batch_size=BATCH_SIZE)
     model = DisasterNetMultimodal(num_classes=3, vocab_size=32000, use_lora=True).to(device)
 
     # 3. Task-Specific Loss Functions

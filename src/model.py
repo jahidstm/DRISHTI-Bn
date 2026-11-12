@@ -20,6 +20,21 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:, :x.size(1), :]
         return x
 
+def _find_lora_targets(model, candidates):
+    """Return the candidate module names that exist in *model*.
+
+    HF transformers renamed ViT attention projections across versions
+    (v4: query/value, v5: q_proj/v_proj). Picking whichever exists keeps
+    LoRA working on both, and keeps checkpoint keys matching the version
+    the checkpoint was trained with.
+    """
+    leaf_names = {name.split(".")[-1] for name, _ in model.named_modules()}
+    found = [c for c in candidates if c in leaf_names]
+    if not found:
+        raise ValueError(f"None of {candidates} found in model.")
+    return found
+
+
 class DisasterNetMultimodal(nn.Module):
     def __init__(self, num_classes=3, vocab_size=32000, use_lora=True):
         super(DisasterNetMultimodal, self).__init__()
@@ -31,11 +46,15 @@ class DisasterNetMultimodal(nn.Module):
         if use_lora:
             print("\n[+] Injecting LoRA Adapters into Vision & Text Encoders...")
             vit_lora_config = LoraConfig(
-                r=8, lora_alpha=16, target_modules=["q_proj", "v_proj"], 
+                r=8, lora_alpha=16,
+                target_modules=_find_lora_targets(
+                    self.vision_encoder, ["q_proj", "v_proj", "query", "value"]
+                ),
                 lora_dropout=0.1, bias="none", modules_to_save=["pooler"]
             )
             text_lora_config = LoraConfig(
-                r=8, lora_alpha=16, target_modules=["query", "value"], 
+                r=8, lora_alpha=16,
+                target_modules=_find_lora_targets(self.text_encoder, ["query", "value"]),
                 lora_dropout=0.1, bias="none"
             )
             self.vision_encoder = get_peft_model(self.vision_encoder, vit_lora_config)

@@ -24,13 +24,16 @@
 
 | Phase | বিষয় | কোথায় চলবে | আনুমানিক সময় | Status |
 |-------|------|-------------|---------------|--------|
-| 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | 🟡 চলমান |
+| 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | 🟡 চলমান (শুধু 0.7 বাকি) |
 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | ⬜ বাকি |
 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 3 | Leakage fix: tweet-grouped split + 3 seeds | Colab T4 | ~2.5–3 ঘণ্টা | ⬜ বাকি |
 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ⬜ বাকি |
 | 6 | (ঐচ্ছিক) Multi-task মডেল grouped split-এ retrain | Colab T4 | ~2 ঘণ্টা | ⬜ ঐচ্ছিক |
+| ➡️ | **এরপর:** DIU নির্দেশনা অনুযায়ী নতুন thesis draft লেখা | Google Docs (DIU template) | — | ⬜ plan শেষে |
+
+> সব Colab script থাকবে [colab/](colab/) ফোল্ডারে (Colab-এ এক cell-এ paste করে চালানো যায়)।
 
 ---
 
@@ -38,17 +41,16 @@
 
 **উদ্দেশ্য:** কিছু হারানোর ঝুঁকি দূর করা আর ভাঙা কোড ঠিক করা, যাতে পরের phase-গুলো নিরাপদে চলে।
 
-- [ ] **0.1 Draft ফেরত আনা।** `DRISHTI_Bn_Thesis_Final_Working_Draft.docx` আর `DRISHTI_Bn_Thesis_Working_Draft_v1.txt` working tree থেকে মুছে গেছে → `git restore` দিয়ে ফেরত আনা। (ইচ্ছাকৃতভাবে মুছে থাকলে জানাবে।)
-- [ ] **0.2 CLAUDE.md ঠিক করা ও commit করা।** নেই এমন ফাইলের উল্লেখ ঠিক করা:
-  - `DRISHTI_Bn_Thesis_Final_Working_Draft.md` → আসল ফাইল `.docx`
-  - `figure_3_2_lora.png` → আসল ফাইল `figure_2_1_lora.png`
-- [ ] **0.3 [src/train.py](src/train.py) ঠিক করা।** `get_dataloaders` এখন ৩টা loader ফেরত দেয়, train.py ২টা আশা করে → crash।
-- [ ] **0.4 [src/model.py](src/model.py) ঠিক করা।** ViT-এর LoRA target `q_proj/v_proj` → `query/value` (HF ViT-এর আসল module নাম; ablation script-গুলোতে আগেই ঠিক করা আছে)।
-- [ ] **0.5 অপ্রয়োজনীয় ফাইল সরানো।** `temp_crop.png`, `temp_sample01_top.png`, `fix_nb.py`, `append_dl_test.py`।
-- [ ] **0.6 `results/gradcam/` পরিষ্কার।** একই sample-এর পুরনো রানের `_ERR` ছবি (checkpoint fix-এর আগের) সরানো; `gradcam_summary.csv`-এর সঙ্গে মিলিয়ে।
-- [ ] **0.7 🖥️ Colab check: কোন checkpoint থেকে কোন সংখ্যা এসেছে।** Drive-এ `models/` ফোল্ডারের সব checkpoint-এর তারিখ, size, MD5 বের করা। উদ্দেশ্য: 77.95% যে checkpoint থেকে এসেছে সেটা teacher-forcing fix (৭ আগস্ট) আর 80/10/10 split (১২ সেপ্টেম্বর)-এর পরে train হয়েছে কিনা নিশ্চিত করা।
-  - Claude Colab code দেবে → তুমি output paste করবে।
-  - 📥 Download: কিছু না (শুধু printed output)।
+- [-] **0.1 Draft ফেরত আনা।** বাদ: পুরনো draft দুটো (`DRISHTI_Bn_Thesis_Final_Working_Draft.docx`, `..._v1.txt`) তুমি ইচ্ছা করে মুছেছ, কারণ সেগুলো result-এর আগের কাজ। মুছে ফেলাটা commit করা হয়েছে (git history-তে থেকে যাবে)। নতুন draft লেখা হবে এই plan শেষ হলে, DIU-র নির্দেশনা অনুযায়ী।
+- [x] **0.2 CLAUDE.md ঠিক করা ও commit করা।** পুরনো draft-এর উল্লেখ সরানো হয়েছে, `figure_3_2_lora.png` → `figure_2_1_lora.png`, `DEFENSE_FIX_PLAN.md` আর `Thesis Writing/` যোগ হয়েছে, transformers ভার্সনের নোট যোগ হয়েছে।
+- [x] **0.3 [src/train.py](src/train.py) ঠিক করা।** এখন `train_loader, val_loader, _ = get_dataloaders(...)`। Import যাচাই করা হয়েছে।
+- [x] **0.4 [src/model.py](src/model.py) version-robust করা।** ⚠️ আগের বিশ্লেষণে ভুল ছিল: `q_proj/v_proj` বাগ নয়। transformers 5.x-এ ViT-এর module নামই `q_proj/v_proj`, আর v2 checkpoint-এ ViT-এর LoRA weight (48টা key) ঠিকঠাক আছে। তাই নাম বদলানো হয়নি; ablation script-এর মতো auto-detect যোগ করা হয়েছে, যাতে transformers 4.x (`query/value`)-এও চলে। যাচাই: v2 checkpoint `strict=True`-এ load হয় ("All keys matched")।
+- [x] **0.5 অপ্রয়োজনীয় ফাইল সরানো।** `temp_crop.png`, `temp_sample01_top.png` (integrated XAI figure-এর crop), `fix_nb.py`, `append_dl_test.py` (একবার চালানো notebook-edit script) মুছে ফেলা হয়েছে।
+- [x] **0.6 `results/gradcam/` পরিষ্কার।** `gradcam_summary.csv`-এ নেই এমন ১৩টা পুরনো রানের ছবি সরানো হয়েছে। এখন ২১টা ছবি, summary-র সঙ্গে হুবহু মেলে (বাকি ৪টা `_ERR` আসল ভুল prediction: sample 017, 019, 020, 021)।
+- [/] **0.7 🖥️ Colab check: কোন checkpoint থেকে কোন সংখ্যা এসেছে।** Drive-এর সব checkpoint-এর তারিখ, size, MD5, LoRA key আর decoder-এর অবস্থা বের করা। উদ্দেশ্য: 77.95% যে checkpoint থেকে এসেছে সেটা teacher-forcing fix (৭ আগস্ট) আর 80/10/10 split (১২ সেপ্টেম্বর)-এর পরে train হয়েছে কিনা নিশ্চিত করা, আর `best_cls_only.pt`-এর decoder সত্যিই untrained কিনা দেখা।
+  - Script: [colab/phase0_checkpoint_audit.py](colab/phase0_checkpoint_audit.py) (CPU runtime-ই যথেষ্ট)
+  - Laptop-এর v2-এর MD5: `16bb292e5d62115cc5c966dc70c120d4` (2026-06-25)
+  - 📥 Download: কিছু না, শুধু printed output paste করবে।
 
 **শেষ হওয়ার শর্ত:** draft ফেরত এসেছে, `train.py`/`model.py` import হলে error নেই, checkpoint-এর ইতিহাস জানা গেছে।
 
@@ -56,7 +58,7 @@
 
 ## Phase 1 — লেখার সংশোধন (নতুন experiment ছাড়া)
 
-**উদ্দেশ্য:** ভুল বা অতিরঞ্জিত দাবি সরানো। প্রতিটা item-এর জন্য Claude **replacement text / NotebookLM prompt** দেবে; draft-এ বসাবে তুমি।
+**উদ্দেশ্য:** ভুল বা অতিরঞ্জিত দাবি ঠিক করা। পুরনো draft মুছে ফেলা হয়েছে, তাই এই phase-এর ফল হবে একটা **"সংশোধিত দাবি" reference** (`docs/corrected_claims.md`): কোন দাবি কীভাবে লিখতে হবে, কোনটা বাদ যাবে, কোনটা limitation। পরে নতুন draft লেখার সময় এটা মেনে লেখা হবে, আর [PHASE4_WRITING_PLAN.md](PHASE4_WRITING_PLAN.md)-এর prompt-গুলোও সেই অনুযায়ী ঠিক করা হবে।
 
 - [ ] **1.1 Cross-Attention XAI-এর দাবি।** "Cross-Attention সবচেয়ে অর্থপূর্ণ ব্যাখ্যা দেয়" — `best_cls_only.pt`-এর decoder কখনো train হয়নি (λ_cap = 0), তাই map random weight থেকে। Phase 4 পর্যন্ত দাবিটা স্থগিত/নরম করা।
 - [ ] **1.2 No-CrossAttn ablation (+1.33pp)।** Classification path-এ decoder ব্যবহারই হয় না → পার্থক্যটা random variance। "কোনো উল্লেখযোগ্য প্রভাব নেই" হিসেবে পুনর্লিখন।
@@ -70,7 +72,7 @@
 - [ ] **1.10 Figure 4.1-এর caption।** এই confusion matrix multi-task মডেলের (77.95%), সেরা মডেলের নয় → caption-এ স্পষ্ট লেখা। (সেরা মডেলের matrix আসবে Phase 2-এ।)
 - [ ] **1.11 Leakage ও seed variance-কে Limitations-এ রাখা** (Phase 3-এর ফল আসার আগ পর্যন্ত placeholder)।
 
-**শেষ হওয়ার শর্ত:** প্রতিটা item-এর replacement text তোমার কাছে পৌঁছেছে এবং তুমি draft-এ বসিয়েছ বলে নিশ্চিত করেছ।
+**শেষ হওয়ার শর্ত:** `docs/corrected_claims.md` তৈরি ও তোমার অনুমোদিত; PHASE4_WRITING_PLAN.md-এর সংশ্লিষ্ট prompt সংশোধিত।
 
 ---
 
@@ -174,4 +176,5 @@
 
 | তারিখ | Phase | কী করা হলো | Commit |
 |-------|-------|------------|--------|
-| 2026-11-12 | — | Fix plan তৈরি | (এই commit) |
+| 2026-11-12 | — | Fix plan তৈরি | `6c266db` |
+| 2026-11-12 | 0 (আংশিক) | 0.1 বাদ (draft ইচ্ছাকৃতভাবে মোছা), 0.2–0.6 শেষ, 0.7-এর Colab script তৈরি | (এই commit) |
