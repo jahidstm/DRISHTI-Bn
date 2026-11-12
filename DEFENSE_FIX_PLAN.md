@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ · Phase 1 (১.২০-এর উত্তর বাকি) · **Phase 3 Colab run শেষ** (৩.৫-এর সিদ্ধান্ত বাকি) · পরের: **Phase 3B**
+> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 (১.২০-এর উত্তর বাকি) · Phase 3 ✅ · বর্তমান: **Phase 3B** (script তৈরি, Colab-এ চালানো বাকি)
 
 ---
 
@@ -28,8 +28,8 @@
 |------|-------|------|-------------|---------------|--------|
 | 1 | 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | ✅ শেষ |
 | 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | 🟡 প্রায় শেষ (১টা প্রশ্ন + ১টা অনুমতি বাকি) |
-| 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | 🟡 run শেষ (৭২ মিনিট); ৩.৫-এর সিদ্ধান্ত বাকি |
-| 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~2 ঘণ্টা | ⬜ বাকি |
+| 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | ✅ শেষ (৭২ মিনিট) |
+| 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~45–60 মিনিট | 🟡 script তৈরি, Colab-এ চালানো বাকি |
 | 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 7 | 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ⬜ বাকি |
@@ -128,7 +128,7 @@
 - [x] **3.2 🖥️ CLS-only (r = 8) ৩টা seed-এ (42, 123, 2024)** → **75.69 ± 1.33%** Macro F1 (74.83 / 75.02 / 77.22)। পুরনো 83.21%-এর চেয়ে ~7.5pp কম → leakage ফল ফুলিয়েছিল। Seed 42-এর checkpoint Drive-এ `models/cls_only_grouped_s42.pt` (Phase 2/4-এ লাগবে)।
 - [x] **3.3 🖥️ ViT-Only baseline ৩টা seed-এ, ঠিক unfreeze নিয়মে** (14.77M ViT + head = 15.16M trainable) → **73.27 ± 0.39%**। CLS-Only তিনটা seed-এই বেশি (গড়ে +2.4pp)।
 - [x] **3.4 🖥️ CrisisViT-style baseline seed 42-এ, ঠিক unfreeze নিয়মে** (51.96M trainable) → **75.87%**। CLS-Only-র সঙ্গে কার্যত সমান (এক std-এর মধ্যে), কিন্তু আমাদের মডেল 38 গুণ কম parameter train করে। বিস্তারিত: [results/defense_fixes/phase3/phase3_results.md](results/defense_fixes/phase3/phase3_results.md)
-- [ ] **3.5 সিদ্ধান্ত (তোমার):** থিসিসে মূল সংখ্যা হিসেবে grouped split-এর mean ± std ব্যবহার করবে কিনা (Claude-এর পরামর্শ: হ্যাঁ)। সিদ্ধান্ত অনুযায়ী CLAUDE.md update।
+- [x] **3.5 সিদ্ধান্ত (তোমার, 2026-11-12): হ্যাঁ।** থিসিসের মূল classification সংখ্যা **75.69 ± 1.33%** (grouped split, ৩ seed)। থিসিসে সৎভাবে লেখা হবে যে পুরনো 83.21% ছিল un-grouped split-এর leakage-এর প্রভাব। CLAUDE.md update হবে Phase 5.1-এ (খসড়া সেখানে)।
 - [-] LoRA r = 4 / 16 grouped split-এ — বাদ (সময় বাঁচাতে)। Rank ablation পুরনো split-এর ফল হিসেবে থাকবে, C5-এর variance সতর্কতাসহ।
 
 **Colab-এ চালানোর আগে:**
@@ -156,19 +156,27 @@
 
 ফলে 77.95% Macro F1, BLEU 1–4, METEOR, ROUGE-L, BERTScore 60.35% আর human eval-এর model caption — সবই leakage-যুক্ত, fix-এর আগের মডেল থেকে।
 
-- [ ] **3B.1 🖥️ ঠিক করা `train.py` দিয়ে multi-task retrain** — λ_cap = 0.5, right-shifted teacher forcing, Phase 3-এর grouped split, seed 42, checkpoint বাছাই validation loss দিয়ে।
-- [ ] **3B.2 🖥️ নতুন test set-এ পুরো benchmark** — Macro F1, per-class F1, confusion matrix, BLEU 1–4, METEOR, ROUGE-L, BERTScore (beam = 3)।
+**Script:** [colab/phase3b_multitask_retrain.py](colab/phase3b_multitask_retrain.py) — এক cell-এ পুরোটা; training শেষ হলে আবার চালালে training বাদ দিয়ে সরাসরি benchmark।
+- `src/model.py`-এর একই architecture (তাই checkpoint `evaluate.py` / `app.py`-তে সরাসরি load হয়)। Speed-এর জন্য দুই task-এ encoder একবার চালানো হয়। লোকালি যাচাই: `model.forward`-এর সঙ্গে logit পার্থক্য 0.0।
+- Beam search `evaluate.py`-র হুবহু একই algorithm (repetition penalty, bigram block, length penalty 0.7); শুধু ViT memory একবার হিসাব হয়। লোকালি যাচাই: একই caption।
+- Hyper-parameter: 15 epoch, bs 16, AdamW lr 1e-4 (wd 0.01), cosine (Phase 3-এর CLS-only-র মতো), AMP, seed 42।
+
+- [ ] **3B.1 🖥️ ঠিক করা `train.py`-এর logic দিয়ে multi-task retrain** — λ_cls = 1.0, λ_cap = 0.5, right-shifted teacher forcing, Phase 3-এর grouped split, seed 42, checkpoint বাছাই validation total loss দিয়ে।
+- [ ] **3B.2 🖥️ নতুন test set-এ (n = 375) পুরো benchmark** — classification দুইভাবে: (ক) ছবি + আসল tweet text, (খ) ছবি + মডেলের নিজের generated caption (demo-র মতো, শুধু ছবি)। Caption: BLEU 1–4, METEOR, ROUGE-L, BERTScore (beam = 3), URL বাদ দিয়ে আরেকবার, আর caption diversity (সব ছবিতে একই caption আসছে কিনা)।
 - [ ] **3B.3 নতুন checkpoint Drive-এ রাখা** → `models/drishti_multitask_v3.pt` (পুরনো v2 মুছবে না)।
 - [ ] **3B.4 সিদ্ধান্ত (তোমার): human evaluation।** আগের ১০০টা model caption v2 থেকে। বিকল্প:
   - (ক) আগেরটা রেখে limitation হিসেবে স্বীকার করা (সময় লাগবে না)
   - (খ) নতুন মডেলের caption দিয়ে আবার করানো, এবার annotator-দের নিয়ে calibration session সহ (IAA-ও ভালো হওয়ার সম্ভাবনা)
 - [ ] **3B.5 সিদ্ধান্ত (তোমার):** নতুন সংখ্যা CLAUDE.md আর থিসিসে বসানো।
 
-📥 **Download (Colab থেকে):**
-- `phase3b_benchmark_summary.csv` → `results/defense_fixes/phase3b/`
-- `phase3b_per_sample.csv` (reference + generated caption) → `results/defense_fixes/phase3b/`
-- `phase3b_confusion_matrix.png` → `results/defense_fixes/phase3b/`
-- Checkpoint **Drive-এই থাকবে**
+**Colab-এ চালানোর আগে:** Runtime → **T4 GPU**। Drive-এ `DisasterNet/defense_fixes/phase3/grouped_split.csv` থাকতে হবে (Phase 3-এ তৈরি হয়েছে)। নতুন session-এ চালানো ভালো; `peft` আগে load হয়ে থাকলে script restart করতে বলবে।
+
+📥 **Download (Drive-এর `DisasterNet/defense_fixes/phase3b/` থেকে → `results/defense_fixes/phase3b/`):**
+- `phase3b_benchmark_summary.csv`
+- `phase3b_per_sample.csv` (৩৭৫টা reference + generated caption; human eval আবার করলে লাগবে)
+- `phase3b_train_log.csv`
+- `phase3b_confusion_matrix.png`
+- Checkpoint `models/drishti_multitask_v3.pt` **Drive-এই থাকবে**
 
 **শেষ হওয়ার শর্ত:** fix-করা, leakage-মুক্ত multi-task মডেলের সব classification ও caption metric জানা গেছে।
 
@@ -196,7 +204,13 @@
 
 ## Phase 5 — চূড়ান্ত সমন্বয় (Local)
 
-- [ ] **5.1 CLAUDE.md-এর সংখ্যা update** (শুধু তোমার অনুমোদিত নতুন সংখ্যা)।
+- [ ] **5.1 CLAUDE.md-এর সংখ্যা update** (শুধু তোমার অনুমোদিত নতুন সংখ্যা)। খসড়া:
+  - ✅ অনুমোদিত (৩.৫): Classification মূল সংখ্যা → CLS-Only **75.69 ± 1.33%** (grouped split, ৩ seed, test n = 375); P 77.09 ± 1.31, R 74.93 ± 1.59; পুরনো 83.21% "original un-grouped split (leakage)" চিহ্নসহ পাশে।
+  - ✅ অনুমোদিত (৩.৫-এর অংশ): Baseline table → ViT-Only 73.27 ± 0.39 · CrisisViT-style 75.87 (1 seed); "SOTA" বাদ; বাকি baseline আর ablation "original split" চিহ্নসহ।
+  - ✅ Trainable parameter → 1,379,331 (≈0.70%) (C9) — ঘটনাগত সংশোধন।
+  - ⏳ অনুমতি বাকি (১.২০): Human eval → model 1.58 / 1.24 / 1.23 বনাম GT 3.42 / 3.08 / 3.23; IAA pooled α 0.38 (C2, C11)।
+  - ⏳ Phase 3B-এর পর: multi-task classification, BLEU/METEOR/ROUGE-L/BERTScore, confusion matrix (3B.5)।
+  - ⏳ Phase 4-এর পর: calibration (T*, ECE after = 2.63%), XAI।
 - [ ] **5.2 [README.md](README.md) পুনর্লিখন।** পুরনো 66.67% F1, BLEU-4 5.14, 80/20 split, 0.1% সরিয়ে বর্তমান ফল।
 - [ ] **5.3 [DRISHTI_XAI_CHECKLIST.md](DRISHTI_XAI_CHECKLIST.md)-এ সংশোধিত দাবি প্রতিফলিত করা।** (`PHASE4_WRITING_PLAN.md` বাদ — writing prompt নতুন করে বানানো হবে।)
 - [ ] **5.4 Demo ([app.py](app.py)) নিয়ে সিদ্ধান্ত।** এখন পুরনো v2 checkpoint চালায়। বিকল্প: (ক) যেমন আছে রেখে ডিফেন্সে স্পষ্ট বলা, (খ) caption-এর জন্য multi-task + classification-এর জন্য CLS-only checkpoint।
@@ -233,4 +247,5 @@
 | 2026-11-12 | 1 ✅ · 3 (script) | তোমার দুটো উত্তর যোগ; C17 (baseline-এ শুধু pooler train) যোগ; Phase 3 Colab script তৈরি ও split লোকালি যাচাই | `cf8d45b` |
 | 2026-11-12 | 1 (আবার খোলা) | Human eval un-blinding bug ধরা ও ঠিক করা (C2, C11); অনুবাদ যাচাইয়ের দাবির প্রমাণ মেলেনি (C10) | `c5a21d2` |
 | 2026-11-12 | 3 (script fix) | Colab-এ torchao crash ঠিক; split-এ class-balance উন্নত; resume-এ saved split ব্যবহার | `12bf43f` |
-| 2026-11-12 | 3 (run শেষ) | ৭টা run-এর ফল সংরক্ষণ (3.2–3.4); corrected_claims-এ C5, C13, C14, C17, D1, D2 update; ৩.৫-এর সিদ্ধান্ত বাকি | (এই commit) |
+| 2026-11-12 | 3 (run শেষ) | ৭টা run-এর ফল সংরক্ষণ (3.2–3.4); corrected_claims-এ C5, C13, C14, C17, D1, D2 update | `4f29b97` |
+| 2026-11-12 | 3 ✅ · 3B (script) | ৩.৫ সিদ্ধান্ত: মূল সংখ্যা 75.69 ± 1.33%; Phase 5.1-এ CLAUDE.md-এর খসড়া; Phase 3B Colab script তৈরি ও লোকালি যাচাই | (এই commit) |
