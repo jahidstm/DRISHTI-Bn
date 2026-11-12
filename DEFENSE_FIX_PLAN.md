@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 (১.২০-এর উত্তর বাকি) · Phase 3 ✅ · বর্তমান: **Phase 3B** (script তৈরি, Colab-এ চালানো বাকি)
+> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 (১.২০-এর উত্তর বাকি) · Phase 3 ✅ · বর্তমান: **Phase 3B** (Colab run শেষ; 3B.6 আর ২টা সিদ্ধান্ত বাকি)
 
 ---
 
@@ -29,7 +29,7 @@
 | 1 | 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | ✅ শেষ |
 | 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | 🟡 প্রায় শেষ (১টা প্রশ্ন + ১টা অনুমতি বাকি) |
 | 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | ✅ শেষ (৭২ মিনিট) |
-| 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~45–60 মিনিট | 🟡 script তৈরি, Colab-এ চালানো বাকি |
+| 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~45–60 মিনিট | 🟡 run শেষ (২০ মিনিট); 3B.6 + সিদ্ধান্ত বাকি |
 | 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 7 | 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ⬜ বাকি |
@@ -96,7 +96,9 @@
 
 **সমস্যা:** CLS-Only (83.21%) test-এ **আসল tweet text** দেখে, Multi-Task (77.95%) দেখে **মডেলের বানানো caption**। দুটো তুলনা একই শর্তে নয়। আর demo-তে শুধু ছবি থাকে, tweet থাকে না।
 
-- [ ] **2.1 🖥️ `best_cls_only.pt` তিনটা অবস্থায় evaluate করা** (একই test set, n = 376):
+> **Phase 3B-এর পর অবস্থা:** Multi-task v3-এর দুই অবস্থা (আসল tweet 77.29%, generated caption 73.63%) 3B-তেই মাপা হয়ে গেছে। Phase 2-এ বাকি শুধু **CLS-only মডেল** (`cls_only_grouped_s42.pt`, grouped test n = 375) দিয়ে (খ) v3-এর generated caption আর (গ) placeholder text। Script Phase 3B.6-এর পর দেওয়া হবে।
+
+- [ ] **2.1 🖥️ `cls_only_grouped_s42.pt` তিনটা অবস্থায় evaluate করা** (grouped test set, n = 375; পুরনো `best_cls_only.pt` / n = 376 নয়):
   - (ক) আসল tweet text দিয়ে — 83.21% আবার পাওয়া যায় কিনা (sanity check)
   - (খ) **Phase 3B-এর নতুন** multi-task মডেলের generated caption দিয়ে (beam = 3) — পুরনো v2 নয়
   - (গ) text ছাড়া / fixed placeholder text দিয়ে (image-only deployment-এর অবস্থা)
@@ -161,10 +163,11 @@
 - Beam search `evaluate.py`-র হুবহু একই algorithm (repetition penalty, bigram block, length penalty 0.7); শুধু ViT memory একবার হিসাব হয়। লোকালি যাচাই: একই caption।
 - Hyper-parameter: 15 epoch, bs 16, AdamW lr 1e-4 (wd 0.01), cosine (Phase 3-এর CLS-only-র মতো), AMP, seed 42।
 
-- [ ] **3B.1 🖥️ ঠিক করা `train.py`-এর logic দিয়ে multi-task retrain** — λ_cls = 1.0, λ_cap = 0.5, right-shifted teacher forcing, Phase 3-এর grouped split, seed 42, checkpoint বাছাই validation total loss দিয়ে।
-- [ ] **3B.2 🖥️ নতুন test set-এ (n = 375) পুরো benchmark** — classification দুইভাবে: (ক) ছবি + আসল tweet text, (খ) ছবি + মডেলের নিজের generated caption (demo-র মতো, শুধু ছবি)। Caption: BLEU 1–4, METEOR, ROUGE-L, BERTScore (beam = 3), URL বাদ দিয়ে আরেকবার, আর caption diversity (সব ছবিতে একই caption আসছে কিনা)।
-- [ ] **3B.3 নতুন checkpoint Drive-এ রাখা** → `models/drishti_multitask_v3.pt` (পুরনো v2 মুছবে না)।
-- [ ] **3B.4 সিদ্ধান্ত (তোমার): human evaluation।** আগের ১০০টা model caption v2 থেকে। বিকল্প:
+- [x] **3B.1 🖥️ ঠিক করা `train.py`-এর logic দিয়ে multi-task retrain** — λ_cls = 1.0, λ_cap = 0.5, right-shifted teacher forcing, Phase 3-এর grouped split, seed 42, checkpoint বাছাই validation total loss দিয়ে → best epoch 4 (১৫ মিনিট)। Val caption loss epoch 5-এর পর ~4.07-এ আটকে, train loss নামতেই থাকে → decoder overfit।
+- [x] **3B.2 🖥️ নতুন test set-এ (n = 375) পুরো benchmark** → classification (ক) ছবি + আসল tweet **77.29%**, (খ) ছবি + generated caption **73.63%** (= ViT-Only)। Caption: BERTScore-F1 69.66 (URL বাদে 62.27); caption আসলে tweet-অনুকরণ (C18)। বিস্তারিত: [results/defense_fixes/phase3b/phase3b_results.md](results/defense_fixes/phase3b/phase3b_results.md)
+- [x] **3B.3 নতুন checkpoint Drive-এ রাখা** → `models/drishti_multitask_v3.pt` (v2 অক্ষত)।
+- [ ] **3B.6 (নতুন) Caption metric লোকালি আবার হিসাব** — `metrics.py`-র BLEU non-standard (BLEU-1..4 প্রায় সমান: 7.42 / 6.82 / 6.80 / 6.93)। `phase3b_per_sample.csv` থেকে sacreBLEU (corpus BLEU) + chrF, URL বাদ দিয়ে diversity। GPU লাগবে না। 📥 ফাইলগুলো download হলেই করা হবে।
+- [ ] **3B.4 সিদ্ধান্ত (তোমার): human evaluation।** আগের ১০০টা model caption v2 থেকে; v3-এর caption-ও tweet-অনুকরণ (C18)। বিকল্প:
   - (ক) আগেরটা রেখে limitation হিসেবে স্বীকার করা (সময় লাগবে না)
   - (খ) নতুন মডেলের caption দিয়ে আবার করানো, এবার annotator-দের নিয়ে calibration session সহ (IAA-ও ভালো হওয়ার সম্ভাবনা)
 - [ ] **3B.5 সিদ্ধান্ত (তোমার):** নতুন সংখ্যা CLAUDE.md আর থিসিসে বসানো।
@@ -231,6 +234,7 @@
 | 2026-11-12 | 1.19 | Human eval সঠিকভাবে un-blind: model 1.58/1.24/1.23 বনাম GT 3.42/3.08/3.23 (fluency/adequacy/faithfulness), Wilcoxon p < 10⁻¹⁶; GT পছন্দ 225/237; IAA pooled α 0.38, within-type ≈ 0 | `results/defense_fixes/phase1/human_eval_unblinded/` |
 | 2026-11-12 | 1.18 | পুরনো ViT unfreeze নিয়ম transformers 5.x-এ মাত্র 590,592 param (pooler) unfreeze করে, ঠিক নিয়মে 14,766,336; CrisisViT-এর 0.34% = ViT-L pooler | `docs/corrected_claims.md` (C17) |
 | 2026-11-12 | 3.1 | Grouped split (Colab-এ চূড়ান্ত): 3,189 group; 3,007 / 373 / 375; class অনুপাত ≈ 59.7/31.6/8.8%; overlap 0 | `colab/phase3_grouped_split_seeds.py` |
+| 2026-11-12 | 3B.1–3B.3 | Multi-task v3 (epoch 4): ছবি + tweet 77.29% · ছবি + generated caption 73.63% · BERTScore-F1 69.66 (URL বাদে 62.27) · caption = tweet-অনুকরণ | `results/defense_fixes/phase3b/phase3b_results.md` |
 | 2026-11-12 | 3.2–3.4 | Grouped split, test n = 375: CLS-Only 75.69 ± 1.33 · ViT-Only 73.27 ± 0.39 · CrisisViT-style 75.87 (1 seed); AP-এর F1 ≈ 45% | `results/defense_fixes/phase3/` |
 | 2026-11-12 | 1.16 | Dataset-এর event ভাগ: Harvey 1,416 · Maria 1,149 · Irma 1,010 · Sri Lanka floods 180 → 95.2% hurricane | `docs/corrected_claims.md` (C16) |
 
@@ -248,4 +252,5 @@
 | 2026-11-12 | 1 (আবার খোলা) | Human eval un-blinding bug ধরা ও ঠিক করা (C2, C11); অনুবাদ যাচাইয়ের দাবির প্রমাণ মেলেনি (C10) | `c5a21d2` |
 | 2026-11-12 | 3 (script fix) | Colab-এ torchao crash ঠিক; split-এ class-balance উন্নত; resume-এ saved split ব্যবহার | `12bf43f` |
 | 2026-11-12 | 3 (run শেষ) | ৭টা run-এর ফল সংরক্ষণ (3.2–3.4); corrected_claims-এ C5, C13, C14, C17, D1, D2 update | `4f29b97` |
-| 2026-11-12 | 3 ✅ · 3B (script) | ৩.৫ সিদ্ধান্ত: মূল সংখ্যা 75.69 ± 1.33%; Phase 5.1-এ CLAUDE.md-এর খসড়া; Phase 3B Colab script তৈরি ও লোকালি যাচাই | (এই commit) |
+| 2026-11-12 | 3 ✅ · 3B (script) | ৩.৫ সিদ্ধান্ত: মূল সংখ্যা 75.69 ± 1.33%; Phase 5.1-এ CLAUDE.md-এর খসড়া; Phase 3B Colab script তৈরি ও লোকালি যাচাই | `36c3cfb` |
+| 2026-11-12 | 3B (run শেষ) | v3-এর ফল সংরক্ষণ (3B.1–3B.3); C1 প্রতিস্থাপন, নতুন C18 (caption = tweet-অনুকরণ), C9-এ multi-task parameter; 3B.6 (metric পুনর্হিসাব) যোগ | (এই commit) |

@@ -10,10 +10,33 @@
 
 ## A. যে সংখ্যা এখন ব্যবহার করা যাবে না
 
-### C1. Multi-task মডেলের সব সংখ্যা — ⏳ Phase 3B
+### C1. Multi-task মডেলের সব সংখ্যা — ✅ Phase 3B-এ প্রতিস্থাপিত (caption metric-এর একাংশ ⏳ 3B.6)
 - **পুরনো দাবি:** Multi-task Macro F1 77.95% (P 93.28%, R 73.03%), per-class F1, confusion matrix (Figure 4.1), BLEU-1..4 = 24.85/14.20/8.95/6.13, METEOR 0.32, ROUGE-L 0.56, BERTScore-F1 60.35%; "λ_cap = 0.5"।
 - **সমস্যা:** এগুলো এসেছে `disasternet_multitask_v2.pth` (২৫ জুন) থেকে, যা train হয়েছিল λ_cap = 0.2, unshifted teacher forcing আর seed ছাড়া 80/20 split দিয়ে। Test set-এর আনুমানিক ~300/376 sample মডেল training-এ দেখেছে। (প্রমাণ: `results/defense_fixes/phase0/checkpoint_audit.md`)
-- **করণীয়:** Phase 3B-এর নতুন মডেলের সংখ্যা দিয়ে প্রতিস্থাপন। ততদিন এই সংখ্যাগুলো কোথাও লেখা যাবে না।
+- **পুরনো সংখ্যা কোথাও লেখা যাবে না।** নতুন মডেল `drishti_multitask_v3.pt` (λ_cap = 0.5, right-shifted, grouped split, seed 42, epoch 4)। পূর্ণ ফল: [results/defense_fixes/phase3b/phase3b_results.md](../results/defense_fixes/phase3b/phase3b_results.md)
+
+  | Classification (test n = 375) | Macro F1 | F1 SD / HR / AP |
+  |-------------------------------|----------|-----------------|
+  | Multi-task v3, ছবি + আসল tweet | 77.29 (১ seed) | 92.00 / 87.24 / 52.63 |
+  | Multi-task v3, ছবি + নিজের generated caption (image-only) | 73.63 | 92.51 / 86.07 / 42.31 |
+  | তুলনা: CLS-Only (৩ seed) | 75.69 ± 1.33 | — |
+  | তুলনা: ViT-Only (৩ seed) | 73.27 ± 0.39 | — |
+
+- **যা দাবি করা যাবে না:**
+  - "Multi-task learning classification উন্নত করে" — 77.29% একটা seed, CLS-Only-র std-এর মধ্যে, আর checkpoint বাছাই (val loss বনাম val F1) ও trainable ViT pooler-এ দুটো মডেল আলাদা।
+  - "Generated caption classification-এ সাহায্য করে" — image-only অবস্থায় 73.63%, অর্থাৎ ViT-Only-র সমান।
+- **নতুন লেখা (English):**
+  > "When the original tweet is available, the multi-task model reaches 77.29% Macro F1 (single seed), within the seed variation of the classification-only model (75.69 ± 1.33%). In an image-only setting, where the classifier receives the model's own generated caption, Macro F1 is 73.63%, on par with the image-only ViT baseline (73.27 ± 0.39%): the generated text adds no information beyond the image."
+- **Caption metric (v3, beam 3, ×100):** BERTScore-F1 69.66 (URL বাদে 62.27); `metrics.py`-র BLEU-1..4 = 7.42 / 6.82 / 6.80 / 6.93, METEOR 1.10, ROUGE-L 1.80।
+  - ⚠️ `metrics.py`-র BLEU non-standard (sentence-level, +1 smoothing, গড়) — তাই BLEU-1..4 প্রায় সমান। ⏳ 3B.6-এ sacreBLEU + chrF দিয়ে আবার হিসাব; সেই সংখ্যাই থিসিসে যাবে।
+  - ⚠️ BERTScore-এর বড় অংশ tweet-এর boilerplate (URL, hashtag, "RT @") মেলার কারণে; mBERT-এ `bn`-এর baseline rescaling নেই, তাই অসম্পর্কিত বাক্যেও ~60। Caption quality-র প্রমাণ হিসেবে উপস্থাপন করা যাবে না।
+
+### C18. Generated "caption" আসলে tweet-এর অনুকরণ — ✅ (Phase 3B)
+- **পর্যবেক্ষণ:** v3-এর caption ছবির বর্ণনা নয়, translated tweet-এর ধাঁচ: hashtag, `RT @handle`, বানানো `t.co` URL, এক বাক্যে Harvey/Maria/Irma মিশিয়ে ফেলা (যেমন "RT @ HurricanMaria : # Harvey ' র পর, কিন্তু হ্যারিকেন মারিয়া https : / t. co / qPSLCVYR")। সব class-এর caption প্রায় একই রকম। ৩৭৫টার মধ্যে ৩২১টা আলাদা, কিন্তু পার্থক্যের বড় অংশ URL-এর এলোমেলো অক্ষরে।
+- **কারণ:** Reference text নিজেই tweet-এর মেশিন অনুবাদ (C10), তাই decoder সেটাই শিখেছে। Validation caption loss epoch 5-এর পর ~4.07-এ আটকে থাকে (perplexity ≈ 59), train loss নামতেই থাকে → decoder overfit।
+- **নতুন লেখা (English):**
+  > "Because the reference texts are translated tweets, the decoder learned to reproduce tweet conventions — hashtags, user mentions and URL fragments — and generic hurricane-relief phrases, rather than image-specific descriptions. We therefore treat the generation branch as an auxiliary task and an object of explainability analysis, not as a usable captioning system."
+- **ভবিষ্যৎ কাজ:** URL/hashtag/mention পরিষ্কার করা reference, অথবা মানুষের লেখা ছবির বর্ণনা (যেমন ছোট একটা manually-captioned subset)।
 
 ### C2. Human evaluation — রিপোর্ট করা সব score ভুল ছিল (un-blinding bug) — ✅ সংশোধিত / ⏳ 3B.4
 - **পুরনো দাবি:** Model: fluency 2.49, adequacy 2.11, faithfulness 2.17 · GT: 2.51, 2.21, 2.30 → "model captions score closely to ground truth"।
@@ -38,7 +61,7 @@
 - **অর্থ:** Model-এর caption মানুষের চোখে খুব দুর্বল (১–৫ স্কেলে ~১.২–১.৬)। Generated caption-এ বাংলা-ইংরেজি মেশানো অর্থহীন শব্দ দেখা যায়। এটা লুকানো যাবে না; সৎভাবে লিখতে হবে।
 - **নতুন লেখা (English):**
   > "Human judges rated the generated captions substantially lower than the reference texts on all three dimensions (fluency 1.58 vs. 3.42, adequacy 1.24 vs. 3.08, faithfulness 1.23 vs. 3.23; Wilcoxon p < 10⁻¹⁶), and preferred the reference in 94.9% of judgements. The caption decoder therefore does not yet produce usable Bengali descriptions; its value in this work lies in the multi-task and explainability analysis rather than in caption quality."
-- ⏳ **৩B.4-এর সিদ্ধান্ত বাকি:** এই ১০০টা model caption পুরনো v2 checkpoint থেকে (C1)। Phase 3B-এর নতুন মডেলের caption ভালো হলে human eval আবার করা যেতে পারে।
+- ⏳ **৩B.4-এর সিদ্ধান্ত বাকি:** এই ১০০টা model caption পুরনো v2 checkpoint থেকে (C1)। Phase 3B-এর v3 caption-ও tweet-অনুকরণ (C18), তাই আবার করলেও ফল সম্ভবত একই রকম খারাপ আসবে — কিন্তু থিসিসের মডেল এখন v3, তাই v2-এর caption-এর মূল্যায়ন রাখলে অমিল থাকে।
 - **পুরনো সমস্যা (C1-এর):** ১০০টা model caption v2 থেকে, অর্থাৎ C1-এর একই সমস্যা।
 - **দুই বিকল্প:** (ক) আগের ফল রেখে limitation হিসেবে লেখা; (খ) নতুন মডেলের caption দিয়ে আবার human eval।
 - **(ক) বেছে নিলে লেখা (English):**
@@ -114,6 +137,7 @@
 
 - No-LoRA-তে trainable = 789,507 (শুধু head, ≈ 0.40%)।
 - Multi-task মডেলে caption decoder (≈ 72.8M parameter, পুরোটা trainable) যোগ হয়, তাই সেখানে "0.30%" বা "0.70%" কোনোটাই খাটে না।
+- ✅ **Multi-task v3-এর সঠিক হিসাব (Phase 3B `[diag]`):** ViT LoRA 294,912 + ViT pooler 590,592 (`src/model.py`-এ `modules_to_save=["pooler"]`) + BERT LoRA 294,912 + classifier head 789,507 + decoder 72,817,664 = **74,787,587 / 271,203,587 (≈27.6%)**। CLS-Only ablation-এ pooler trainable নয় — দুটো মডেলের পার্থক্য হিসেবে উল্লেখ করতে হবে।
 - **নতুন লেখা (English):**
   > "LoRA adds 589,824 trainable parameters to the two encoders (0.30% of the 197.0M encoder parameters); together with the fusion head, 1.38M parameters (≈0.70%) are trained for classification."
 
@@ -210,7 +234,8 @@
 2. ✅ **Seed variance:** ৩ seed-এ CLS-Only 74.83–77.22%; Affected_People-এর F1 ± 4.6pp (test-এ মাত্র ৩২টা sample)। CrisisViT-style একটা seed-এ।
 3. ✅ Reference text হলো tweet-এর মেশিন অনুবাদ, ছবির বর্ণনা নয় (C10)।
 4. ✅ Human eval: ৩ জন annotator (বন্ধু), calibration session ছাড়া; ধরন অনুযায়ী আলাদা করে মাপলে IAA প্রায় শূন্য, একসঙ্গে মাপলে fair (α = 0.38) (C11)। মূল un-blinding bug ঠিক করা হয়েছে (C2)।
-9. ✅ Caption generation দুর্বল: মানুষের rating model 1.2–1.6/5 বনাম reference 3.1–3.4/5 (C2)।
+9. ✅ Caption generation দুর্বল: মানুষের rating model 1.2–1.6/5 বনাম reference 3.1–3.4/5 (C2); v3-এর caption tweet-অনুকরণ, ছবি-নির্দিষ্ট নয় (C18)।
+11. ✅ Multi-task ফল একটা seed-এ (42); image-only অবস্থায় generated caption ViT-Only-র চেয়ে বেশি কিছু যোগ করে না (C1)।
 10. ✅ Corpus-এর 8.9% text অনুবাদ হয়নি (ইংরেজি থেকে গেছে) (C10)।
 5. ✅ Class imbalance: Affected_People মাত্র 330টা (8.8%) — সব মডেলে এই class-এর F1 সবচেয়ে কম।
 6. ✅ Temperature scaling-এ উন্নতি হয়নি; validation set ছোট (C8)।
