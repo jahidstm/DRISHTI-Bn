@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 (১.২০-এর উত্তর বাকি) · Phase 3 ✅ · Phase 3B ✅ · পরের: **Phase 2** (CLS-only মডেলের fair evaluation)
+> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 ✅ · Phase 3 ✅ · Phase 3B ✅ · বর্তমান: **Phase 2** (script তৈরি, Colab-এ চালানো বাকি)
 
 ---
 
@@ -27,10 +27,10 @@
 | ক্রম | Phase | বিষয় | কোথায় চলবে | আনুমানিক সময় | Status |
 |------|-------|------|-------------|---------------|--------|
 | 1 | 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | ✅ শেষ |
-| 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | 🟡 প্রায় শেষ (১টা প্রশ্ন + ১টা অনুমতি বাকি) |
+| 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | ✅ শেষ |
 | 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | ✅ শেষ (৭২ মিনিট) |
 | 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~45–60 মিনিট | ✅ শেষ |
-| 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
+| 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~10 মিনিট | 🟡 script তৈরি, Colab-এ চালানো বাকি |
 | 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 7 | 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ⬜ বাকি |
 | ➡️ | — | **এরপর:** DIU নির্দেশনা অনুযায়ী নতুন thesis draft লেখা | Google Docs (DIU template) | — | ⬜ plan শেষে |
@@ -260,4 +260,4 @@
 | 2026-11-12 | 3 ✅ · 3B (script) | ৩.৫ সিদ্ধান্ত: মূল সংখ্যা 75.69 ± 1.33%; Phase 5.1-এ CLAUDE.md-এর খসড়া; Phase 3B Colab script তৈরি ও লোকালি যাচাই | `36c3cfb` |
 | 2026-11-12 | 3B (run শেষ) | v3-এর ফল সংরক্ষণ (3B.1–3B.3); C1 প্রতিস্থাপন, নতুন C18 (caption = tweet-অনুকরণ), C9-এ multi-task parameter; 3B.6 (metric পুনর্হিসাব) যোগ | `0288960` |
 | 2026-11-12 | 3B ✅ · 5.1 (আংশিক) | 3B.6 শেষ (sacreBLEU/chrF + তুচ্ছ baseline); 3B.4 = (ক), 3B.5 = হ্যাঁ; CLAUDE.md-এ অনুমোদিত সংখ্যা বসানো; Colab-এর download করা ফাইল যোগ | `14ccbeb` |
-| 2026-11-12 | 1 ✅ · 2 (script) | ১.২০-এর উত্তর: human eval-এর সঠিক সংখ্যা CLAUDE.md-এ, "human-verified translation" দাবি বাদ; Phase 2 Colab script তৈরি | (এই commit) |
+| 2026-11-12 | 1 ✅ · 2 (script) | ১.২০-এর উত্তর: human eval-এর সঠিক সংখ্যা CLAUDE.md-এ, "human-verified translation" দাবি বাদ; Phase 2 Colab script তৈরি | `9da91da` |
