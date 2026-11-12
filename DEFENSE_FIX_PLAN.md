@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ; বর্তমান: **Phase 1** (২টা উত্তর বাকি) · **Phase 3** (Colab-এ চালানোর অপেক্ষায়)
+> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ · Phase 1 (১.২০-এর উত্তর বাকি) · **Phase 3 Colab run শেষ** (৩.৫-এর সিদ্ধান্ত বাকি) · পরের: **Phase 3B**
 
 ---
 
@@ -28,7 +28,7 @@
 |------|-------|------|-------------|---------------|--------|
 | 1 | 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | ✅ শেষ |
 | 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | 🟡 প্রায় শেষ (১টা প্রশ্ন + ১টা অনুমতি বাকি) |
-| 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | 🟡 Colab-এ চালানো বাকি |
+| 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | 🟡 run শেষ (৭২ মিনিট); ৩.৫-এর সিদ্ধান্ত বাকি |
 | 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~2 ঘণ্টা | ⬜ বাকি |
 | 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
@@ -125,9 +125,9 @@
 - [x] **3.1 Tweet/caption-grouped, class-balanced split** (80/10/10; union-find দিয়ে একই tweet বা হুবহু একই caption এক group-এ; `GroupShuffleSplit`-এর ২০০টা চেষ্টা থেকে যেটার class অনুপাত পুরো dataset-এর সবচেয়ে কাছে)। যাচাই: 3,755 sample → 3,189 group; train 3,007 · val 373 · test 375; class অনুপাত তিনটাতেই ≈ 59.7 / 31.6 / 8.8%; tweet ও caption overlap = 0।
   - প্রথম চেষ্টায় (`StratifiedGroupKFold`) test-এ class অনুপাত বাঁকা ছিল (Severe 52% বনাম train 60%) আর Colab-এ `torchao` 0.10 / peft-এর অমিলে crash হয়েছিল (কোনো training হয়নি) → দুটোই script-এ ঠিক করা হয়েছে।
   - Resume করলে Drive-এ সেভ করা `grouped_split.csv` আবার ব্যবহার হয়, তাই মাঝপথে split বদলাবে না। **পরের সব phase এই ফাইল থেকেই split নেবে।**
-- [ ] **3.2 🖥️ CLS-only (r = 8) ৩টা seed-এ (42, 123, 2024)** → mean ± std Macro F1। Seed 42-এর checkpoint Drive-এ `models/cls_only_grouped_s42.pt` (Phase 2/4-এ লাগবে)।
-- [ ] **3.3 🖥️ ViT-Only baseline ৩টা seed-এ, ঠিক unfreeze নিয়মে** (শেষ ২টা block + pooler = 14.77M parameter)।
-- [ ] **3.4 🖥️ CrisisViT-style baseline seed 42-এ, ঠিক unfreeze নিয়মে** (ViT-Large-এর শেষ ৪টা block + pooler)। সময় থাকলে script-এ `CRISISVIT_SEEDS`-এ 123, 2024 যোগ।
+- [x] **3.2 🖥️ CLS-only (r = 8) ৩টা seed-এ (42, 123, 2024)** → **75.69 ± 1.33%** Macro F1 (74.83 / 75.02 / 77.22)। পুরনো 83.21%-এর চেয়ে ~7.5pp কম → leakage ফল ফুলিয়েছিল। Seed 42-এর checkpoint Drive-এ `models/cls_only_grouped_s42.pt` (Phase 2/4-এ লাগবে)।
+- [x] **3.3 🖥️ ViT-Only baseline ৩টা seed-এ, ঠিক unfreeze নিয়মে** (14.77M ViT + head = 15.16M trainable) → **73.27 ± 0.39%**। CLS-Only তিনটা seed-এই বেশি (গড়ে +2.4pp)।
+- [x] **3.4 🖥️ CrisisViT-style baseline seed 42-এ, ঠিক unfreeze নিয়মে** (51.96M trainable) → **75.87%**। CLS-Only-র সঙ্গে কার্যত সমান (এক std-এর মধ্যে), কিন্তু আমাদের মডেল 38 গুণ কম parameter train করে। বিস্তারিত: [results/defense_fixes/phase3/phase3_results.md](results/defense_fixes/phase3/phase3_results.md)
 - [ ] **3.5 সিদ্ধান্ত (তোমার):** থিসিসে মূল সংখ্যা হিসেবে grouped split-এর mean ± std ব্যবহার করবে কিনা (Claude-এর পরামর্শ: হ্যাঁ)। সিদ্ধান্ত অনুযায়ী CLAUDE.md update।
 - [-] LoRA r = 4 / 16 grouped split-এ — বাদ (সময় বাঁচাতে)। Rank ablation পুরনো split-এর ফল হিসেবে থাকবে, C5-এর variance সতর্কতাসহ।
 
@@ -216,7 +216,8 @@
 | 2026-11-12 | 0.7 | একমাত্র multi-task checkpoint v2 (২৫ জুন) সব fix-এর আগের; test set-এর ~300/376 training-এ দেখা (আনুমানিক)। `best_cls_only.pt`-এর decoder untrained (std 0.02084 ≈ init) — নিশ্চিত। | `results/defense_fixes/phase0/checkpoint_audit.md` |
 | 2026-11-12 | 1.19 | Human eval সঠিকভাবে un-blind: model 1.58/1.24/1.23 বনাম GT 3.42/3.08/3.23 (fluency/adequacy/faithfulness), Wilcoxon p < 10⁻¹⁶; GT পছন্দ 225/237; IAA pooled α 0.38, within-type ≈ 0 | `results/defense_fixes/phase1/human_eval_unblinded/` |
 | 2026-11-12 | 1.18 | পুরনো ViT unfreeze নিয়ম transformers 5.x-এ মাত্র 590,592 param (pooler) unfreeze করে, ঠিক নিয়মে 14,766,336; CrisisViT-এর 0.34% = ViT-L pooler | `docs/corrected_claims.md` (C17) |
-| 2026-11-12 | 3.1 | Grouped split লোকালি যাচাই: 3,189 group; 3,005 / 375 / 375; overlap 0 | `colab/phase3_grouped_split_seeds.py` |
+| 2026-11-12 | 3.1 | Grouped split (Colab-এ চূড়ান্ত): 3,189 group; 3,007 / 373 / 375; class অনুপাত ≈ 59.7/31.6/8.8%; overlap 0 | `colab/phase3_grouped_split_seeds.py` |
+| 2026-11-12 | 3.2–3.4 | Grouped split, test n = 375: CLS-Only 75.69 ± 1.33 · ViT-Only 73.27 ± 0.39 · CrisisViT-style 75.87 (1 seed); AP-এর F1 ≈ 45% | `results/defense_fixes/phase3/` |
 | 2026-11-12 | 1.16 | Dataset-এর event ভাগ: Harvey 1,416 · Maria 1,149 · Irma 1,010 · Sri Lanka floods 180 → 95.2% hurricane | `docs/corrected_claims.md` (C16) |
 
 ---
@@ -231,4 +232,5 @@
 | 2026-11-12 | 1 (প্রায়) | `docs/corrected_claims.md` তৈরি (C1–C16 + Limitations); নতুন ফল: dataset-এর 95.2% hurricane; PHASE4_WRITING_PLAN.md বাদ | `df140a8` |
 | 2026-11-12 | 1 ✅ · 3 (script) | তোমার দুটো উত্তর যোগ; C17 (baseline-এ শুধু pooler train) যোগ; Phase 3 Colab script তৈরি ও split লোকালি যাচাই | `cf8d45b` |
 | 2026-11-12 | 1 (আবার খোলা) | Human eval un-blinding bug ধরা ও ঠিক করা (C2, C11); অনুবাদ যাচাইয়ের দাবির প্রমাণ মেলেনি (C10) | `c5a21d2` |
-| 2026-11-12 | 3 (script fix) | Colab-এ torchao crash ঠিক; split-এ class-balance উন্নত; resume-এ saved split ব্যবহার | (এই commit) |
+| 2026-11-12 | 3 (script fix) | Colab-এ torchao crash ঠিক; split-এ class-balance উন্নত; resume-এ saved split ব্যবহার | `12bf43f` |
+| 2026-11-12 | 3 (run শেষ) | ৭টা run-এর ফল সংরক্ষণ (3.2–3.4); corrected_claims-এ C5, C13, C14, C17, D1, D2 update; ৩.৫-এর সিদ্ধান্ত বাকি | (এই commit) |

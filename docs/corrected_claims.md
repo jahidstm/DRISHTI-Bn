@@ -67,7 +67,7 @@
 - **গুরুত্বপূর্ণ পর্যবেক্ষণ:** একই config দুবার চালিয়ে 83.21% আর 81.47% → **~1.7pp run-to-run variance।** তাই single-seed ফলে ~2pp-এর কম পার্থক্য (r = 4: 79.41%, r = 16: 79.14%, No-CrossAttn: 81.88%) অর্থবহ বলা যাবে না।
 - **নতুন লেখা (English):**
   > "Two independent runs of the identical r = 8 configuration produced 83.21% and 81.47%, indicating run-to-run variance of roughly 1.7 percentage points. Differences smaller than this should not be interpreted as meaningful."
-- ⏳ Phase 3-এর ৩-seed ফল এলে mean ± std দিয়ে এটা প্রতিস্থাপিত হবে।
+- ✅ **Phase 3 (grouped split, ৩ seed):** CLS-Only r = 8 → 75.69 ± 1.33% (74.83 / 75.02 / 77.22)। Seed-এর পার্থক্যেই ~2.4pp ছড়ায়, তাই পুরনো single-seed rank/CrossAttn পার্থক্য অর্থবহ নয়। Rank ablation grouped split-এ চালানো হয়নি — লিখলে "original (leaky) split, single seed" বলে চিহ্নিত করতে হবে।
 
 ### C6. Caption-Only (16.90%) — ✅
 - **সমস্যা:** λ_cls = 0, তাই classifier head কখনো train হয়নি। 16.90% একটা random head-এর ফল, কোনো তথ্য দেয় না।
@@ -155,10 +155,13 @@
 - **আপাতত লেখা (English):**
   > "The reported 83.21% Macro F1 is obtained with the original (translated) tweet text as the text input. In an image-only deployment the tweet is unavailable; performance under that setting is reported in Section X."
 - Phase 2-এর ফল এলে Section X-এর সংখ্যা যোগ হবে।
+- ⚠️ Phase 3: leakage-মুক্ত split-এ এই সংখ্যা **75.69 ± 1.33%** (৩ seed)। থিসিসে মূল সংখ্যা কোনটা হবে, সেটা ৩.৫-এর সিদ্ধান্ত।
 
 ### C14. "CrisisViT (SOTA)" — ✅
 - **সমস্যা:** এটা আমাদের নিজস্ব CrisisViT-style re-implementation (ViT-Large/16, শেষ ৪টা block unfrozen), মূল paper-এর রিপোর্ট করা ফল নয়।
 - **নতুন লেবেল:** "CrisisViT-style baseline (our re-implementation, ViT-Large/16)"। "SOTA" শব্দ বাদ।
+- ✅ **Phase 3:** ঠিক নিয়মে (৫১.৯৬M trainable) grouped split-এ 75.87% (seed 42) — CLS-Only (75.69 ± 1.33)-এর সঙ্গে কার্যত সমান। তাই "CrisisViT-কে ছাড়িয়ে গেছে" দাবি বাদ। যা বলা যায় (English):
+  > "DRISHTI-Bn matches a CrisisViT-style ViT-Large baseline (75.69 ± 1.33% vs. 75.87% Macro F1) while training 38× fewer parameters (1.38M vs. 51.96M) on a ViT-Base backbone."
 
 ### C15. "First Bengali multimodal …" ধরনের দাবি — ✅
 - **সমস্যা:** README-তে "First Bengali Multimodal Flood Intelligence System"। কিন্তু `literature/1. base_papers/`-এ *BanglaMM-Disaster* (Bangla multimodal disaster classification) আর *BiCap* (Bangla image captioning) আছে।
@@ -181,7 +184,7 @@
 - Title, abstract, objective-এ "flood" শব্দের বদলে "flood and storm" / "hydro-meteorological disaster" জাতীয় শব্দ বিবেচনা করা। Harvey-তে ব্যাপক বন্যা হয়েছিল, তাই "flood-related" বলা যায়, কিন্তু "flood-only" নয়।
 - ⏳ **Title (তোমার উত্তর, 2026-11-12):** আপাতত "Flood" থাকবে; supervisor-এর সঙ্গে কথা বলে চূড়ান্ত হবে। "Flood" রাখলে dataset section-এ ওপরের event table আর ব্যাখ্যা অবশ্যই থাকতে হবে, যাতে examiner নিজে আবিষ্কার না করেন।
 
-### C17. ViT-Only ও CrisisViT baseline-এ আসলে শুধু pooler train হয়েছিল — ⏳ Phase 3
+### C17. ViT-Only ও CrisisViT baseline-এ আসলে শুধু pooler train হয়েছিল — ✅ Phase 3-এ আবার চালানো হয়েছে
 - **পুরনো দাবি:** ViT-Only (78.64%) "last 2 blocks + pooler unfrozen"; CrisisViT-style (78.15%) "last 4 blocks unfrozen (0.34% trainable)"।
 - **সমস্যা:** দুটো script-ই block খোঁজে `"encoder.layer.N"` নাম দিয়ে। transformers 5.x-এ ViT-এর parameter নাম `layers.N...`, তাই কোনো block মেলে না, শুধু `pooler` মেলে। প্রমাণ:
   - Laptop-এ (transformers 5.12.1) ViT-Base-এ পুরনো নিয়ম unfreeze করে **590,592** parameter (শুধু pooler); ঠিক নিয়মে হওয়ার কথা **14,766,336**।
@@ -189,13 +192,22 @@
 - **প্রভাব:** দুটো baseline প্রায় linear probe হিসেবে চলেছে, তাই DRISHTI-Bn-এর সঙ্গে তুলনায় তারা দুর্বল হয়ে থাকতে পারে। "DRISHTI-Bn CrisisViT-কে 5.06pp ছাড়িয়ে গেছে" দাবিটা এই কারণে এখন নির্ভরযোগ্য নয়।
 - **করণীয়:** Phase 3-এ দুটো baseline ঠিক নিয়মে (version-robust regex) আবার চালানো হচ্ছে। ফল এলে baseline table নতুন করে লেখা হবে।
 - Full Fine-Tune baseline (74.19%) এই সমস্যায় পড়ে না (সব parameter unfreeze করে)।
+- ✅ **Phase 3-এর নতুন baseline table (grouped split, test n = 375):**
+
+  | Model | Seeds | Macro F1 | Trainable |
+  |-------|-------|----------|-----------|
+  | ViT-Only (last 2 blocks + pooler) | 3 | 73.27 ± 0.39 | 15.16M |
+  | CrisisViT-style (ViT-L, last 4 blocks + pooler) | 1 | 75.87 | 51.96M |
+  | **DRISHTI-Bn CLS-Only (LoRA r = 8)** | 3 | **75.69 ± 1.33** | **1.38M** |
+
+  CLS-Only তিনটা seed-এই ViT-Only-র চেয়ে বেশি (+1.1 / +1.8 / +4.3pp)। Stratified Random, BanglaBERT-Only, Full Fine-Tune grouped split-এ চালানো হয়নি — রাখলে "original split" চিহ্নসহ।
 
 ---
 
 ## D. Limitations অংশে যা থাকবে (তালিকা)
 
-1. ⏳ **Data leakage:** একই tweet-এর একাধিক ছবি train ও test-এ ভাগ হয়েছিল — 376টার মধ্যে 80টা (21.3%) test sample-এর হুবহু একই text train-এ আছে। (Phase 3-এর পর: grouped split-এর ফল দিয়ে প্রতিস্থাপন বা পাশে রাখা।)
-2. ⏳ **Single-seed ফল / run-to-run variance (~1.7pp)।** (Phase 3-এর পর mean ± std।)
+1. ✅ **Data leakage:** মূল split-এ 376টার মধ্যে 80টা (21.3%) test sample-এর হুবহু একই text train-এ ছিল। Tweet/caption-grouped split-এ CLS-Only 83.21% → 75.69 ± 1.33% (Phase 3)। Ablation আর কিছু baseline শুধু মূল split-এ আছে।
+2. ✅ **Seed variance:** ৩ seed-এ CLS-Only 74.83–77.22%; Affected_People-এর F1 ± 4.6pp (test-এ মাত্র ৩২টা sample)। CrisisViT-style একটা seed-এ।
 3. ✅ Reference text হলো tweet-এর মেশিন অনুবাদ, ছবির বর্ণনা নয় (C10)।
 4. ✅ Human eval: ৩ জন annotator (বন্ধু), calibration session ছাড়া; ধরন অনুযায়ী আলাদা করে মাপলে IAA প্রায় শূন্য, একসঙ্গে মাপলে fair (α = 0.38) (C11)। মূল un-blinding bug ঠিক করা হয়েছে (C2)।
 9. ✅ Caption generation দুর্বল: মানুষের rating model 1.2–1.6/5 বনাম reference 3.1–3.4/5 (C2)।
