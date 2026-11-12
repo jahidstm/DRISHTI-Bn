@@ -84,13 +84,16 @@
 
 ## B. যে দাবি বাদ যাবে বা নতুনভাবে লিখতে হবে
 
-### C3. Cross-Attention "সবচেয়ে অর্থপূর্ণ ব্যাখ্যা" — ⏳ Phase 4
+### C3. Cross-Attention "সবচেয়ে অর্থপূর্ণ ব্যাখ্যা" — ✅ Phase 4 (দাবি উল্টে গেছে)
+- **Phase 4-এর ফল:** Trained v3 decoder-এর cross-attention আর classification-এর Grad-CAM-এর শীর্ষ-10% patch-এর মিল (IoU) 0.059 — random-এর (≈ 0.054) সমান। অর্থাৎ decoder ছবির যে অংশ দেখে, সেটা class-এর প্রমাণের সঙ্গে সম্পর্কহীন। Cross-attention **শুধু caption generation-এর সহায়ক বিশ্লেষণ**, ছোট করে (তোমার সিদ্ধান্ত 4.4)। নতুন Figure 4.5 → `figure_4_5_crossattn_grouped.png`।
+- **নতুন লেখা (English):**
+  > "As an auxiliary analysis, we visualise the cross-attention of the trained caption decoder. Its most-attended patches overlap with the Grad-CAM evidence for the predicted class no more than chance (top-10% IoU 0.059 vs. 0.054 expected at random), confirming that the generation branch attends to different image regions than the classifier and does not explain the classification decision."
 - **পুরনো দাবি:** "Cross-Attention provides the most spatially meaningful explanations."
 - **সমস্যা:** Map নেওয়া হয়েছে `best_cls_only.pt`-এর decoder থেকে, যা কখনো train হয়নি (λ_cap = 0)। প্রমাণ: `vocab_projector.weight` std = 0.02084 ≈ PyTorch default init 0.0208। তার ওপর classification-এ decoder ব্যবহারই হয় না।
 - **আপাতত:** Figure 4.5 আর Figure 4.7-এর Cross-Attention column ব্যবহার করা যাবে না।
 - **Phase 4-এর পর:** নতুন multi-task মডেলের trained decoder থেকে map বানিয়ে সেটাকে **caption generation-এর ব্যাখ্যা** হিসেবে উপস্থাপন (classification-এর নয়)। Classification-এর ব্যাখ্যা হিসেবে থাকবে শুধু Grad-CAM আর Attention Rollout।
 
-### C20. পুরনো Grad-CAM (Figure 4.4) ফাঁকা ছিল — ✅ কারণ নিশ্চিত / ⏳ নতুন figure Phase 4
+### C20. পুরনো Grad-CAM (Figure 4.4) ফাঁকা ছিল — ✅ ঠিক করা হয়েছে (Phase 4: ০/২১টা map শূন্য, faithfulness random-এর ~২০ গুণ — C7)
 - **পুরনো দাবি:** "Grad-CAM: dark heatmap; ViT global attention lacks spatial localization."
 - **আসল কারণ (bug):** `gradcam_xai.py` আর `integrated_xai_pipeline.py` শেষ ViT block-এর **output**-এর patch token-এ hook করে। HF ViT-এর pooler শুধু CLS token পড়ে, তাই ওই patch token-গুলোর gradient গাণিতিকভাবে শূন্য। লোকালি যাচাই: শেষ block-এর patch gradient max = **0.0**, আগের block-এ 0.023। ফলে প্রতিটা map শূন্য, overlay-তে একরঙা অন্ধকার।
 - **যা বলা যাবে না:** "ViT-এ Grad-CAM কাজ করে না" বা "dark heatmap ViT-এর বৈশিষ্ট্য"।
@@ -119,30 +122,39 @@
 
 ### C7. "XAI accuracy 81% (17/21)" — ✅
 - **সমস্যা:** এটা XAI-এর কোনো metric নয়; ২১টা নির্বাচিত sample-এ classification accuracy।
-- **নতুন লেখা:** "Of the 21 samples selected for qualitative XAI analysis (7 per class), the model classified 17 correctly (Severe_Damage 7/7, Humanitarian_Rescue 7/7, Affected_People 3/7)." — কোনো "XAI accuracy" শব্দ নয়।
+- **নতুন লেখা:** কোনো "XAI accuracy" শব্দ নয়। Phase 4-এর ২১টা sample (grouped test, ৭/class, random seed 42, বাছাই করা নয়):
+  > "Of the 21 randomly drawn test samples used for qualitative XAI analysis (7 per class), the model classified 15 correctly (Severe_Damage 6/7, Humanitarian_Rescue 7/7, Affected_People 2/7); misclassified samples had markedly lower confidence (mean 0.58 vs. 0.89)."
+- **XAI-এর আসল সংখ্যাগত মূল্যায়ন — faithfulness (deletion test, পুরো test set n = 375):**
+
+  | Method | শীর্ষ 10% patch মুছলে prob কমে | 25% | 50% | 50% মুছলে accuracy |
+  |--------|------------------------------|-----|-----|---------------------|
+  | **Grad-CAM** | **6.92 pp** | **14.27 pp** | **21.27 pp** | **73.87%** |
+  | Attention Rollout | 0.85 pp | 3.26 pp | 7.35 pp | 81.60% |
+  | Random | 0.34 pp | 1.57 pp | 4.16 pp | 86.93% |
+
+  > "A deletion test on all 375 test images shows that Grad-CAM identifies the evidence the classifier relies on: removing the top 10% of Grad-CAM patches lowers the predicted-class probability by 6.92 percentage points, about 20 times more than removing random patches (0.34 pp); removing the top half reduces accuracy from 88.27% to 73.87% (random: 86.93%). Attention Rollout is only weakly faithful (7.35 vs. 4.16 pp at 50%), as expected for a class-agnostic method. Grad-CAM and Rollout overlap moderately (top-10% IoU 0.148, 2.7× chance)."
 
 ---
 
 ## C. সঠিক কিন্তু সৎভাবে/সম্পূর্ণভাবে লিখতে হবে
 
-### C8. Calibration — ⏳ Phase 4-এ নতুন মডেলে আবার মাপা হচ্ছে
-- **T*-এর অমিলের কারণ (পাওয়া গেছে):** `integrated_xai_pipeline.py` নিজের আলাদা split বানায় (90/10, তারপর 10/90), তাই তার "val" set-এর বেশিরভাগই মডেলের training data। দেখা data-য় মডেল অতি-নিশ্চিত ও সঠিক → T* = 0.6669 (< 1)। `temp_scaling_xai.py`-এর T* = 1.1113 সঠিক val set-এ fit হয়েছিল। দুটোই পুরনো split আর পুরনো মডেলের — Phase 4-এ grouped split-এ নতুন T* আসবে, সেটাই একমাত্র সংখ্যা হবে।
+### C8. Calibration — ✅ Phase 4 (নতুন মডেল, grouped split)
 - **পুরনো দাবি:** "Temperature Scaling confirms high reliability (ECE = 2.16%)."
-- **সমস্যা:** TS-এর পর সব metric সামান্য **খারাপ** হয়েছে, কিন্তু শুধু "before" সংখ্যা দেখানো হচ্ছিল।
-- **পুরো table (test set, `best_cls_only.pt`, T* = 1.1113):**
+- **পুরনো সমস্যা:** TS-এর পর সব metric সামান্য খারাপ হয়েছিল, কিন্তু শুধু "before" দেখানো হচ্ছিল। আর T* দুই জায়গায় দুই রকম (1.1113 বনাম 0.6669)। কারণ: `integrated_xai_pipeline.py` নিজের আলাদা split বানায়, তাই তার "val"-এর বেশিরভাগই training data → T* < 1। **দুটো T*-ই বাতিল।**
+- **চূড়ান্ত table (CLS-Only seed 42; T* grouped val n = 373-এ fit; test n = 375; 10 bin):**
 
-  | Metric | Before TS | After TS |
-  |--------|-----------|----------|
-  | ECE | 2.16% | 2.63% |
-  | MCE | 62.09% | 62.56% |
-  | NLL | 0.3201 | 0.3224 |
-  | Brier | 0.1715 | 0.1728 |
-  | Mean confidence | 88.25% | 86.65% |
-  | Accuracy | 88.83% | 88.83% |
+  | Metric | Before TS | After TS (T* = 1.1349) |
+  |--------|-----------|------------------------|
+  | ECE | **2.57%** | 2.99% |
+  | MCE | 19.06% | 20.60% |
+  | NLL | 0.3223 | 0.3228 |
+  | Brier | 0.1681 | 0.1688 |
+  | Mean confidence | 88.84% | 87.03% |
+  | Accuracy | 88.27% | 88.27% |
 
 - **নতুন লেখা (English):**
-  > "The uncalibrated model was already well calibrated (ECE = 2.16%, mean confidence 88.25% vs. accuracy 88.83%). Temperature scaling (T* = 1.1113, fitted on the validation set) slightly softened the predictions but did not improve test calibration (ECE 2.63%), consistent with the small validation set (n = 375)."
-- ⏳ Integrated pipeline-এ T* = 0.6669 এসেছিল — Phase 4-এ কারণ বের করে একটা সংখ্যায় স্থির হবে। ততদিন শুধু 1.1113 ব্যবহার।
+  > "Without any post-hoc correction the model is already well calibrated (ECE = 2.57%; mean confidence 88.84% vs. accuracy 88.27%). Temperature scaling (T* = 1.1349, fitted on the validation set, n = 373) slightly softened the predictions but did not improve calibration on the test set (ECE 2.99%), which we attribute to the small validation set. We therefore report the uncalibrated model as reliable and temperature scaling as giving no additional benefit."
+- Figure 4.8 → `figure_4_8_calibration_diagram_grouped.png`।
 
 ### C9. Trainable parameter — ✅ (CLAUDE.md-এর সংখ্যা বদল Phase 5-এ, অনুমতি সাপেক্ষে)
 - **সমস্যা:** "0.30%" গোনা হয়েছিল classifier head তৈরির **আগে** (`cls_only_ablation.py:212`), তাই head বাদ পড়েছে। No-LoRA-তে "0 trainable" লেখা, অথচ head train হয়েছে। README-তে আবার "~0.1%"।

@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 ✅ · Phase 3 ✅ · Phase 3B ✅ · Phase 2 ✅ · বর্তমান: **Phase 4** (script তৈরি, Colab-এ চালানো বাকি)
+> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 ✅ · Phase 3 ✅ · Phase 3B ✅ · Phase 2 ✅ · Phase 4 ✅ (figure download বাকি) · পরের: **Phase 5** (local)
 
 ---
 
@@ -31,7 +31,7 @@
 | 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | ✅ শেষ (৭২ মিনিট) |
 | 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~45–60 মিনিট | ✅ শেষ |
 | 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~10 মিনিট | ✅ শেষ |
-| 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
+| 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ✅ শেষ |
 | 7 | 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ⬜ বাকি |
 | ➡️ | — | **এরপর:** DIU নির্দেশনা অনুযায়ী নতুন thesis draft লেখা | Google Docs (DIU template) | — | ⬜ plan শেষে |
 
@@ -199,10 +199,10 @@
 
 **Script:** [colab/phase4_xai_calibration.py](colab/phase4_xai_calibration.py) — training নেই, ~১৫–২০ মিনিট। মূল মডেল `cls_only_grouped_s42.pt` (XAI + calibration), `drishti_multitask_v3.pt` (cross-attention)। Grad-CAM, Rollout, cross-attention, calibration-এর function লোকালি CPU-তে যাচাই করা।
 
-- [ ] **4.1 🖥️ Cross-attention trained v3 decoder থেকে** — মডেলের নিজের generated caption teacher-force করে, ২১টা grouped test sample (৭/class, `random.Random(42)`, বাছাই করা নয়)। Caption generation-এর ব্যাখ্যা হিসেবে, classification-এর নয়।
-- [ ] **4.2 🖥️ Calibration নতুন মডেলে** — T* grouped val (373)-এ fit, grouped test (375)-এ ECE / MCE / NLL / Brier আগে-পরে + reliability diagram। পুরনো 1.1113 ও 0.6669 দুটোই বাতিল।
-- [ ] **4.3 🖥️ Grad-CAM ঠিক করা + সব XAI figure নতুন করে** — Grad-CAM শেষ block-এর input-এ (ReLU, channel-wise gradient weight)। Figure 4.4–4.7 (প্রতি class-এর প্রথম sample) + ২১টা sample-এর পূর্ণ grid।
-- [ ] **4.5 (নতুন) 🖥️ Faithfulness / deletion test** — পুরো test set (375)-এ Grad-CAM / Rollout / random অনুযায়ী শীর্ষ 10 / 25 / 50% patch মুছে predicted-class probability কতটা কমে। "XAI accuracy"-র বদলে এটাই XAI-এর আসল সংখ্যাগত মূল্যায়ন।
+- [x] **4.1 🖥️ Cross-attention trained v3 decoder থেকে** → Grad-CAM-এর সঙ্গে শীর্ষ-10% IoU 0.059 ≈ random (0.054): classification-এর প্রমাণের সঙ্গে সম্পর্কহীন, তাই শুধু সহায়ক (C3)। — মডেলের নিজের generated caption teacher-force করে, ২১টা grouped test sample (৭/class, `random.Random(42)`, বাছাই করা নয়)। Caption generation-এর ব্যাখ্যা হিসেবে, classification-এর নয়।
+- [x] **4.2 🖥️ Calibration নতুন মডেলে** → **T* = 1.1349**; ECE 2.57% → 2.99% (TS-এ উন্নতি নেই, মডেল আগে থেকেই ভালো calibrated) (C8)। — T* grouped val (373)-এ fit, grouped test (375)-এ ECE / MCE / NLL / Brier আগে-পরে + reliability diagram। পুরনো 1.1113 ও 0.6669 দুটোই বাতিল।
+- [x] **4.3 🖥️ Grad-CAM ঠিক করা + সব XAI figure নতুন করে** → ০/২১টা map শূন্য; ২১টার মধ্যে ১৫টা সঠিক (SD 6/7, HR 7/7, AP 2/7)। 📥 figure download বাকি। — Grad-CAM শেষ block-এর input-এ (ReLU, channel-wise gradient weight)। Figure 4.4–4.7 (প্রতি class-এর প্রথম sample) + ২১টা sample-এর পূর্ণ grid।
+- [x] **4.5 (নতুন) 🖥️ Faithfulness / deletion test** → শীর্ষ 10% মুছলে prob কমে Grad-CAM 6.92 pp · Rollout 0.85 · Random 0.34; 50%-এ accuracy 73.87 / 81.60 / 86.93% → Grad-CAM শক্তভাবে faithful (C7)। বিস্তারিত: [results/defense_fixes/phase4/phase4_results.md](results/defense_fixes/phase4/phase4_results.md) — পুরো test set (375)-এ Grad-CAM / Rollout / random অনুযায়ী শীর্ষ 10 / 25 / 50% patch মুছে predicted-class probability কতটা কমে। "XAI accuracy"-র বদলে এটাই XAI-এর আসল সংখ্যাগত মূল্যায়ন।
 - [x] **4.4 সিদ্ধান্ত (তোমার, 2026-11-12):** cross-attention সংক্ষেপে সহায়ক বিশ্লেষণ হিসেবে; মূল ফোকাস Grad-CAM ও Rollout।
 
 📥 **Download (Drive-এর `DisasterNet/defense_fixes/phase4/` থেকে):**
@@ -242,6 +242,7 @@
 | 2026-11-12 | 1.19 | Human eval সঠিকভাবে un-blind: model 1.58/1.24/1.23 বনাম GT 3.42/3.08/3.23 (fluency/adequacy/faithfulness), Wilcoxon p < 10⁻¹⁶; GT পছন্দ 225/237; IAA pooled α 0.38, within-type ≈ 0 | `results/defense_fixes/phase1/human_eval_unblinded/` |
 | 2026-11-12 | 1.18 | পুরনো ViT unfreeze নিয়ম transformers 5.x-এ মাত্র 590,592 param (pooler) unfreeze করে, ঠিক নিয়মে 14,766,336; CrisisViT-এর 0.34% = ViT-L pooler | `docs/corrected_claims.md` (C17) |
 | 2026-11-12 | 3.1 | Grouped split (Colab-এ চূড়ান্ত): 3,189 group; 3,007 / 373 / 375; class অনুপাত ≈ 59.7/31.6/8.8%; overlap 0 | `colab/phase3_grouped_split_seeds.py` |
+| 2026-11-12 | 4.1–4.5 | T* = 1.1349 (ECE 2.57→2.99%) · XAI ১৫/২১ সঠিক · deletion test শীর্ষ-10%: Grad-CAM 6.92 / Rollout 0.85 / Random 0.34 pp · IoU GC–RO 0.148, GC–CA 0.059 | `results/defense_fixes/phase4/phase4_results.md` |
 | 2026-11-12 | 2.1–2.3 | CLS-Only s42: tweet 74.83 · generated caption 76.41 · placeholder 76.52 · অন্য sample-এর tweet 76.63 · খালি text 61.95 → মডেল কার্যত image-driven (C19) | `results/defense_fixes/phase2/phase2_results.md` |
 | 2026-11-12 | 3B.6 | sacreBLEU: v3 BLEU 14.38 / chrF 14.19 (clean 0.11 / 8.46); random train tweet chrF 21.58, constant tweet 20.46 → মডেল তুচ্ছ baseline-এর নিচে | `results/defense_fixes/phase3b/phase3b_caption_metrics_standard.csv` |
 | 2026-11-12 | 3B.1–3B.3 | Multi-task v3 (epoch 4): ছবি + tweet 77.29% · ছবি + generated caption 73.63% · BERTScore-F1 69.66 (URL বাদে 62.27) · caption = tweet-অনুকরণ | `results/defense_fixes/phase3b/phase3b_results.md` |
@@ -267,4 +268,5 @@
 | 2026-11-12 | 3B ✅ · 5.1 (আংশিক) | 3B.6 শেষ (sacreBLEU/chrF + তুচ্ছ baseline); 3B.4 = (ক), 3B.5 = হ্যাঁ; CLAUDE.md-এ অনুমোদিত সংখ্যা বসানো; Colab-এর download করা ফাইল যোগ | `14ccbeb` |
 | 2026-11-12 | 1 ✅ · 2 (script) | ১.২০-এর উত্তর: human eval-এর সঠিক সংখ্যা CLAUDE.md-এ, "human-verified translation" দাবি বাদ; Phase 2 Colab script তৈরি | `9da91da` |
 | 2026-11-12 | 2 ✅ | Phase 2-এর ফল সংরক্ষণ; নতুন C19 (classifier text প্রায় ব্যবহার করে না), C13 চূড়ান্ত; demo-র পরামর্শ 5.4-এ | `8b629b2` |
-| 2026-11-12 | 4 (script) | T*-এর অমিলের কারণ (integrated pipeline-এর নিজস্ব split) আর পুরনো Grad-CAM-এর শূন্য-gradient bug ধরা; Phase 4 Colab script (calibration, ঠিক Grad-CAM, Rollout, v3 cross-attention, faithfulness test) | (এই commit) |
+| 2026-11-12 | 4 (script) | T*-এর অমিলের কারণ (integrated pipeline-এর নিজস্ব split) আর পুরনো Grad-CAM-এর শূন্য-gradient bug ধরা; Phase 4 Colab script (calibration, ঠিক Grad-CAM, Rollout, v3 cross-attention, faithfulness test) | `6f55911` |
+| 2026-11-12 | 4 ✅ | Phase 4-এর ফল: T* = 1.1349, ECE 2.57→2.99%; ঠিক করা Grad-CAM faithful (random-এর ~২০ গুণ), Rollout দুর্বল, cross-attention ≈ random; C3, C7, C8, C20 চূড়ান্ত | (এই commit) |
