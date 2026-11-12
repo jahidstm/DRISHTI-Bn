@@ -46,7 +46,7 @@
 - [x] **0.3 [src/train.py](src/train.py) ঠিক করা।** এখন `train_loader, val_loader, _ = get_dataloaders(...)`। Import যাচাই করা হয়েছে।
 - [x] **0.4 [src/model.py](src/model.py) version-robust করা।** ⚠️ আগের বিশ্লেষণে ভুল ছিল: `q_proj/v_proj` বাগ নয়। transformers 5.x-এ ViT-এর module নামই `q_proj/v_proj`, আর v2 checkpoint-এ ViT-এর LoRA weight (48টা key) ঠিকঠাক আছে। তাই নাম বদলানো হয়নি; ablation script-এর মতো auto-detect যোগ করা হয়েছে, যাতে transformers 4.x (`query/value`)-এও চলে। যাচাই: v2 checkpoint `strict=True`-এ load হয় ("All keys matched")।
 - [x] **0.5 অপ্রয়োজনীয় ফাইল সরানো।** `temp_crop.png`, `temp_sample01_top.png` (integrated XAI figure-এর crop), `fix_nb.py`, `append_dl_test.py` (একবার চালানো notebook-edit script) মুছে ফেলা হয়েছে।
-- [x] **0.6 `results/gradcam/` পরিষ্কার।** `gradcam_summary.csv`-এ নেই এমন ১৩টা পুরনো রানের ছবি সরানো হয়েছে। এখন ২১টা ছবি, summary-র সঙ্গে হুবহু মেলে (বাকি ৪টা `_ERR` আসল ভুল prediction: sample 017, 019, 020, 021)।
+- [x] **0.6 `results/gradcam/` পরিষ্কার।** `gradcam_summary.csv`-এ নেই এমন ১১টা পুরনো রানের ছবি সরানো হয়েছে। এখন ২১টা ছবি, summary-র সঙ্গে হুবহু মেলে (বাকি ৪টা `_ERR` আসল ভুল prediction: sample 017, 019, 020, 021)।
 - [/] **0.7 🖥️ Colab check: কোন checkpoint থেকে কোন সংখ্যা এসেছে।** Drive-এর সব checkpoint-এর তারিখ, size, MD5, LoRA key আর decoder-এর অবস্থা বের করা। উদ্দেশ্য: 77.95% যে checkpoint থেকে এসেছে সেটা teacher-forcing fix (৭ আগস্ট) আর 80/10/10 split (১২ সেপ্টেম্বর)-এর পরে train হয়েছে কিনা নিশ্চিত করা, আর `best_cls_only.pt`-এর decoder সত্যিই untrained কিনা দেখা।
   - Script: [colab/phase0_checkpoint_audit.py](colab/phase0_checkpoint_audit.py) (CPU runtime-ই যথেষ্ট)
   - Laptop-এর v2-এর MD5: `16bb292e5d62115cc5c966dc70c120d4` (2026-06-25)
