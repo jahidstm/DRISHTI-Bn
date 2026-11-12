@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 ✅ · Phase 3 ✅ · Phase 3B ✅ · Phase 2 ✅ (figure download বাকি) · পরের: **Phase 4** (XAI)
+> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 ✅ · Phase 3 ✅ · Phase 3B ✅ · Phase 2 ✅ · বর্তমান: **Phase 4** (script তৈরি, Colab-এ চালানো বাকি)
 
 ---
 
@@ -189,23 +189,27 @@
 
 ---
 
-## Phase 4 — XAI fix (Colab T4)
+## Phase 4 — XAI ও calibration fix (Colab T4)
 
 **সমস্যা:**
 - Cross-attention map এসেছে untrained decoder (`best_cls_only.pt`) থেকে।
-- Integrated pipeline-এ T* = 0.6669, আলাদা script-এ T* = 1.1113 — অমিল।
+- Integrated pipeline-এ T* = 0.6669, আলাদা script-এ T* = 1.1113 — অমিল। **কারণ পাওয়া গেছে:** `integrated_xai_pipeline.py` নিজের আলাদা split বানায় (90/10, তারপর 10/90), তাই তার "val" set-এর বেশিরভাগই মডেলের training data — দেখা data-য় মডেল অতি-নিশ্চিত ও সঠিক, তাই T* < 1। `temp_scaling_xai.py`-এর 1.1113 সঠিক val set-এ fit হয়েছিল। একই কারণে integrated pipeline-এর ২১টা "test" sample-এর অনেকগুলোও training-এ দেখা।
+- **(নতুন, 2026-11-12) পুরনো Grad-CAM ফাঁকা ছিল:** `gradcam_xai.py` ও `integrated_xai_pipeline.py` শেষ ViT block-এর **output** patch token-এ hook করে। Pooler শুধু CLS token পড়ে, তাই ওখানে gradient ঠিক শূন্য (লোকালি যাচাই: patch grad max = 0.0, আগের block-এ 0.023)। ফলে map সবসময় শূন্য — পুরনো "Dark heatmap; lacks spatial localization" পর্যবেক্ষণের আসল কারণ এটাই। Figure 4.4 অবৈধ।
+- Phase 2-এর ফল (C19): classifier কার্যত image-driven → XAI-এর মূল ভার Grad-CAM + Rollout; cross-attention শুধু সহায়ক (তোমার সিদ্ধান্ত, 2026-11-12)।
 
-- [ ] **4.1 🖥️ Cross-attention map trained decoder থেকে আবার বানানো** (**Phase 3B-এর নতুন** multi-task checkpoint; v2-এর decoder unshifted teacher forcing-এ train হওয়ায় সেটা চলবে না; একই ২১টা sample)। এটা caption generation-এর ব্যাখ্যা হিসেবে উপস্থাপন — classification-এর নয়।
-- [ ] **4.2 🖥️ T*-এর অমিলের কারণ বের করা** (কোন checkpoint/split-এ fit হয়েছে) এবং একটা সংখ্যায় স্থির করা।
-- [ ] **4.3 Figure 4.5 ও 4.7 আবার বানানো** (প্রয়োজনে)।
-- [ ] **4.4 সিদ্ধান্ত (তোমার):** নতুন map যথেষ্ট অর্থবহ না হলে cross-attention অংশ ছোট করে limitation হিসেবে রাখা।
+**Script:** [colab/phase4_xai_calibration.py](colab/phase4_xai_calibration.py) — training নেই, ~১৫–২০ মিনিট। মূল মডেল `cls_only_grouped_s42.pt` (XAI + calibration), `drishti_multitask_v3.pt` (cross-attention)। Grad-CAM, Rollout, cross-attention, calibration-এর function লোকালি CPU-তে যাচাই করা।
 
-📥 **Download (Colab থেকে):**
-- `figure_4_5_crossattn_examples.png` (নতুন) → project root (পুরনোটা প্রতিস্থাপন)
-- `figure_4_7_integrated_xai.png` (নতুন, প্রয়োজনে) → project root
-- `crossattn_summary_v2.csv` → `results/defense_fixes/phase4/`
+- [ ] **4.1 🖥️ Cross-attention trained v3 decoder থেকে** — মডেলের নিজের generated caption teacher-force করে, ২১টা grouped test sample (৭/class, `random.Random(42)`, বাছাই করা নয়)। Caption generation-এর ব্যাখ্যা হিসেবে, classification-এর নয়।
+- [ ] **4.2 🖥️ Calibration নতুন মডেলে** — T* grouped val (373)-এ fit, grouped test (375)-এ ECE / MCE / NLL / Brier আগে-পরে + reliability diagram। পুরনো 1.1113 ও 0.6669 দুটোই বাতিল।
+- [ ] **4.3 🖥️ Grad-CAM ঠিক করা + সব XAI figure নতুন করে** — Grad-CAM শেষ block-এর input-এ (ReLU, channel-wise gradient weight)। Figure 4.4–4.7 (প্রতি class-এর প্রথম sample) + ২১টা sample-এর পূর্ণ grid।
+- [ ] **4.5 (নতুন) 🖥️ Faithfulness / deletion test** — পুরো test set (375)-এ Grad-CAM / Rollout / random অনুযায়ী শীর্ষ 10 / 25 / 50% patch মুছে predicted-class probability কতটা কমে। "XAI accuracy"-র বদলে এটাই XAI-এর আসল সংখ্যাগত মূল্যায়ন।
+- [x] **4.4 সিদ্ধান্ত (তোমার, 2026-11-12):** cross-attention সংক্ষেপে সহায়ক বিশ্লেষণ হিসেবে; মূল ফোকাস Grad-CAM ও Rollout।
 
-**শেষ হওয়ার শর্ত:** cross-attention figure trained decoder থেকে; T* একটাই সংখ্যা।
+📥 **Download (Drive-এর `DisasterNet/defense_fixes/phase4/` থেকে):**
+- `figure_4_4_gradcam_grouped.png`, `figure_4_5_crossattn_grouped.png`, `figure_4_6_rollout_grouped.png`, `figure_4_7_integrated_xai_grouped.png`, `figure_4_8_calibration_diagram_grouped.png` → project root (পুরনো figure মুছবে না; Phase 5-এ সিদ্ধান্ত)
+- `xai_all_21_samples.png`, `phase4_calibration.csv`, `phase4_xai_samples.csv`, `phase4_faithfulness.csv` → `results/defense_fixes/phase4/`
+
+**শেষ হওয়ার শর্ত:** সব XAI figure ও calibration সংখ্যা চূড়ান্ত মডেল আর grouped split থেকে; T* একটাই; XAI-এর একটা সংখ্যাগত মূল্যায়ন (faithfulness)।
 
 ---
 
@@ -262,4 +266,5 @@
 | 2026-11-12 | 3B (run শেষ) | v3-এর ফল সংরক্ষণ (3B.1–3B.3); C1 প্রতিস্থাপন, নতুন C18 (caption = tweet-অনুকরণ), C9-এ multi-task parameter; 3B.6 (metric পুনর্হিসাব) যোগ | `0288960` |
 | 2026-11-12 | 3B ✅ · 5.1 (আংশিক) | 3B.6 শেষ (sacreBLEU/chrF + তুচ্ছ baseline); 3B.4 = (ক), 3B.5 = হ্যাঁ; CLAUDE.md-এ অনুমোদিত সংখ্যা বসানো; Colab-এর download করা ফাইল যোগ | `14ccbeb` |
 | 2026-11-12 | 1 ✅ · 2 (script) | ১.২০-এর উত্তর: human eval-এর সঠিক সংখ্যা CLAUDE.md-এ, "human-verified translation" দাবি বাদ; Phase 2 Colab script তৈরি | `9da91da` |
-| 2026-11-12 | 2 ✅ | Phase 2-এর ফল সংরক্ষণ; নতুন C19 (classifier text প্রায় ব্যবহার করে না), C13 চূড়ান্ত; demo-র পরামর্শ 5.4-এ | (এই commit) |
+| 2026-11-12 | 2 ✅ | Phase 2-এর ফল সংরক্ষণ; নতুন C19 (classifier text প্রায় ব্যবহার করে না), C13 চূড়ান্ত; demo-র পরামর্শ 5.4-এ | `8b629b2` |
+| 2026-11-12 | 4 (script) | T*-এর অমিলের কারণ (integrated pipeline-এর নিজস্ব split) আর পুরনো Grad-CAM-এর শূন্য-gradient bug ধরা; Phase 4 Colab script (calibration, ঠিক Grad-CAM, Rollout, v3 cross-attention, faithfulness test) | (এই commit) |

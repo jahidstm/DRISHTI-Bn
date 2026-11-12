@@ -90,6 +90,13 @@
 - **আপাতত:** Figure 4.5 আর Figure 4.7-এর Cross-Attention column ব্যবহার করা যাবে না।
 - **Phase 4-এর পর:** নতুন multi-task মডেলের trained decoder থেকে map বানিয়ে সেটাকে **caption generation-এর ব্যাখ্যা** হিসেবে উপস্থাপন (classification-এর নয়)। Classification-এর ব্যাখ্যা হিসেবে থাকবে শুধু Grad-CAM আর Attention Rollout।
 
+### C20. পুরনো Grad-CAM (Figure 4.4) ফাঁকা ছিল — ✅ কারণ নিশ্চিত / ⏳ নতুন figure Phase 4
+- **পুরনো দাবি:** "Grad-CAM: dark heatmap; ViT global attention lacks spatial localization."
+- **আসল কারণ (bug):** `gradcam_xai.py` আর `integrated_xai_pipeline.py` শেষ ViT block-এর **output**-এর patch token-এ hook করে। HF ViT-এর pooler শুধু CLS token পড়ে, তাই ওই patch token-গুলোর gradient গাণিতিকভাবে শূন্য। লোকালি যাচাই: শেষ block-এর patch gradient max = **0.0**, আগের block-এ 0.023। ফলে প্রতিটা map শূন্য, overlay-তে একরঙা অন্ধকার।
+- **যা বলা যাবে না:** "ViT-এ Grad-CAM কাজ করে না" বা "dark heatmap ViT-এর বৈশিষ্ট্য"।
+- **সংশোধন (Phase 4):** শেষ block-এর **input**-এ hook (Jacob Gildenblat-এর `pytorch-grad-cam`-এর ViT নিয়মের মতো), channel-wise mean gradient weight, ReLU।
+- **লেখার সময়:** পুরনো Figure 4.4 বাদ, Phase 4-এর নতুন figure। Methodology-তে কোন layer-এ hook করা হয়েছে সেটা লিখতে হবে।
+
 ### C4. No-CrossAttn ablation (+1.33pp) — ✅
 - **পুরনো দাবি:** "Cross-attention contributes +1.33pp (81.88% → 83.21%)."
 - **সমস্যা:** দুটো রানেই λ_cap = 0, আর classification path-এ decoder ব্যবহার হয় না। দুই মডেলের classification অংশ হুবহু এক; পার্থক্য শুধু random initialization-এর।
@@ -118,7 +125,8 @@
 
 ## C. সঠিক কিন্তু সৎভাবে/সম্পূর্ণভাবে লিখতে হবে
 
-### C8. Calibration — ✅ (T* অংশ ⏳ Phase 4)
+### C8. Calibration — ⏳ Phase 4-এ নতুন মডেলে আবার মাপা হচ্ছে
+- **T*-এর অমিলের কারণ (পাওয়া গেছে):** `integrated_xai_pipeline.py` নিজের আলাদা split বানায় (90/10, তারপর 10/90), তাই তার "val" set-এর বেশিরভাগই মডেলের training data। দেখা data-য় মডেল অতি-নিশ্চিত ও সঠিক → T* = 0.6669 (< 1)। `temp_scaling_xai.py`-এর T* = 1.1113 সঠিক val set-এ fit হয়েছিল। দুটোই পুরনো split আর পুরনো মডেলের — Phase 4-এ grouped split-এ নতুন T* আসবে, সেটাই একমাত্র সংখ্যা হবে।
 - **পুরনো দাবি:** "Temperature Scaling confirms high reliability (ECE = 2.16%)."
 - **সমস্যা:** TS-এর পর সব metric সামান্য **খারাপ** হয়েছে, কিন্তু শুধু "before" সংখ্যা দেখানো হচ্ছিল।
 - **পুরো table (test set, `best_cls_only.pt`, T* = 1.1113):**
