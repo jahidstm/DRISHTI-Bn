@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ; পরের ধাপ: **Phase 3** (Colab); Phase 1-এ শুধু ২টা প্রশ্ন বাকি
+> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ; বর্তমান phase: **Phase 3** (Colab-এ চালানোর অপেক্ষায়)
 
 ---
 
@@ -27,8 +27,8 @@
 | ক্রম | Phase | বিষয় | কোথায় চলবে | আনুমানিক সময় | Status |
 |------|-------|------|-------------|---------------|--------|
 | 1 | 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | ✅ শেষ |
-| 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | 🟡 প্রায় শেষ (২টা প্রশ্ন বাকি) |
-| 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds | Colab T4 | ~2.5–3 ঘণ্টা | ⬜ বাকি |
+| 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | ✅ শেষ |
+| 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | 🟡 Colab-এ চালানো বাকি |
 | 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~2 ঘণ্টা | ⬜ বাকি |
 | 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
@@ -81,11 +81,10 @@
 - [x] **1.14 (নতুন) "CrisisViT (SOTA)" লেবেল** → C14
 - [x] **1.15 (নতুন) "First …" দাবি** → C15 (*BanglaMM-Disaster*, *BiCap* আগে থেকেই আছে)
 - [x] **1.16 (নতুন) Dataset "flood-only" নয়** → C16: 95.2% hurricane (Harvey/Irma/Maria), মাত্র 4.8% (180টা) Sri Lanka flood
-- [ ] **1.17 তোমার উত্তর লাগবে (❓):**
-  - C10: অনুবাদে সত্যিই human verification হয়েছিল কি?
-  - C16: Title-এ "Flood" শব্দ থাকবে কি?
+- [x] **1.17 তোমার উত্তর:** অনুবাদ ৩ জন মানুষ যাচাই করেছিলেন → দাবি থাকবে (C10); Title-এ আপাতত "Flood" থাকবে, supervisor-এর সঙ্গে কথা বলে চূড়ান্ত (C16)।
+- [x] **1.18 (নতুন) ViT-Only ও CrisisViT baseline-এ শুধু pooler train হয়েছিল** → C17 (Phase 3-এ আবার চালানো হচ্ছে)
 
-**শেষ হওয়ার শর্ত:** `docs/corrected_claims.md` তৈরি (✅) আর 1.17-এর দুটো প্রশ্নের উত্তর।
+**শেষ হওয়ার শর্ত:** ✅ পূরণ হয়েছে।
 
 ---
 
@@ -115,17 +114,28 @@
 - 376টা test sample-এর **80টার (21.3%)** হুবহু একই tweet/caption train set-এ আছে (একই tweet-এর একাধিক ছবি, split হয়েছে sample ধরে)।
 - একই config দুবার চালিয়ে 83.21% ও 81.47% → ~1.7pp variance; single-seed ফলে ২pp-র কম পার্থক্য অর্থবহ নয়।
 
-- [ ] **3.1 Tweet-ID-grouped stratified split** (80/10/10, `StratifiedGroupKFold`/সমতুল্য) — train/test-এ কোনো tweet শেয়ার হবে না। Overlap = 0 যাচাই।
-- [ ] **3.2 🖥️ CLS-only (r = 8) grouped split-এ ৩টা seed-এ (42, 123, 2024) train** → mean ± std Macro F1।
-- [ ] **3.3 🖥️ ViT-Only baseline একই grouped split-এ ৩টা seed-এ** → মূল তুলনা (multimodal বনাম image-only) টিকে থাকে কিনা।
-- [ ] **3.4 (সময় থাকলে) 🖥️ LoRA r = 4 / 16 grouped split-এ ১টা করে seed।**
-- [ ] **3.5 নতুন split-এর index সংরক্ষণ** → `test_set_indices_grouped.csv`।
-- [ ] **3.6 সিদ্ধান্ত (তোমার):** থিসিসে মূল সংখ্যা হিসেবে পুরনো split রাখবে, নাকি grouped split-এর mean ± std। সিদ্ধান্ত অনুযায়ী CLAUDE.md update।
+**আরেকটা সমস্যা (Phase 1-এ ধরা পড়েছে, C17):** ViT-Only আর CrisisViT baseline-এ block unfreeze করার নিয়ম (`"encoder.layer.N"`) transformers 5.x-এ কিছুই মেলায় না, তাই শুধু pooler train হয়েছিল। দুটো baseline-ই এখানে ঠিক নিয়মে আবার চালানো হচ্ছে।
 
-📥 **Download (Colab থেকে):**
-- `phase3_seed_results.csv` → `results/defense_fixes/phase3/`
+**Script:** [colab/phase3_grouped_split_seeds.py](colab/phase3_grouped_split_seeds.py) — এক cell-এ পুরোটা। Disconnect হলে আবার চালালে শেষ হওয়া run বাদ দিয়ে বাকিগুলো চলবে।
+
+- [x] **3.1 Tweet/caption-grouped stratified split** (80/10/10, `StratifiedGroupKFold`, union-find দিয়ে একই tweet বা হুবহু একই caption এক group-এ)। Laptop-এ যাচাই: 3,755 sample → 3,189 group; train 3,005 · val 375 · test 375; tweet ও caption overlap = 0; class অনুপাত আগের মতোই।
+- [ ] **3.2 🖥️ CLS-only (r = 8) ৩টা seed-এ (42, 123, 2024)** → mean ± std Macro F1। Seed 42-এর checkpoint Drive-এ `models/cls_only_grouped_s42.pt` (Phase 2/4-এ লাগবে)।
+- [ ] **3.3 🖥️ ViT-Only baseline ৩টা seed-এ, ঠিক unfreeze নিয়মে** (শেষ ২টা block + pooler = 14.77M parameter)।
+- [ ] **3.4 🖥️ CrisisViT-style baseline seed 42-এ, ঠিক unfreeze নিয়মে** (ViT-Large-এর শেষ ৪টা block + pooler)। সময় থাকলে script-এ `CRISISVIT_SEEDS`-এ 123, 2024 যোগ।
+- [ ] **3.5 সিদ্ধান্ত (তোমার):** থিসিসে মূল সংখ্যা হিসেবে grouped split-এর mean ± std ব্যবহার করবে কিনা (Claude-এর পরামর্শ: হ্যাঁ)। সিদ্ধান্ত অনুযায়ী CLAUDE.md update।
+- [-] LoRA r = 4 / 16 grouped split-এ — বাদ (সময় বাঁচাতে)। Rank ablation পুরনো split-এর ফল হিসেবে থাকবে, C5-এর variance সতর্কতাসহ।
+
+**Colab-এ চালানোর আগে:**
+1. Runtime → Change runtime type → **T4 GPU**।
+2. Drive-এর `DisasterNet/` ফোল্ডারে **`processed.zip`** আছে কিনা দেখো। না থাকলে laptop-এর `data/processed.zip` (475 MB) সেখানে upload করো। (Phase 0.7-এর audit-এ Drive-এ কোনো CSV পাওয়া যায়নি।)
+3. Script চালাও। প্রায় ৩–৩.৫ ঘণ্টা লাগবে।
+4. শেষে `PHASE 3 FINAL SUMMARY` থেকে নিচের পুরো অংশ Claude-কে paste করো। শুরুর দিকের `[diag]` লাইন দুটোও paste করো।
+
+📥 **Download (Drive-এর `DisasterNet/defense_fixes/phase3/` থেকে laptop-এ):**
 - `test_set_indices_grouped.csv` → project root
-- Checkpoint-গুলো **Drive-এই থাকবে** (লোকালে download লাগবে না)
+- `grouped_split.csv` → `results/defense_fixes/phase3/`
+- `phase3_seed_results.csv` → `results/defense_fixes/phase3/` (paste করলে Claude নিজেও বানাতে পারবে)
+- Checkpoint **Drive-এই থাকবে**
 
 **শেষ হওয়ার শর্ত:** leakage-মুক্ত split-এ mean ± std জানা গেছে; ViT-Only-র সঙ্গে তুলনা নিশ্চিত।
 
@@ -198,6 +208,8 @@
 | তারিখ | Phase/Task | ফল (সংক্ষেপে) | সংরক্ষিত ফাইল |
 |-------|-----------|---------------|---------------|
 | 2026-11-12 | 0.7 | একমাত্র multi-task checkpoint v2 (২৫ জুন) সব fix-এর আগের; test set-এর ~300/376 training-এ দেখা (আনুমানিক)। `best_cls_only.pt`-এর decoder untrained (std 0.02084 ≈ init) — নিশ্চিত। | `results/defense_fixes/phase0/checkpoint_audit.md` |
+| 2026-11-12 | 1.18 | পুরনো ViT unfreeze নিয়ম transformers 5.x-এ মাত্র 590,592 param (pooler) unfreeze করে, ঠিক নিয়মে 14,766,336; CrisisViT-এর 0.34% = ViT-L pooler | `docs/corrected_claims.md` (C17) |
+| 2026-11-12 | 3.1 | Grouped split লোকালি যাচাই: 3,189 group; 3,005 / 375 / 375; overlap 0 | `colab/phase3_grouped_split_seeds.py` |
 | 2026-11-12 | 1.16 | Dataset-এর event ভাগ: Harvey 1,416 · Maria 1,149 · Irma 1,010 · Sri Lanka floods 180 → 95.2% hurricane | `docs/corrected_claims.md` (C16) |
 
 ---
@@ -209,4 +221,5 @@
 | 2026-11-12 | — | Fix plan তৈরি | `6c266db` |
 | 2026-11-12 | 0 (আংশিক) | 0.1 বাদ (draft ইচ্ছাকৃতভাবে মোছা), 0.2–0.6 শেষ, 0.7-এর Colab script তৈরি | `c380372` |
 | 2026-11-12 | 0 ✅ | 0.7 checkpoint audit শেষ; Phase 3B (multi-task retrain) বাধ্যতামূলক হিসেবে যোগ, phase-এর ক্রম বদল | `47db4f5` |
-| 2026-11-12 | 1 (প্রায়) | `docs/corrected_claims.md` তৈরি (C1–C16 + Limitations); নতুন ফল: dataset-এর 95.2% hurricane; PHASE4_WRITING_PLAN.md বাদ | (এই commit) |
+| 2026-11-12 | 1 (প্রায়) | `docs/corrected_claims.md` তৈরি (C1–C16 + Limitations); নতুন ফল: dataset-এর 95.2% hurricane; PHASE4_WRITING_PLAN.md বাদ | `df140a8` |
+| 2026-11-12 | 1 ✅ · 3 (script) | তোমার দুটো উত্তর যোগ; C17 (baseline-এ শুধু pooler train) যোগ; Phase 3 Colab script তৈরি ও split লোকালি যাচাই | (এই commit) |

@@ -94,14 +94,16 @@
 - **নতুন লেখা (English):**
   > "LoRA adds 589,824 trainable parameters to the two encoders (0.30% of the 197.0M encoder parameters); together with the fusion head, 1.38M parameters (≈0.70%) are trained for classification."
 
-### C10. Ground truth "caption" আসলে tweet-এর অনুবাদ — ✅ / ❓
+### C10. Ground truth "caption" আসলে tweet-এর অনুবাদ — ✅
 - **সমস্যা:** "Caption" শব্দে মনে হয় ছবির বর্ণনা। আসলে এগুলো CrisisMMD tweet text-এর মেশিন অনুবাদ।
 - **তথ্য (`master_dataset_translated.csv`):**
   - 3,755টা ছবি, কিন্তু unique tweet মাত্র 3,189টা; 566টা caption duplicate (একই tweet-এর একাধিক ছবি)
   - English text-এর 100%-এ আর Bengali text-এর 97.3%-এ URL (`https://t.co/...`) আছে
 - **নতুন লেখা (English):**
   > "The Bengali reference texts are machine translations of the original tweets accompanying each image, not purpose-written image descriptions. They frequently contain information not visible in the image (locations, organisations, URLs). This explains the modest BLEU scores and the low human ratings of the references themselves (2.21–2.51/5)."
-- ❓ README-তে লেখা "machine-translated … + human verification"। **সত্যিই কি human verification হয়েছিল?** না হলে এই দাবি বাদ যাবে। (Notebook অনুযায়ী অনুবাদ মডেল: `monirbishal/en-bn-nmt`।)
+- ✅ **Human verification নিশ্চিত (তোমার উত্তর, 2026-11-12):** ৩ জন মানুষ অনুবাদ যাচাই করেছিলেন। দাবিটা রাখা যাবে। অনুবাদ মডেল: `monirbishal/en-bn-nmt` (notebook অনুযায়ী)।
+  - Writing-এর সময় যা লিখতে হবে: কতগুলো অনুবাদ যাচাই হয়েছিল (সব, নাকি একটা অংশ), কী ধরনের ভুল ঠিক করা হয়েছিল, verifier-রা কারা (যেমন native Bengali speaker)। এই তথ্য তখন তোমার কাছ থেকে নেব।
+  - সতর্কতা: যাচাইয়ের পরেও 97.3% Bengali text-এ URL থেকে গেছে, অর্থাৎ verification-এ URL সরানো হয়নি। তাই লেখায় বলতে হবে verification ছিল **অনুবাদের মান** যাচাই, text পরিষ্কার করা নয়।
 
 ### C11. Human eval-এর IAA (κ ≈ 0) — ✅
 - **তথ্য:** Annotator-দের গড় score অনেক আলাদা (caption A ও B মিলিয়ে গড়):
@@ -134,7 +136,7 @@
 - **সমস্যা:** README-তে "First Bengali Multimodal Flood Intelligence System"। কিন্তু `literature/1. base_papers/`-এ *BanglaMM-Disaster* (Bangla multimodal disaster classification) আর *BiCap* (Bangla image captioning) আছে।
 - **নতুন লেখা:** "first" এড়িয়ে নির্দিষ্টভাবে লেখা, যেমন: "To our knowledge, this is one of the first works to jointly perform flood-damage classification and Bengali text generation from disaster images with explainability analysis." — আর related work-এ এই দুটো paper থেকে পার্থক্য স্পষ্ট করা।
 
-### C16. "Flood corpus" — dataset আসলে প্রধানত hurricane-এর — ✅ / ❓
+### C16. "Flood corpus" — dataset আসলে প্রধানত hurricane-এর — ✅ (title ⏳ supervisor)
 - **পুরনো দাবি:** "CrisisMMD-derived Bengali **flood** corpus"; README: "Flood-only subset extracted; earthquake, hurricane, wildfire samples removed."
 - **সমস্যা:** প্রতিটা ছবিকে CrisisMMD-এর raw event ফোল্ডারের সঙ্গে মিলিয়ে দেখা গেছে (৩,৭৫৫টার সবগুলো মিলেছে):
 
@@ -149,7 +151,16 @@
 - **নতুন লেখা (English):**
   > "The corpus is derived from four CrisisMMD events involving severe flooding and storm damage: Hurricanes Harvey, Irma and Maria and the 2017 Sri Lanka floods (earthquake and wildfire events were excluded). Hurricane events account for 95.2% of the samples."
 - Title, abstract, objective-এ "flood" শব্দের বদলে "flood and storm" / "hydro-meteorological disaster" জাতীয় শব্দ বিবেচনা করা। Harvey-তে ব্যাপক বন্যা হয়েছিল, তাই "flood-related" বলা যায়, কিন্তু "flood-only" নয়।
-- ❓ Title-এ "Flood" শব্দ থাকবে কিনা, সেটা তোমার (ও supervisor-এর) সিদ্ধান্ত।
+- ⏳ **Title (তোমার উত্তর, 2026-11-12):** আপাতত "Flood" থাকবে; supervisor-এর সঙ্গে কথা বলে চূড়ান্ত হবে। "Flood" রাখলে dataset section-এ ওপরের event table আর ব্যাখ্যা অবশ্যই থাকতে হবে, যাতে examiner নিজে আবিষ্কার না করেন।
+
+### C17. ViT-Only ও CrisisViT baseline-এ আসলে শুধু pooler train হয়েছিল — ⏳ Phase 3
+- **পুরনো দাবি:** ViT-Only (78.64%) "last 2 blocks + pooler unfrozen"; CrisisViT-style (78.15%) "last 4 blocks unfrozen (0.34% trainable)"।
+- **সমস্যা:** দুটো script-ই block খোঁজে `"encoder.layer.N"` নাম দিয়ে। transformers 5.x-এ ViT-এর parameter নাম `layers.N...`, তাই কোনো block মেলে না, শুধু `pooler` মেলে। প্রমাণ:
+  - Laptop-এ (transformers 5.12.1) ViT-Base-এ পুরনো নিয়ম unfreeze করে **590,592** parameter (শুধু pooler); ঠিক নিয়মে হওয়ার কথা **14,766,336**।
+  - CrisisViT-এর রিপোর্ট করা "0.34% trainable" = ViT-Large-এর pooler (1024×1024 + 1024 = 1,049,600 ÷ ~303M ≈ 0.35%)। ৪টা block সত্যিই unfreeze হলে হতো ~16%।
+- **প্রভাব:** দুটো baseline প্রায় linear probe হিসেবে চলেছে, তাই DRISHTI-Bn-এর সঙ্গে তুলনায় তারা দুর্বল হয়ে থাকতে পারে। "DRISHTI-Bn CrisisViT-কে 5.06pp ছাড়িয়ে গেছে" দাবিটা এই কারণে এখন নির্ভরযোগ্য নয়।
+- **করণীয়:** Phase 3-এ দুটো baseline ঠিক নিয়মে (version-robust regex) আবার চালানো হচ্ছে। ফল এলে baseline table নতুন করে লেখা হবে।
+- Full Fine-Tune baseline (74.19%) এই সমস্যায় পড়ে না (সব parameter unfreeze করে)।
 
 ---
 
