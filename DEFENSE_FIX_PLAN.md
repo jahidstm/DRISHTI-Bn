@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — বর্তমান phase: **Phase 0**
+> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ; পরের ধাপ: **Phase 1** (local) ও **Phase 3** (Colab)
 
 ---
 
@@ -24,14 +24,18 @@
 
 | Phase | বিষয় | কোথায় চলবে | আনুমানিক সময় | Status |
 |-------|------|-------------|---------------|--------|
-| 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | 🟡 চলমান (শুধু 0.7 বাকি) |
-| 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | ⬜ বাকি |
-| 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
-| 3 | Leakage fix: tweet-grouped split + 3 seeds | Colab T4 | ~2.5–3 ঘণ্টা | ⬜ বাকি |
-| 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
-| 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ⬜ বাকি |
-| 6 | (ঐচ্ছিক) Multi-task মডেল grouped split-এ retrain | Colab T4 | ~2 ঘণ্টা | ⬜ ঐচ্ছিক |
-| ➡️ | **এরপর:** DIU নির্দেশনা অনুযায়ী নতুন thesis draft লেখা | Google Docs (DIU template) | — | ⬜ plan শেষে |
+| ক্রম | Phase | বিষয় | কোথায় চলবে | আনুমানিক সময় | Status |
+|------|-------|------|-------------|---------------|--------|
+| 1 | 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | ✅ শেষ |
+| 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) — Colab phase-এর পাশাপাশি চলবে | Local | 1 দিন | ⬜ বাকি |
+| 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds | Colab T4 | ~2.5–3 ঘণ্টা | ⬜ বাকি |
+| 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~2 ঘণ্টা | ⬜ বাকি |
+| 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
+| 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
+| 7 | 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ⬜ বাকি |
+| ➡️ | — | **এরপর:** DIU নির্দেশনা অনুযায়ী নতুন thesis draft লেখা | Google Docs (DIU template) | — | ⬜ plan শেষে |
+
+> ⚠️ **ক্রম বদলেছে (Phase 0.7-এর পর):** একমাত্র multi-task checkpoint (v2) সব fix-এর আগের, আর test set-এর আনুমানিক ~300/376 sample সে training-এ দেখেছে। তাই আগের ঐচ্ছিক Phase 6 এখন বাধ্যতামূলক **Phase 3B**, আর Phase 2 ও 4 এর ওপর নির্ভরশীল। বিস্তারিত: [results/defense_fixes/phase0/checkpoint_audit.md](results/defense_fixes/phase0/checkpoint_audit.md)
 
 > সব Colab script থাকবে [colab/](colab/) ফোল্ডারে (Colab-এ এক cell-এ paste করে চালানো যায়)।
 
@@ -47,10 +51,11 @@
 - [x] **0.4 [src/model.py](src/model.py) version-robust করা।** ⚠️ আগের বিশ্লেষণে ভুল ছিল: `q_proj/v_proj` বাগ নয়। transformers 5.x-এ ViT-এর module নামই `q_proj/v_proj`, আর v2 checkpoint-এ ViT-এর LoRA weight (48টা key) ঠিকঠাক আছে। তাই নাম বদলানো হয়নি; ablation script-এর মতো auto-detect যোগ করা হয়েছে, যাতে transformers 4.x (`query/value`)-এও চলে। যাচাই: v2 checkpoint `strict=True`-এ load হয় ("All keys matched")।
 - [x] **0.5 অপ্রয়োজনীয় ফাইল সরানো।** `temp_crop.png`, `temp_sample01_top.png` (integrated XAI figure-এর crop), `fix_nb.py`, `append_dl_test.py` (একবার চালানো notebook-edit script) মুছে ফেলা হয়েছে।
 - [x] **0.6 `results/gradcam/` পরিষ্কার।** `gradcam_summary.csv`-এ নেই এমন ১১টা পুরনো রানের ছবি সরানো হয়েছে। এখন ২১টা ছবি, summary-র সঙ্গে হুবহু মেলে (বাকি ৪টা `_ERR` আসল ভুল prediction: sample 017, 019, 020, 021)।
-- [/] **0.7 🖥️ Colab check: কোন checkpoint থেকে কোন সংখ্যা এসেছে।** Drive-এর সব checkpoint-এর তারিখ, size, MD5, LoRA key আর decoder-এর অবস্থা বের করা। উদ্দেশ্য: 77.95% যে checkpoint থেকে এসেছে সেটা teacher-forcing fix (৭ আগস্ট) আর 80/10/10 split (১২ সেপ্টেম্বর)-এর পরে train হয়েছে কিনা নিশ্চিত করা, আর `best_cls_only.pt`-এর decoder সত্যিই untrained কিনা দেখা।
+- [x] **0.7 🖥️ Colab check: কোন checkpoint থেকে কোন সংখ্যা এসেছে।** ✅ ফল: [checkpoint_audit.md](results/defense_fixes/phase0/checkpoint_audit.md)
+  - Drive-এ multi-task checkpoint মাত্র একটা: v2 (২৫ জুন, laptop-এর সঙ্গে MD5 হুবহু এক)। তখনকার `train.py`-তে λ_cap = 0.2, unshifted teacher forcing, আর seed ছাড়া 80/20 `random_split` ছিল। → 77.95%, সব caption metric আর human eval-এর model caption এই দূষিত checkpoint থেকে।
+  - `best_cls_only.pt`-এর decoder untrained — **নিশ্চিত** (`vocab_projector` std 0.02084 ≈ init 0.0208)।
+  - CLS-only, ablation, baseline, XAI, calibration-এর সংখ্যা এতে প্রভাবিত নয়। Drive-এর সব checkpoint-এর তারিখ, size, MD5, LoRA key আর decoder-এর অবস্থা বের করা। উদ্দেশ্য: 77.95% যে checkpoint থেকে এসেছে সেটা teacher-forcing fix (৭ আগস্ট) আর 80/10/10 split (১২ সেপ্টেম্বর)-এর পরে train হয়েছে কিনা নিশ্চিত করা, আর `best_cls_only.pt`-এর decoder সত্যিই untrained কিনা দেখা।
   - Script: [colab/phase0_checkpoint_audit.py](colab/phase0_checkpoint_audit.py) (CPU runtime-ই যথেষ্ট)
-  - Laptop-এর v2-এর MD5: `16bb292e5d62115cc5c966dc70c120d4` (2026-06-25)
-  - 📥 Download: কিছু না, শুধু printed output paste করবে।
 
 **শেষ হওয়ার শর্ত:** draft ফেরত এসেছে, `train.py`/`model.py` import হলে error নেই, checkpoint-এর ইতিহাস জানা গেছে।
 
@@ -82,7 +87,7 @@
 
 - [ ] **2.1 🖥️ `best_cls_only.pt` তিনটা অবস্থায় evaluate করা** (একই test set, n = 376):
   - (ক) আসল tweet text দিয়ে — 83.21% আবার পাওয়া যায় কিনা (sanity check)
-  - (খ) multi-task মডেলের generated caption দিয়ে (beam = 3)
+  - (খ) **Phase 3B-এর নতুন** multi-task মডেলের generated caption দিয়ে (beam = 3) — পুরনো v2 নয়
   - (গ) text ছাড়া / fixed placeholder text দিয়ে (image-only deployment-এর অবস্থা)
 - [ ] **2.2 🖥️ সেরা মডেলের confusion matrix** (অবস্থা ক) → নতুন figure।
 - [ ] **2.3 ফল সংরক্ষণ** → `results/defense_fixes/phase2/` + Result Log।
@@ -118,13 +123,40 @@
 
 ---
 
+## Phase 3B — Multi-task মডেল নতুন করে train (Colab T4, বাধ্যতামূলক)
+
+**সমস্যা (Phase 0.7-এ ধরা পড়েছে):** একমাত্র multi-task checkpoint `disasternet_multitask_v2.pth` (২৫ জুন) train হয়েছিল:
+- λ_cap = 0.2 (README/থিসিসে লেখা 0.5)
+- unshifted teacher forcing (decoder-এর input আর target একই → autoencoding identity bias)
+- seed ছাড়া 80/20 `random_split` → বর্তমান 376-sample test set-এর আনুমানিক ~300টা সে training-এ দেখেছে
+
+ফলে 77.95% Macro F1, BLEU 1–4, METEOR, ROUGE-L, BERTScore 60.35% আর human eval-এর model caption — সবই leakage-যুক্ত, fix-এর আগের মডেল থেকে।
+
+- [ ] **3B.1 🖥️ ঠিক করা `train.py` দিয়ে multi-task retrain** — λ_cap = 0.5, right-shifted teacher forcing, Phase 3-এর grouped split, seed 42, checkpoint বাছাই validation loss দিয়ে।
+- [ ] **3B.2 🖥️ নতুন test set-এ পুরো benchmark** — Macro F1, per-class F1, confusion matrix, BLEU 1–4, METEOR, ROUGE-L, BERTScore (beam = 3)।
+- [ ] **3B.3 নতুন checkpoint Drive-এ রাখা** → `models/drishti_multitask_v3.pt` (পুরনো v2 মুছবে না)।
+- [ ] **3B.4 সিদ্ধান্ত (তোমার): human evaluation।** আগের ১০০টা model caption v2 থেকে। বিকল্প:
+  - (ক) আগেরটা রেখে limitation হিসেবে স্বীকার করা (সময় লাগবে না)
+  - (খ) নতুন মডেলের caption দিয়ে আবার করানো, এবার annotator-দের নিয়ে calibration session সহ (IAA-ও ভালো হওয়ার সম্ভাবনা)
+- [ ] **3B.5 সিদ্ধান্ত (তোমার):** নতুন সংখ্যা CLAUDE.md আর থিসিসে বসানো।
+
+📥 **Download (Colab থেকে):**
+- `phase3b_benchmark_summary.csv` → `results/defense_fixes/phase3b/`
+- `phase3b_per_sample.csv` (reference + generated caption) → `results/defense_fixes/phase3b/`
+- `phase3b_confusion_matrix.png` → `results/defense_fixes/phase3b/`
+- Checkpoint **Drive-এই থাকবে**
+
+**শেষ হওয়ার শর্ত:** fix-করা, leakage-মুক্ত multi-task মডেলের সব classification ও caption metric জানা গেছে।
+
+---
+
 ## Phase 4 — XAI fix (Colab T4)
 
 **সমস্যা:**
 - Cross-attention map এসেছে untrained decoder (`best_cls_only.pt`) থেকে।
 - Integrated pipeline-এ T* = 0.6669, আলাদা script-এ T* = 1.1113 — অমিল।
 
-- [ ] **4.1 🖥️ Cross-attention map trained decoder থেকে আবার বানানো** (Phase 0.7-এ যাচাই করা multi-task checkpoint, একই ২১টা sample)। এটা caption generation-এর ব্যাখ্যা হিসেবে উপস্থাপন — classification-এর নয়।
+- [ ] **4.1 🖥️ Cross-attention map trained decoder থেকে আবার বানানো** (**Phase 3B-এর নতুন** multi-task checkpoint; v2-এর decoder unshifted teacher forcing-এ train হওয়ায় সেটা চলবে না; একই ২১টা sample)। এটা caption generation-এর ব্যাখ্যা হিসেবে উপস্থাপন — classification-এর নয়।
 - [ ] **4.2 🖥️ T*-এর অমিলের কারণ বের করা** (কোন checkpoint/split-এ fit হয়েছে) এবং একটা সংখ্যায় স্থির করা।
 - [ ] **4.3 Figure 4.5 ও 4.7 আবার বানানো** (প্রয়োজনে)।
 - [ ] **4.4 সিদ্ধান্ত (তোমার):** নতুন map যথেষ্ট অর্থবহ না হলে cross-attention অংশ ছোট করে limitation হিসেবে রাখা।
@@ -151,24 +183,13 @@
 
 ---
 
-## Phase 6 — (ঐচ্ছিক) Multi-task মডেল grouped split-এ retrain
-
-শুধু সময় থাকলে। Multi-task (λ_cap = 0.5) মডেল grouped split-এ train করে BLEU/BERTScore আর classification আবার মাপা, যাতে caption metric-ও leakage-মুক্ত হয়।
-
-- [ ] **6.1 🖥️ Multi-task retrain (grouped split, seed 42)**
-- [ ] **6.2 🖥️ Caption metric (BLEU 1–4, METEOR, ROUGE-L, BERTScore) আবার মাপা**
-
-📥 **Download:** `phase6_caption_metrics.csv` → `results/defense_fixes/phase6/`
-
----
-
 ## Result Log
 
 > Colab থেকে paste করা ফল এখানে সংক্ষেপে জমা হবে। পূর্ণ output থাকবে `results/defense_fixes/<phase>/`-এ।
 
 | তারিখ | Phase/Task | ফল (সংক্ষেপে) | সংরক্ষিত ফাইল |
 |-------|-----------|---------------|---------------|
-| — | — | — | — |
+| 2026-11-12 | 0.7 | একমাত্র multi-task checkpoint v2 (২৫ জুন) সব fix-এর আগের; test set-এর ~300/376 training-এ দেখা (আনুমানিক)। `best_cls_only.pt`-এর decoder untrained (std 0.02084 ≈ init) — নিশ্চিত। | `results/defense_fixes/phase0/checkpoint_audit.md` |
 
 ---
 
@@ -177,4 +198,5 @@
 | তারিখ | Phase | কী করা হলো | Commit |
 |-------|-------|------------|--------|
 | 2026-11-12 | — | Fix plan তৈরি | `6c266db` |
-| 2026-11-12 | 0 (আংশিক) | 0.1 বাদ (draft ইচ্ছাকৃতভাবে মোছা), 0.2–0.6 শেষ, 0.7-এর Colab script তৈরি | (এই commit) |
+| 2026-11-12 | 0 (আংশিক) | 0.1 বাদ (draft ইচ্ছাকৃতভাবে মোছা), 0.2–0.6 শেষ, 0.7-এর Colab script তৈরি | `c380372` |
+| 2026-11-12 | 0 ✅ | 0.7 checkpoint audit শেষ; Phase 3B (multi-task retrain) বাধ্যতামূলক হিসেবে যোগ, phase-এর ক্রম বদল | (এই commit) |
