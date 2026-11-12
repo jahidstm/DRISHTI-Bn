@@ -187,12 +187,20 @@
 - **সমস্যা:** Matrix-টা v2 মডেলের (77.95%), সেরা মডেলের (83.21%) নয়; আর C1 অনুযায়ী v2-এর সংখ্যা ব্যবহারযোগ্যই নয়।
 - **করণীয়:** Phase 2-এ সেরা মডেলের নতুন matrix, Phase 3B-এ নতুন multi-task মডেলের matrix। পুরনো figure ব্যবহার করা যাবে না।
 
-### C13. 83.21% কোন শর্তে মাপা — ⏳ Phase 2
+### C13. মূল সংখ্যা কোন শর্তে মাপা — ✅ Phase 2
 - **সমস্যা:** CLS-only মডেল test-এ **আসল tweet text** দেখে। Deployment-এ (demo) শুধু ছবি থাকে।
-- **আপাতত লেখা (English):**
-  > "The reported 83.21% Macro F1 is obtained with the original (translated) tweet text as the text input. In an image-only deployment the tweet is unavailable; performance under that setting is reported in Section X."
-- Phase 2-এর ফল এলে Section X-এর সংখ্যা যোগ হবে।
-- ⚠️ Phase 3: leakage-মুক্ত split-এ এই সংখ্যা **75.69 ± 1.33%** (৩ seed)। থিসিসে মূল সংখ্যা কোনটা হবে, সেটা ৩.৫-এর সিদ্ধান্ত।
+- **Phase 2-এর ফল (CLS-Only seed 42, grouped test n = 375):** আসল tweet 74.83% · v3-এর generated caption 76.41% · placeholder "বন্যা পরিস্থিতি" 76.52% · অন্য sample-এর tweet 76.63% · খালি text 61.95% (out-of-distribution)। পূর্ণ ফল: [results/defense_fixes/phase2/phase2_results.md](../results/defense_fixes/phase2/phase2_results.md)
+- **নতুন লেখা (English):**
+  > "The main result (75.69 ± 1.33% Macro F1) uses the original translated tweet as text input. Performance does not depend on having the tweet: with a generic placeholder sentence instead (as in our image-only demo) the seed-42 model scores 76.52% versus 74.83% with the tweet."
+
+### C19. "Multimodal fusion" — মডেল আসলে text-এর বিষয়বস্তু প্রায় ব্যবহার করে না — ✅ Phase 2
+- **প্রমাণ:** প্রতিটা ছবির সঙ্গে অন্য sample-এর tweet দিলে Macro F1 কমে না (76.63 বনাম 74.83), আর ৯৬.৫% prediction অপরিবর্তিত থাকে। Generated caption বা দুই শব্দের placeholder দিলেও একই। ≤ 1.8pp পার্থক্যগুলো Affected_People-এর (৩২টা sample) noise, seed spread-এর (74.83–77.22) চেয়ে ছোট।
+- **খালি text ব্যতিক্রম:** শুধু [CLS][SEP] training-এ কখনো আসেনি, তাই মডেল Affected_People প্রায় বলেই না (F1 6.06)। এটা "text লাগে" প্রমাণ করে না, কেবল input distribution-এর বাইরে যাওয়ার প্রভাব।
+- **ফল:** ViT-Only-র চেয়ে CLS-Only-র +2.4pp **tweet-এর অর্থ থেকে আসেনি।** সম্ভাব্য কারণ: ViT-এর সব attention layer-এ LoRA (ViT-Only-তে শেষ ২টা block fine-tune), আর/অথবা BanglaBERT-এর [CLS] vector প্রায় একটা স্থির বাড়তি input হিসেবে কাজ করা। মডেল কার্যত image-driven।
+- **যা দাবি করা যাবে না:** "text and image are complementary", "fusion of tweet semantics improves classification", "multimodal synergy"।
+- **নতুন লেখা (English):**
+  > "A text-ablation test shows that the classifier relies almost entirely on the image: replacing each tweet with that of another test sample changes 3.5% of predictions and does not lower Macro F1 (76.63% vs. 74.83%). The improvement over the ViT-Only baseline should therefore be attributed to the LoRA-adapted image branch and training configuration rather than to tweet semantics. This is consistent with the weak text-only baseline (BanglaBERT-Only, 43.02% on the original split) and the noisy, often off-topic tweet texts (C10)."
+- **ইতিবাচক দিক (defense-এ বলা যায়):** Deployment-এ tweet না থাকলেও performance কমে না — image-only demo-র জন্য এটা সুবিধা।
 
 ### C14. "CrisisViT (SOTA)" — ✅
 - **সমস্যা:** এটা আমাদের নিজস্ব CrisisViT-style re-implementation (ViT-Large/16, শেষ ৪টা block unfrozen), মূল paper-এর রিপোর্ট করা ফল নয়।
@@ -249,6 +257,7 @@
 4. ✅ Human eval: ৩ জন annotator (বন্ধু), calibration session ছাড়া; ধরন অনুযায়ী আলাদা করে মাপলে IAA প্রায় শূন্য, একসঙ্গে মাপলে fair (α = 0.38) (C11)। মূল un-blinding bug ঠিক করা হয়েছে (C2)।
 9. ✅ Caption generation দুর্বল: মানুষের rating model 1.2–1.6/5 বনাম reference 3.1–3.4/5 (C2); v3-এর caption tweet-অনুকরণ, ছবি-নির্দিষ্ট নয় (C18)।
 11. ✅ Multi-task ফল একটা seed-এ (42); image-only অবস্থায় generated caption ViT-Only-র চেয়ে বেশি কিছু যোগ করে না (C1)।
+12. ✅ Classifier tweet-এর বিষয়বস্তু প্রায় ব্যবহার করে না — অন্য sample-এর tweet দিলেও ফল একই (C19)। তাই "multimodal" সুবিধা দেখানো যায়নি।
 10. ✅ Corpus-এর 8.9% text অনুবাদ হয়নি (ইংরেজি থেকে গেছে) (C10)।
 5. ✅ Class imbalance: Affected_People মাত্র 330টা (8.8%) — সব মডেলে এই class-এর F1 সবচেয়ে কম।
 6. ✅ Temperature scaling-এ উন্নতি হয়নি; validation set ছোট (C8)।

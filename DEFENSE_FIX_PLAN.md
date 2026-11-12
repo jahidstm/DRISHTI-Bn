@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 ✅ · Phase 3 ✅ · Phase 3B ✅ · বর্তমান: **Phase 2** (script তৈরি, Colab-এ চালানো বাকি)
+> **অবস্থা:** 🟡 চলমান — Phase 0 ✅ · Phase 1 ✅ · Phase 3 ✅ · Phase 3B ✅ · Phase 2 ✅ (figure download বাকি) · পরের: **Phase 4** (XAI)
 
 ---
 
@@ -30,7 +30,7 @@
 | 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | ✅ শেষ |
 | 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds + baseline fix | Colab T4 | ~3–3.5 ঘণ্টা | ✅ শেষ (৭২ মিনিট) |
 | 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~45–60 মিনিট | ✅ শেষ |
-| 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~10 মিনিট | 🟡 script তৈরি, Colab-এ চালানো বাকি |
+| 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~10 মিনিট | ✅ শেষ |
 | 6 | 4 | XAI fix: trained decoder থেকে cross-attention + T* মেলানো (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
 | 7 | 5 | চূড়ান্ত সমন্বয়: সংখ্যা, figure, README, demo | Local | ½ দিন | ⬜ বাকি |
 | ➡️ | — | **এরপর:** DIU নির্দেশনা অনুযায়ী নতুন thesis draft লেখা | Google Docs (DIU template) | — | ⬜ plan শেষে |
@@ -100,14 +100,14 @@
 
 **Script:** [colab/phase2_fair_evaluation.py](colab/phase2_fair_evaluation.py) — training নেই, ~১০ মিনিট। লাগবে Drive-এ `models/cls_only_grouped_s42.pt` (Phase 3), `defense_fixes/phase3/grouped_split.csv`, `defense_fixes/phase3b/phase3b_per_sample.csv`।
 
-- [ ] **2.1 🖥️ `cls_only_grouped_s42.pt` পাঁচ অবস্থায় evaluate করা** (grouped test set, n = 375; পুরনো `best_cls_only.pt` / n = 376 নয়):
+- [x] **2.1 🖥️ `cls_only_grouped_s42.pt` পাঁচ অবস্থায় evaluate করা** → A 74.83 (Phase 3-এর সঙ্গে হুবহু মেলে) · B 76.41 · C 61.95 · D 76.52 · **E 76.63** (৯৬.৫% prediction অপরিবর্তিত) → classifier tweet-এর বিষয়বস্তু প্রায় ব্যবহার করে না (C19)। বিস্তারিত: [results/defense_fixes/phase2/phase2_results.md](results/defense_fixes/phase2/phase2_results.md) (grouped test set, n = 375; পুরনো `best_cls_only.pt` / n = 376 নয়):
   - (A) আসল tweet text — sanity check: Phase 3-এর 74.83% আবার আসা উচিত
   - (B) Phase 3B-এর v3 generated caption (image-only pipeline)
   - (C) খালি text (image-only, কোনো text নেই)
   - (D) demo-র placeholder "বন্যা পরিস্থিতি" (`app.py` caption না পেলে এটা দেয়)
   - (E) এলোমেলো tweet (অন্য sample-এর tweet) — মডেল text-এর ওপর কতটা নির্ভর করে
-- [ ] **2.2 🖥️ নতুন Figure 4.1** — CLS-Only, অবস্থা A, grouped test set।
-- [ ] **2.3 ফল সংরক্ষণ** → `results/defense_fixes/phase2/` + Result Log।
+- [x] **2.2 🖥️ নতুন Figure 4.1** — CLS-Only, অবস্থা A, grouped test set। Drive-এ তৈরি; 📥 download বাকি।
+- [x] **2.3 ফল সংরক্ষণ** → `results/defense_fixes/phase2/` + Result Log।
 
 📥 **Download (Drive-এর `DisasterNet/defense_fixes/phase2/` থেকে):**
 - `phase2_eval_summary.csv` → `results/defense_fixes/phase2/`
@@ -220,7 +220,7 @@
   - ⏳ Phase 4-এর পর: calibration (T*, ECE after = 2.63%), XAI।
 - [ ] **5.2 [README.md](README.md) পুনর্লিখন।** পুরনো 66.67% F1, BLEU-4 5.14, 80/20 split, 0.1% সরিয়ে বর্তমান ফল।
 - [ ] **5.3 [DRISHTI_XAI_CHECKLIST.md](DRISHTI_XAI_CHECKLIST.md)-এ সংশোধিত দাবি প্রতিফলিত করা।** (`PHASE4_WRITING_PLAN.md` বাদ — writing prompt নতুন করে বানানো হবে।)
-- [ ] **5.4 Demo ([app.py](app.py)) নিয়ে সিদ্ধান্ত।** এখন পুরনো v2 checkpoint চালায়। বিকল্প: (ক) যেমন আছে রেখে ডিফেন্সে স্পষ্ট বলা, (খ) caption-এর জন্য multi-task + classification-এর জন্য CLS-only checkpoint।
+- [ ] **5.4 Demo ([app.py](app.py)) নিয়ে সিদ্ধান্ত।** এখন পুরনো v2 checkpoint চালায়। Phase 2-এর পর পরামর্শ: classification-এর জন্য `cls_only_grouped_s42.pt` + placeholder text (76.52%, tweet ছাড়াই), caption-এর জন্য v3 (শুধু প্রদর্শনের জন্য, দুর্বলতা স্বীকার করে)। বিকল্প: (ক) যেমন আছে রেখে ডিফেন্সে স্পষ্ট বলা, (খ) caption-এর জন্য multi-task + classification-এর জন্য CLS-only checkpoint।
 - [ ] **5.5 সব figure-এর তালিকা মিলিয়ে দেখা** (CLAUDE.md-এর figure table বনাম root-এ আসল ফাইল)।
 - [ ] **5.6 ডিফেন্সের সম্ভাব্য প্রশ্ন ও উত্তরের তালিকা** (leakage, fair comparison, IAA, calibration, caption-এর মান)।
 
@@ -238,6 +238,7 @@
 | 2026-11-12 | 1.19 | Human eval সঠিকভাবে un-blind: model 1.58/1.24/1.23 বনাম GT 3.42/3.08/3.23 (fluency/adequacy/faithfulness), Wilcoxon p < 10⁻¹⁶; GT পছন্দ 225/237; IAA pooled α 0.38, within-type ≈ 0 | `results/defense_fixes/phase1/human_eval_unblinded/` |
 | 2026-11-12 | 1.18 | পুরনো ViT unfreeze নিয়ম transformers 5.x-এ মাত্র 590,592 param (pooler) unfreeze করে, ঠিক নিয়মে 14,766,336; CrisisViT-এর 0.34% = ViT-L pooler | `docs/corrected_claims.md` (C17) |
 | 2026-11-12 | 3.1 | Grouped split (Colab-এ চূড়ান্ত): 3,189 group; 3,007 / 373 / 375; class অনুপাত ≈ 59.7/31.6/8.8%; overlap 0 | `colab/phase3_grouped_split_seeds.py` |
+| 2026-11-12 | 2.1–2.3 | CLS-Only s42: tweet 74.83 · generated caption 76.41 · placeholder 76.52 · অন্য sample-এর tweet 76.63 · খালি text 61.95 → মডেল কার্যত image-driven (C19) | `results/defense_fixes/phase2/phase2_results.md` |
 | 2026-11-12 | 3B.6 | sacreBLEU: v3 BLEU 14.38 / chrF 14.19 (clean 0.11 / 8.46); random train tweet chrF 21.58, constant tweet 20.46 → মডেল তুচ্ছ baseline-এর নিচে | `results/defense_fixes/phase3b/phase3b_caption_metrics_standard.csv` |
 | 2026-11-12 | 3B.1–3B.3 | Multi-task v3 (epoch 4): ছবি + tweet 77.29% · ছবি + generated caption 73.63% · BERTScore-F1 69.66 (URL বাদে 62.27) · caption = tweet-অনুকরণ | `results/defense_fixes/phase3b/phase3b_results.md` |
 | 2026-11-12 | 3.2–3.4 | Grouped split, test n = 375: CLS-Only 75.69 ± 1.33 · ViT-Only 73.27 ± 0.39 · CrisisViT-style 75.87 (1 seed); AP-এর F1 ≈ 45% | `results/defense_fixes/phase3/` |
@@ -261,3 +262,4 @@
 | 2026-11-12 | 3B (run শেষ) | v3-এর ফল সংরক্ষণ (3B.1–3B.3); C1 প্রতিস্থাপন, নতুন C18 (caption = tweet-অনুকরণ), C9-এ multi-task parameter; 3B.6 (metric পুনর্হিসাব) যোগ | `0288960` |
 | 2026-11-12 | 3B ✅ · 5.1 (আংশিক) | 3B.6 শেষ (sacreBLEU/chrF + তুচ্ছ baseline); 3B.4 = (ক), 3B.5 = হ্যাঁ; CLAUDE.md-এ অনুমোদিত সংখ্যা বসানো; Colab-এর download করা ফাইল যোগ | `14ccbeb` |
 | 2026-11-12 | 1 ✅ · 2 (script) | ১.২০-এর উত্তর: human eval-এর সঠিক সংখ্যা CLAUDE.md-এ, "human-verified translation" দাবি বাদ; Phase 2 Colab script তৈরি | `9da91da` |
+| 2026-11-12 | 2 ✅ | Phase 2-এর ফল সংরক্ষণ; নতুন C19 (classifier text প্রায় ব্যবহার করে না), C13 চূড়ান্ত; demo-র পরামর্শ 5.4-এ | (এই commit) |
