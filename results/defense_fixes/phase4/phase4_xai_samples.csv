@@ -1,0 +1,22 @@
+﻿n,index,image_path,true,pred,correct,conf_raw,conf_cal,iou_gc_ro,iou_gc_ca,gradcam_zero,caption
+1,2683,Severe_Damage/907591129239101440_0.jpg,Severe_Damage,Severe_Damage,True,0.9930941,0.98662126,0.08108108108108109,0.08108108108108109,False,# Hurrican Harvey https : / t. co / MPEMABCHO
+2,685,Severe_Damage/922560865144012803_0.jpg,Severe_Damage,Affected_People,False,0.56129944,0.54810643,0.5384615384615384,0.21212121212121213,False,# HurricanMaria https : / t. co / OPECHOTA
+3,115,Severe_Damage/901692349289566210_2.jpg,Severe_Damage,Severe_Damage,True,0.94927037,0.92626315,0.0,0.0,False,RT @ HurricanMaria : # Harvey https : / t. co / jv0QsHRCO
+4,3151,Severe_Damage/904311772294807552_0.jpg,Severe_Damage,Severe_Damage,True,0.88001287,0.8420831,0.0,0.0,False,# Hurrican Harvey ' ss : / t. co / cCHOTPRMA https : হার্ভি ত্রাণের জন্য দান করা হয়েছে ।
+5,1291,Severe_Damage/904379734745866240_0.jpg,Severe_Damage,Severe_Damage,True,0.9114696,0.881519,0.17647058823529413,0.1111111111111111,False,হার্ভি এবং ইরমা https : / t. co / MSNEMABCHOT # Hurrican Harvey এর পরে ।
+6,1139,Severe_Damage/927340512817926144_0.jpg,Severe_Damage,Severe_Damage,True,0.7452994,0.7035333,0.02564102564102564,0.08108108108108109,False,# হুরিকানে হ্যারাভি https : / t. co / zEMABCHO
+7,1021,Severe_Damage/910225493877813249_1.jpg,Severe_Damage,Severe_Damage,True,0.78041613,0.74196255,0.02564102564102564,0.17647058823529413,False,# Hurrican Harvey ' ss : / t. co / jva1gtCVY https হয়েছে ।
+8,373,Humanitarian_Rescue/909147681917886464_0.jpg,Humanitarian_Rescue,Humanitarian_Rescue,True,0.995634,0.9910643,0.0,0.02564102564102564,False,RT @ HurricanMaria : # Harvey ' র পর https : / t. co / cCHRW0r4
+9,3053,Humanitarian_Rescue/906395699855667200_0.jpg,Humanitarian_Rescue,Humanitarian_Rescue,True,0.94268024,0.9187677,0.0,0.0,False,RT @ HurricanMaria : # Harvey ' র পর থেকে রক্ষা করে ।
+10,287,Humanitarian_Rescue/906339619381399553_1.jpg,Humanitarian_Rescue,Humanitarian_Rescue,True,0.99698716,0.99359447,0.02564102564102564,0.05263157894736842,False,# Hurrican Harvey ত্রাণের জন্য দান করা হয়েছে । https : / t. co / cPSJMAE
+11,2733,Humanitarian_Rescue/905499072731197440_0.jpg,Humanitarian_Rescue,Humanitarian_Rescue,True,0.9686756,0.94992864,0.2903225806451613,0.0,False,# হুরিকান হ্যারাভি https : / t. co / cCHOTJK
+12,3684,Humanitarian_Rescue/909876188100915201_0.jpg,Humanitarian_Rescue,Humanitarian_Rescue,True,0.66372555,0.6284605,0.25,0.02564102564102564,False,# Hurrican Harvey ' ss : / t. co / jvEMABCHOT
+13,2015,Humanitarian_Rescue/909854786501136384_0.png,Humanitarian_Rescue,Humanitarian_Rescue,True,0.9151642,0.8859663,0.0,0.0,False,"# HurricanMaria এর পরে, কিন্তু হ্যারিকেন ইরামা https : / t. co / jvyPECHO"
+14,281,Humanitarian_Rescue/906196156262338560_1.jpg,Humanitarian_Rescue,Humanitarian_Rescue,True,0.83808446,0.80311155,0.3333333333333333,0.17647058823529413,False,# হুরিকানে হ্যারাভি ত্রাণের জন্য https : / t. co / cCSLHOTK
+15,3286,Affected_People/905289541862531073_0.jpg,Affected_People,Humanitarian_Rescue,False,0.41974282,0.40909323,0.42857142857142855,0.05263157894736842,False,আরটি @ সিএনএন : # হুরিকানেমারিয়া ' র পর পুয়ের্টো রিকোতে কাজ করা হয়েছে । https : / t. co / cCHJMYR
+16,44,Affected_People/870668890564567040_0.jpg,Affected_People,Severe_Damage,False,0.6890439,0.6614544,0.17647058823529413,0.14285714285714285,False,আরটি @ সিএনএন : # হুরিকানে হ্যারাভি ত্রাণের জন্য সরবরাহ করেছে https : / t. co / qPSLWKBC
+17,22,Affected_People/870248079043158017_1.jpg,Affected_People,Severe_Damage,False,0.51858354,0.49968252,0.0,0.02564102564102564,False,"RT @ HurricanMaria : # Harvey ' র পর, কিন্তু হ্যারিকেন মারিয়া https : / t. co / qPSLCVYR"
+18,205,Affected_People/905060535674298370_3.jpg,Affected_People,Affected_People,True,0.92284626,0.89188915,0.42857142857142855,0.0,False,"# HurricanMaria এর পর, কিন্তু হার্ভি ত্রাণের জন্য https : / t. co / jvyPECHO"
+19,633,Affected_People/915319640145911809_3.jpg,Affected_People,Affected_People,True,0.78032017,0.73977166,0.3333333333333333,0.0,False,আরটি @ সিএনএন : # হুরিকানে হ্যারাভি ত্রাণের জন্য সরবরাহ করেছে https : / t. co / jvyPECHO
+20,1072,Affected_People/904253904313090050_0.jpg,Affected_People,Severe_Damage,False,0.51616126,0.49920613,0.0,0.08108108108108109,False,আরটি @ ডাব্লিউএমএ : # হুরিকান হ্যারাভি https : / t. co / cCHOTJMAB
+21,1987,Affected_People/904991929305370625_0.jpg,Affected_People,Severe_Damage,False,0.7860809,0.74351716,0.0,0.0,False,# Hurrican Harvey ' ss : / t. co / cPEMABCHOT
