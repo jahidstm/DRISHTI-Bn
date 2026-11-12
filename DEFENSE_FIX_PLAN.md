@@ -2,7 +2,7 @@
 
 > **শুরু:** 12 November 2026
 > **লক্ষ্য:** Final defense-এর আগে থিসিসের সব methodological ও documentation সমস্যা ধাপে ধাপে ঠিক করা
-> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ; পরের ধাপ: **Phase 1** (local) ও **Phase 3** (Colab)
+> **অবস্থা:** 🟡 চলমান — Phase 0 শেষ; পরের ধাপ: **Phase 3** (Colab); Phase 1-এ শুধু ২টা প্রশ্ন বাকি
 
 ---
 
@@ -14,7 +14,7 @@
 4. **Image/figure download।** কোন ফাইল Colab থেকে download করে কোন ফোল্ডারে রাখতে হবে, প্রতিটা task-এ **📥 Download** অংশে লেখা থাকবে।
 5. **Phase শেষ হলে:** Claude এই ফাইলের checkbox আর Progress Log update করবে, তারপর `git commit` + `git push` করবে।
 6. **সংখ্যা বদলানোর নিয়ম।** CLAUDE.md-এর "NEVER change these numbers" নিয়ম বহাল থাকবে। নতুন experiment-এ নতুন সংখ্যা এলে, **তোমার অনুমতি নিয়ে** তবেই CLAUDE.md আর থিসিসে সংখ্যা বদলানো হবে।
-7. **থিসিস draft-এ সরাসরি হাত দেওয়া হবে না।** লেখার পরিবর্তন NotebookLM prompt বা নির্দিষ্ট replacement text হিসেবে দেওয়া হবে; draft-এ বসাবে তুমি।
+7. **Writing পরে।** এই plan-এ শুধু fix; সব phase শেষ হলে [docs/corrected_claims.md](docs/corrected_claims.md) মেনে নতুন writing prompt বানানো হবে। পুরনো `PHASE4_WRITING_PLAN.md` ব্যবহার হবে না।
 
 **Status চিহ্ন:** `[ ]` বাকি · `[/]` চলছে · `[x]` শেষ · `[-]` বাদ দেওয়া হয়েছে (কারণসহ)
 
@@ -27,7 +27,7 @@
 | ক্রম | Phase | বিষয় | কোথায় চলবে | আনুমানিক সময় | Status |
 |------|-------|------|-------------|---------------|--------|
 | 1 | 0 | Repo সুরক্ষা ও পরিচ্ছন্নতা | Local + Colab (ছোট check) | 1–2 ঘণ্টা | ✅ শেষ |
-| 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) — Colab phase-এর পাশাপাশি চলবে | Local | 1 দিন | ⬜ বাকি |
+| 2 | 1 | লেখার সংশোধন (নতুন experiment ছাড়া) | Local | 1 দিন | 🟡 প্রায় শেষ (২টা প্রশ্ন বাকি) |
 | 3 | 3 | Leakage fix: tweet-grouped split + 3 seeds | Colab T4 | ~2.5–3 ঘণ্টা | ⬜ বাকি |
 | 4 | **3B** | **Multi-task মডেল নতুন করে train (বাধ্যতামূলক — Phase 0.7-এর ফল)** | Colab T4 | ~2 ঘণ্টা | ⬜ বাকি |
 | 5 | 2 | Fair evaluation: CLS-only মডেল generated caption দিয়ে (3B-এর মডেল লাগবে) | Colab T4 | ~1 ঘণ্টা | ⬜ বাকি |
@@ -63,21 +63,29 @@
 
 ## Phase 1 — লেখার সংশোধন (নতুন experiment ছাড়া)
 
-**উদ্দেশ্য:** ভুল বা অতিরঞ্জিত দাবি ঠিক করা। পুরনো draft মুছে ফেলা হয়েছে, তাই এই phase-এর ফল হবে একটা **"সংশোধিত দাবি" reference** (`docs/corrected_claims.md`): কোন দাবি কীভাবে লিখতে হবে, কোনটা বাদ যাবে, কোনটা limitation। পরে নতুন draft লেখার সময় এটা মেনে লেখা হবে, আর [PHASE4_WRITING_PLAN.md](PHASE4_WRITING_PLAN.md)-এর prompt-গুলোও সেই অনুযায়ী ঠিক করা হবে।
+**উদ্দেশ্য:** ভুল বা অতিরঞ্জিত দাবি ঠিক করা। ফল: **[docs/corrected_claims.md](docs/corrected_claims.md)** — কোন দাবি কীভাবে লিখতে হবে, কোনটা বাদ যাবে, কোনটা limitation। সব phase শেষ হলে নতুন writing prompt বানানো হবে এই ফাইল মেনে (পুরনো `PHASE4_WRITING_PLAN.md` আর ব্যবহার হবে না)।
 
-- [ ] **1.1 Cross-Attention XAI-এর দাবি।** "Cross-Attention সবচেয়ে অর্থপূর্ণ ব্যাখ্যা দেয়" — `best_cls_only.pt`-এর decoder কখনো train হয়নি (λ_cap = 0), তাই map random weight থেকে। Phase 4 পর্যন্ত দাবিটা স্থগিত/নরম করা।
-- [ ] **1.2 No-CrossAttn ablation (+1.33pp)।** Classification path-এ decoder ব্যবহারই হয় না → পার্থক্যটা random variance। "কোনো উল্লেখযোগ্য প্রভাব নেই" হিসেবে পুনর্লিখন।
-- [ ] **1.3 "r=8 Multi-Task" লেবেল।** Script-এ `LAMBDA_CAP = 0.0` → এটা CLS-only config। টেবিলের লেবেল ঠিক করা, আর লক্ষ্য করা যে একই config দুবার চালিয়ে 83.21% ও 81.47% এসেছে (≈1.7pp variance)।
-- [ ] **1.4 Caption-Only (16.90%)।** Classifier head train হয়নি (λ_cls = 0) → সংখ্যাটা অর্থহীন। টেবিল থেকে সরানো বা footnote দিয়ে ব্যাখ্যা।
-- [ ] **1.5 Calibration-এর সৎ রিপোর্ট।** ECE 2.16% → 2.63% (TS-এর পর খারাপ), NLL ও Brier-ও সামান্য খারাপ। দুটোই রিপোর্ট করা; ব্যাখ্যা: মডেল আগে থেকেই well-calibrated। [PHASE4_WRITING_PLAN.md](PHASE4_WRITING_PLAN.md)-এর সংশ্লিষ্ট লাইনও ঠিক করা।
-- [ ] **1.6 "XAI accuracy 81%"।** এটা ২১টা sample-এ classification accuracy, XAI metric নয় → নাম বদল।
-- [ ] **1.7 Trainable parameter-এর হিসাব।** 0.30% (589,824) হিসাবে classifier head (~0.79M) ধরা হয়নি; No-LoRA-তে "0 trainable" অথচ head train হয়েছে; README-তে 0.1%। একটা সামঞ্জস্যপূর্ণ সংজ্ঞা ঠিক করা ("encoder-এর trainable parameter" বনাম "মোট trainable")।
-- [ ] **1.8 Ground truth "caption" আসলে tweet অনুবাদ।** 97%-এ URL আছে, এগুলো ছবির বর্ণনা নয়। Dataset অংশে স্পষ্ট করা; কম BLEU আর GT-র কম human score (2.2–2.5)-এর ব্যাখ্যা হিসেবে ব্যবহার।
-- [ ] **1.9 Human eval-এর IAA (κ ≈ 0)।** Annotator-দের গড় fluency 1.7 / 2.7 / 3.1 — calibration session না হওয়া, annotator বন্ধু হওয়া → Limitations-এ।
-- [ ] **1.10 Figure 4.1-এর caption।** এই confusion matrix multi-task মডেলের (77.95%), সেরা মডেলের নয় → caption-এ স্পষ্ট লেখা। (সেরা মডেলের matrix আসবে Phase 2-এ।)
-- [ ] **1.11 Leakage ও seed variance-কে Limitations-এ রাখা** (Phase 3-এর ফল আসার আগ পর্যন্ত placeholder)।
+- [x] **1.1 Cross-Attention XAI-এর দাবি** → C3 (চূড়ান্ত লেখা ⏳ Phase 4)
+- [x] **1.2 No-CrossAttn ablation (+1.33pp)** → C4
+- [x] **1.3 "r=8 Multi-Task" লেবেল ও ~1.7pp variance** → C5
+- [x] **1.4 Caption-Only (16.90%)** → C6
+- [x] **1.5 Calibration-এর পুরো before/after table** → C8 (T* ⏳ Phase 4)
+- [x] **1.6 "XAI accuracy 81%"** → C7
+- [x] **1.7 Trainable parameter** → C9: সঠিক হিসাব LoRA 589,824 + head 789,507 = 1,379,331 (≈ 0.70%); 0.30% শুধু encoder-এর LoRA অংশ
+- [x] **1.8 Reference text = tweet-এর মেশিন অনুবাদ** → C10
+- [x] **1.9 Human eval-এর IAA** → C11
+- [x] **1.10 Figure 4.1** → C12 (নতুন figure ⏳ Phase 2/3B)
+- [x] **1.11 Leakage ও seed variance** → Limitations তালিকা (D), ⏳ Phase 3
+- [x] **1.12 (নতুন) Multi-task-এর সব সংখ্যা ব্যবহার স্থগিত** → C1, C2 (⏳ Phase 3B)
+- [x] **1.13 (নতুন) 83.21% কোন শর্তে মাপা** → C13 (⏳ Phase 2)
+- [x] **1.14 (নতুন) "CrisisViT (SOTA)" লেবেল** → C14
+- [x] **1.15 (নতুন) "First …" দাবি** → C15 (*BanglaMM-Disaster*, *BiCap* আগে থেকেই আছে)
+- [x] **1.16 (নতুন) Dataset "flood-only" নয়** → C16: 95.2% hurricane (Harvey/Irma/Maria), মাত্র 4.8% (180টা) Sri Lanka flood
+- [ ] **1.17 তোমার উত্তর লাগবে (❓):**
+  - C10: অনুবাদে সত্যিই human verification হয়েছিল কি?
+  - C16: Title-এ "Flood" শব্দ থাকবে কি?
 
-**শেষ হওয়ার শর্ত:** `docs/corrected_claims.md` তৈরি ও তোমার অনুমোদিত; PHASE4_WRITING_PLAN.md-এর সংশ্লিষ্ট prompt সংশোধিত।
+**শেষ হওয়ার শর্ত:** `docs/corrected_claims.md` তৈরি (✅) আর 1.17-এর দুটো প্রশ্নের উত্তর।
 
 ---
 
@@ -174,7 +182,7 @@
 
 - [ ] **5.1 CLAUDE.md-এর সংখ্যা update** (শুধু তোমার অনুমোদিত নতুন সংখ্যা)।
 - [ ] **5.2 [README.md](README.md) পুনর্লিখন।** পুরনো 66.67% F1, BLEU-4 5.14, 80/20 split, 0.1% সরিয়ে বর্তমান ফল।
-- [ ] **5.3 [DRISHTI_XAI_CHECKLIST.md](DRISHTI_XAI_CHECKLIST.md) ও [PHASE4_WRITING_PLAN.md](PHASE4_WRITING_PLAN.md)-এ সংশোধিত দাবি প্রতিফলিত করা।**
+- [ ] **5.3 [DRISHTI_XAI_CHECKLIST.md](DRISHTI_XAI_CHECKLIST.md)-এ সংশোধিত দাবি প্রতিফলিত করা।** (`PHASE4_WRITING_PLAN.md` বাদ — writing prompt নতুন করে বানানো হবে।)
 - [ ] **5.4 Demo ([app.py](app.py)) নিয়ে সিদ্ধান্ত।** এখন পুরনো v2 checkpoint চালায়। বিকল্প: (ক) যেমন আছে রেখে ডিফেন্সে স্পষ্ট বলা, (খ) caption-এর জন্য multi-task + classification-এর জন্য CLS-only checkpoint।
 - [ ] **5.5 সব figure-এর তালিকা মিলিয়ে দেখা** (CLAUDE.md-এর figure table বনাম root-এ আসল ফাইল)।
 - [ ] **5.6 ডিফেন্সের সম্ভাব্য প্রশ্ন ও উত্তরের তালিকা** (leakage, fair comparison, IAA, calibration, caption-এর মান)।
@@ -190,6 +198,7 @@
 | তারিখ | Phase/Task | ফল (সংক্ষেপে) | সংরক্ষিত ফাইল |
 |-------|-----------|---------------|---------------|
 | 2026-11-12 | 0.7 | একমাত্র multi-task checkpoint v2 (২৫ জুন) সব fix-এর আগের; test set-এর ~300/376 training-এ দেখা (আনুমানিক)। `best_cls_only.pt`-এর decoder untrained (std 0.02084 ≈ init) — নিশ্চিত। | `results/defense_fixes/phase0/checkpoint_audit.md` |
+| 2026-11-12 | 1.16 | Dataset-এর event ভাগ: Harvey 1,416 · Maria 1,149 · Irma 1,010 · Sri Lanka floods 180 → 95.2% hurricane | `docs/corrected_claims.md` (C16) |
 
 ---
 
@@ -199,4 +208,5 @@
 |-------|-------|------------|--------|
 | 2026-11-12 | — | Fix plan তৈরি | `6c266db` |
 | 2026-11-12 | 0 (আংশিক) | 0.1 বাদ (draft ইচ্ছাকৃতভাবে মোছা), 0.2–0.6 শেষ, 0.7-এর Colab script তৈরি | `c380372` |
-| 2026-11-12 | 0 ✅ | 0.7 checkpoint audit শেষ; Phase 3B (multi-task retrain) বাধ্যতামূলক হিসেবে যোগ, phase-এর ক্রম বদল | (এই commit) |
+| 2026-11-12 | 0 ✅ | 0.7 checkpoint audit শেষ; Phase 3B (multi-task retrain) বাধ্যতামূলক হিসেবে যোগ, phase-এর ক্রম বদল | `47db4f5` |
+| 2026-11-12 | 1 (প্রায়) | `docs/corrected_claims.md` তৈরি (C1–C16 + Limitations); নতুন ফল: dataset-এর 95.2% hurricane; PHASE4_WRITING_PLAN.md বাদ | (এই commit) |
