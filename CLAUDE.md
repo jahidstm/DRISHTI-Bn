@@ -87,18 +87,28 @@ Differences < ~2.5pp are within seed variance (grouped split CLS-Only range 74.8
 ### XAI (21 samples, 7/class)
 - Overall: 17/21 = **81%** | SD: 7/7 | HR: 7/7 | AP: 3/7
 
-### Human Evaluation (100 samples, 3 annotators, blind A/B)
-> ⚠️ The numbers below come from a merge bug (A/B swap ignored) and are WRONG — see `docs/corrected_claims.md` C2/C11.
-> Replacing them here is pending the user's permission (DEFENSE_FIX_PLAN 1.20). Captions were from v2, not v3 (decision 3B.4 = keep, as limitation).
-| Dimension | Model | Ground Truth |
-|-----------|-------|--------------|
-| Fluency | 2.49/5 | 2.51/5 |
-| Adequacy | 2.11/5 | 2.21/5 |
-| Faithfulness | 2.17/5 | 2.30/5 |
+### Human Evaluation (100 samples, 3 annotators, blind A/B — correctly un-blinded)
+> Corrected 2026-11-12 with the user's approval (DEFENSE_FIX_PLAN 1.20). Source: `src/human_eval_unblind.py` →
+> `results/defense_fixes/phase1/human_eval_unblinded/`. Model captions are from the old v2 checkpoint, not v3
+> (decision 3B.4: kept as a limitation; v3 assessed with automatic metrics only).
 
-**Per-class (model):** SD(2.46, 2.12, 2.16) | HR(2.49, 2.12, 2.13) | AP(2.71, 2.08, 2.33)
+| Dimension | Model | Ground Truth | Wilcoxon p |
+|-----------|-------|--------------|------------|
+| Fluency | **1.58/5** | **3.42/5** | 2.1 × 10⁻¹⁷ |
+| Adequacy | **1.24/5** | **3.08/5** | 9.7 × 10⁻¹⁸ |
+| Faithfulness | **1.23/5** | **3.23/5** | 1.8 × 10⁻¹⁷ |
 
-**IAA:** Mean κ ≈ −0.000 | Krippendorff's α ≈ −0.052
+**Per-class (model F / A / Fa):** SD(1.63, 1.28, 1.29) | HR(1.53, 1.21, 1.16) | AP(1.46, 1.08, 1.08)
+
+**Preference:** GT preferred in 225 of 237 judgements (94.9%)
+
+**IAA:** pooled (model + GT, 200 items) Krippendorff's α = **0.38**, quadratic-weighted κ = 0.40 · within caption type ≈ 0
+
+Superseded (merge bug — A/B swap ignored): model 2.49 / 2.11 / 2.17, GT 2.51 / 2.21 / 2.30, κ ≈ −0.000, α ≈ −0.052.
+
+### Translation
+Bengali texts are **machine translations** of the CrisisMMD tweets (`monirbishal/en-bn-nmt`), NOT human-verified
+(user confirmed 2026-11-12). 8.9% were left untranslated; 97.3% contain URLs. Never write "human-verified translation".
 
 ---
 

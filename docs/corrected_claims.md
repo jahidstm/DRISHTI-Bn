@@ -165,7 +165,7 @@
   - Dataset-এ যাচাই না হওয়ার লক্ষণ: **333টা (8.9%) "Bengali" text-এ বাংলা অক্ষর ৩০%-এরও কম** — অর্থাৎ অনুবাদই হয়নি, ইংরেজি থেকে গেছে (যেমন `"E. Coli As as 135 times Secure Limit in Hustan Houses…"`)। আর 97.3%-এ URL রয়ে গেছে।
   - **যা সৎভাবে বলা যায় (English):**
     > "Translation quality was assessed on a subset: in the human evaluation, three native Bengali speakers rated 100 translated reference texts at 3.42/5 for fluency and 3.08/5 for adequacy. A further 8.9% of the corpus was left untranslated by the NMT system (`monirbishal/en-bn-nmt`)."
-  - ❓ June-এ preprocessing-এর সময় আলাদা কোনো যাচাই হয়ে থাকলে (কে, কতগুলো, কী ঠিক করেছিলেন) জানাবে — তাহলে সেটাও লেখা যাবে। না হলে "machine-translated + human verification" দাবি বাদ।
+  - ✅ **তোমার উত্তর (2026-11-12):** Dataset তৈরির সময় অনুবাদ আলাদাভাবে যাচাই করা হয়নি। তাই **"human-verified translation" দাবি পুরোপুরি বাদ।** থিসিসে শুধু "machine-translated (NMT)" লেখা হবে, ওপরের English লেখার মতো। Human eval-এ reference-এর score (3.42 / 3.08) অনুবাদের মানের পরোক্ষ ইঙ্গিত হিসেবে উল্লেখ করা যায়, কিন্তু "verification" বলা যাবে না।
 
 ### C11. Human eval-এর IAA — ✅ (C2-এর bug ঠিক করে আবার হিসাব)
 - **পুরনো দাবি:** Mean κ ≈ −0.000, α = −0.052 (ভুলভাবে align করা rating-এর ওপর)।

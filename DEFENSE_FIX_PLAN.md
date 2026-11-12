@@ -84,9 +84,9 @@
 - [x] **1.17 তোমার উত্তর:** Title-এ আপাতত "Flood" থাকবে, supervisor-এর সঙ্গে কথা বলে চূড়ান্ত (C16)। অনুবাদ যাচাই → 1.19 দেখো।
 - [x] **1.18 (নতুন) ViT-Only ও CrisisViT baseline-এ শুধু pooler train হয়েছিল** → C17 (Phase 3-এ আবার চালানো হচ্ছে)
 - [x] **1.19 (নতুন) Human eval-এর un-blinding bug ঠিক করা** → C2, C11। HTML tool A/B এলোমেলো করেছিল, merge script সব row-এ A = model ধরেছিল। [src/human_eval_unblind.py](src/human_eval_unblind.py) HTML থেকে আসল assignment পড়ে (৩০০ row-এর caption text যাচাই করা) আবার হিসাব করেছে → model 1.58 / 1.24 / 1.23 বনাম GT 3.42 / 3.08 / 3.23 (p < 10⁻¹⁶); GT পছন্দ 94.9%; pooled α = 0.38।
-- [ ] **1.20 তোমার উত্তর/অনুমতি লাগবে:**
-  - (ক) `annotator_*_responses.csv` আসলে caption-এর human eval, অনুবাদ যাচাই নয়। June-এ আলাদা কোনো অনুবাদ যাচাই হয়েছিল কি? (C10)
-  - (খ) CLAUDE.md-এর Human Evaluation অংশের পুরনো (ভুল) সংখ্যা সংশোধিত সংখ্যা দিয়ে বদলানোর অনুমতি।
+- [x] **1.20 তোমার উত্তর (2026-11-12):**
+  - (ক) অনুবাদ আলাদাভাবে যাচাই হয়নি → "human-verified translation" দাবি বাদ, শুধু "machine-translated" (C10; CLAUDE.md-এ Translation অংশ যোগ)।
+  - (খ) অনুমতি দেওয়া হয়েছে → CLAUDE.md-এর Human Evaluation অংশে সংশোধিত সংখ্যা বসানো হয়েছে (C2, C11)।
 
 **শেষ হওয়ার শর্ত:** 1.20-এর দুটো উত্তর।
 
@@ -96,19 +96,23 @@
 
 **সমস্যা:** CLS-Only (83.21%) test-এ **আসল tweet text** দেখে, Multi-Task (77.95%) দেখে **মডেলের বানানো caption**। দুটো তুলনা একই শর্তে নয়। আর demo-তে শুধু ছবি থাকে, tweet থাকে না।
 
-> **Phase 3B-এর পর অবস্থা:** Multi-task v3-এর দুই অবস্থা (আসল tweet 77.29%, generated caption 73.63%) 3B-তেই মাপা হয়ে গেছে। Phase 2-এ বাকি শুধু **CLS-only মডেল** (`cls_only_grouped_s42.pt`, grouped test n = 375) দিয়ে (খ) v3-এর generated caption আর (গ) placeholder text। Script Phase 3B.6-এর পর দেওয়া হবে।
+> **Phase 3B-এর পর অবস্থা:** Multi-task v3-এর দুই অবস্থা (আসল tweet 77.29%, generated caption 73.63%) 3B-তেই মাপা হয়ে গেছে। Phase 2-এ বাকি শুধু **CLS-only মডেল**।
 
-- [ ] **2.1 🖥️ `cls_only_grouped_s42.pt` তিনটা অবস্থায় evaluate করা** (grouped test set, n = 375; পুরনো `best_cls_only.pt` / n = 376 নয়):
-  - (ক) আসল tweet text দিয়ে — 83.21% আবার পাওয়া যায় কিনা (sanity check)
-  - (খ) **Phase 3B-এর নতুন** multi-task মডেলের generated caption দিয়ে (beam = 3) — পুরনো v2 নয়
-  - (গ) text ছাড়া / fixed placeholder text দিয়ে (image-only deployment-এর অবস্থা)
-- [ ] **2.2 🖥️ সেরা মডেলের confusion matrix** (অবস্থা ক) → নতুন figure।
+**Script:** [colab/phase2_fair_evaluation.py](colab/phase2_fair_evaluation.py) — training নেই, ~১০ মিনিট। লাগবে Drive-এ `models/cls_only_grouped_s42.pt` (Phase 3), `defense_fixes/phase3/grouped_split.csv`, `defense_fixes/phase3b/phase3b_per_sample.csv`।
+
+- [ ] **2.1 🖥️ `cls_only_grouped_s42.pt` পাঁচ অবস্থায় evaluate করা** (grouped test set, n = 375; পুরনো `best_cls_only.pt` / n = 376 নয়):
+  - (A) আসল tweet text — sanity check: Phase 3-এর 74.83% আবার আসা উচিত
+  - (B) Phase 3B-এর v3 generated caption (image-only pipeline)
+  - (C) খালি text (image-only, কোনো text নেই)
+  - (D) demo-র placeholder "বন্যা পরিস্থিতি" (`app.py` caption না পেলে এটা দেয়)
+  - (E) এলোমেলো tweet (অন্য sample-এর tweet) — মডেল text-এর ওপর কতটা নির্ভর করে
+- [ ] **2.2 🖥️ নতুন Figure 4.1** — CLS-Only, অবস্থা A, grouped test set।
 - [ ] **2.3 ফল সংরক্ষণ** → `results/defense_fixes/phase2/` + Result Log।
 
-📥 **Download (Colab থেকে):**
+📥 **Download (Drive-এর `DisasterNet/defense_fixes/phase2/` থেকে):**
 - `phase2_eval_summary.csv` → `results/defense_fixes/phase2/`
 - `phase2_per_sample.csv` → `results/defense_fixes/phase2/`
-- `figure_4_1b_confusion_matrix_best.png` → project root
+- `figure_4_1_confusion_matrix_grouped.png` → project root (পুরনো `figure_4_1_confusion_matrix.png` মুছবে না, Phase 5-এ সিদ্ধান্ত)
 
 **শেষ হওয়ার শর্ত:** তিন অবস্থার Macro F1 জানা গেছে; থিসিসে কোন সংখ্যা কোন শর্তে, সেটা স্পষ্ট।
 
@@ -255,4 +259,5 @@
 | 2026-11-12 | 3 (run শেষ) | ৭টা run-এর ফল সংরক্ষণ (3.2–3.4); corrected_claims-এ C5, C13, C14, C17, D1, D2 update | `4f29b97` |
 | 2026-11-12 | 3 ✅ · 3B (script) | ৩.৫ সিদ্ধান্ত: মূল সংখ্যা 75.69 ± 1.33%; Phase 5.1-এ CLAUDE.md-এর খসড়া; Phase 3B Colab script তৈরি ও লোকালি যাচাই | `36c3cfb` |
 | 2026-11-12 | 3B (run শেষ) | v3-এর ফল সংরক্ষণ (3B.1–3B.3); C1 প্রতিস্থাপন, নতুন C18 (caption = tweet-অনুকরণ), C9-এ multi-task parameter; 3B.6 (metric পুনর্হিসাব) যোগ | `0288960` |
-| 2026-11-12 | 3B ✅ · 5.1 (আংশিক) | 3B.6 শেষ (sacreBLEU/chrF + তুচ্ছ baseline); 3B.4 = (ক), 3B.5 = হ্যাঁ; CLAUDE.md-এ অনুমোদিত সংখ্যা বসানো; Colab-এর download করা ফাইল যোগ | (এই commit) |
+| 2026-11-12 | 3B ✅ · 5.1 (আংশিক) | 3B.6 শেষ (sacreBLEU/chrF + তুচ্ছ baseline); 3B.4 = (ক), 3B.5 = হ্যাঁ; CLAUDE.md-এ অনুমোদিত সংখ্যা বসানো; Colab-এর download করা ফাইল যোগ | `14ccbeb` |
+| 2026-11-12 | 1 ✅ · 2 (script) | ১.২০-এর উত্তর: human eval-এর সঠিক সংখ্যা CLAUDE.md-এ, "human-verified translation" দাবি বাদ; Phase 2 Colab script তৈরি | (এই commit) |
