@@ -172,19 +172,6 @@ Superseded (do NOT use): `figure_4_1_confusion_matrix.png` (v2), `figure_4_2_bas
 `figure_4_4_gradcam_examples.png` (blank Grad-CAM), `figure_4_5_crossattn_examples.png` (untrained decoder),
 `figure_4_6_rollout_examples.png`, `figure_4_7_integrated_xai.png`, `figure_4_8_calibration_diagram.png` — kept under `figures_superseded/`.
 
-------|---------|
-| `figure_3_1_architecture.png` | DRISHTI-Bn architecture |
-| `figure_2_1_lora.png` | LoRA injection diagram |
-| `figure_3_3_xai_pipeline.png` | XAI pipeline flowchart |
-| `figure_4_1_confusion_matrix.png` | Confusion matrix (n=376) — ⚠️ from v2, superseded; new: `results/defense_fixes/phase3b/phase3b_confusion_matrix.png` |
-| `figure_4_2_baseline_comparison.png` | Baseline bar chart — ⚠️ old numbers, must be redrawn (Phase 5) |
-| `figure_4_3_ablation_study.png` | Ablation bar chart — ⚠️ original split; relabel per C4–C6 (Phase 5) |
-| `figure_4_4_gradcam_examples.png` | Grad-CAM (samples 003,012,016) |
-| `figure_4_5_crossattn_examples.png` | Cross-Attention examples |
-| `figure_4_6_rollout_examples.png` | Attention Rollout examples |
-| `figure_4_7_integrated_xai.png` | Integrated XAI comparison |
-| `figure_4_8_calibration_diagram.png` | Calibration reliability diagram |
-
 ---
 
 ## Model & Dataset Info
