@@ -6,19 +6,15 @@
 
 ---
 
-## ১. ধাপগুলো
+## ১. ধাপগুলো (সহজ পথ)
 
-1. `python src/bd_fetch_wikimedia.py` → ছবি নামবে, `bd_external/bd_labels.csv` আর `bd_external/review.html` তৈরি হবে।
-2. `review.html` browser-এ খোলো — প্রতিটা ছবির নিচে তার `image_id` (যেমন `BD017`)।
-3. `bd_labels.csv` Excel / Google Sheets-এ খোলো।
-   - **Labeller A** শুধু `label_a` column পূরণ করবে, **Labeller B** শুধু `label_b` — আলাদা কপিতে কাজ করে পরে একটা ফাইলে মেলাও, যাতে কেউ অন্যেরটা না দেখে।
-4. দুজনের কাজ শেষে: যেখানে `label_a` = `label_b`, সেটাই `final_label`; যেখানে আলাদা, দুজন একসঙ্গে দেখে ঠিক করো (আর `notes`-এ কারণ লেখো)।
-5. (ঐচ্ছিক) `description_bn` — নিচের §৪ দেখো।
-6. `python src/bd_external_eval.py` → ফল `results/bd_external/`-এ।
-
-> **লক্ষ্য:** প্রতি class-এ অন্তত ~২৫–৩০টা ছবি। কোনো class-এ কম পড়লে নিজের তোলা বা অন্য CC-licensed ছবি যোগ করা যায় (§৫)।
-
----
+1. ✅ ছবি নামানো হয়ে গেছে (৪১৯টা) — `data/bd_external/images/`।
+2. ✅ বন্ধুদের জন্য প্যাকেজ তৈরি — `data/bd_external/BD_labelling_package.zip` (`python src/bd_make_label_package.py`)।
+3. **একই ZIP দুজনকেই পাঠাও** (WhatsApp/Drive)। দুজনেই **সব ৪১৯টা ছবি** লেবেল করবে — ভাগ করে নয় (দুজনের উত্তর মিলিয়েই মান মাপা হয়)।
+4. প্রত্যেকে: ZIP unzip → `লেবেলিং_শুরু_করুন.html` Chrome/Edge-এ খোলো → নাম লেখো → প্রতিটা ছবিতে বোতাম চাপো (বা 1/2/3/4) → শেষে "ফলাফল ডাউনলোড" → `labels_<নাম>.csv` ফেরত পাঠাও।
+5. দুটো ফাইল `bd_external/`-এ রাখো → `python src/bd_merge_labels.py` → মতভেদের ছবি `bd_external/disagreements.html`-এ।
+6. মতভেদগুলো দুজন একসঙ্গে দেখে `bd_labels.csv`-এর `final_label`-এ লেখো (Excel-এ)।
+7. Drive থেকে `models/cls_only_grouped_s42.pt` → `models/`; তারপর `python src/bd_external_eval.py --no-captions`।
 
 ## ২. লেবেল (একটাই বেছে নাও)
 
