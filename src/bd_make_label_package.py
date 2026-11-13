@@ -1,10 +1,9 @@
 """
 BD external test set — make the labelling package for the two labellers
 =======================================================================
-Creates ONE zip to send to each labeller (same zip for both):
-  BD_labelling_package.zip
-    ├── লেবেলিং_শুরু_করুন.html   <- open this in Chrome/Edge, click buttons, download the result
-    └── images/BD001.jpg ...     (480 px copies)
+Creates ONE self-contained file to send to each labeller (same file for both):
+  data/bd_external/BD_labelling_tool.html   (~25 MB; all images embedded, nothing to unzip)
+Open it in Chrome/Edge, click buttons, download the result.
 
 The labeller clicks SD / HR / AP / EX (or keys 1-4) for every image, then presses
 "ফলাফল ডাউনলোড" and sends back the file  labels_<name>.csv .
@@ -12,7 +11,7 @@ Progress is saved in the browser automatically (they can close and continue late
 
 Usage: python src/bd_make_label_package.py
 """
-import os, sys, json, zipfile, io
+import os, sys, json, io, base64
 import pandas as pd
 from PIL import Image
 
@@ -22,10 +21,15 @@ if hasattr(sys.stdout, "reconfigure"):
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSV = os.path.join(ROOT, "bd_external", "bd_labels.csv")
 IMG = os.path.join(ROOT, "data", "bd_external", "images")
-OUT = os.path.join(ROOT, "data", "bd_external", "BD_labelling_package.zip")
+OUT = os.path.join(ROOT, "data", "bd_external", "BD_labelling_tool.html")
 
 df = pd.read_csv(CSV, dtype=str, keep_default_na=False)
-items = [{"id": r.image_id, "f": f"images/{r.file}"} for r in df.itertuples()]
+def b64(fname):
+    im = Image.open(os.path.join(IMG, fname)).convert("RGB"); im.thumbnail((480, 480))
+    buf = io.BytesIO(); im.save(buf, "JPEG", quality=82)
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+
+items = [{"id": r.image_id, "f": b64(r.file)} for r in df.itertuples()]
 
 HTML = r"""<!doctype html><html lang="bn"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -54,7 +58,7 @@ details li{margin:4px 0}.hint{font-size:13px;color:var(--mute)}
 </style></head><body>
 <header><b>ছবি লেবেলিং</b><span id="who"></span><div class="bar"><i id="prog"></i></div><span id="cnt"></span></header>
 <main>
- <div class="img"><div class="id" id="iid"></div><img id="pic" alt=""><div class="hint">কীবোর্ড: 1 = SD · 2 = HR · 3 = AP · 4 = EX · ← → আগের/পরের ছবি</div></div>
+ <div class="img"><div class="id" id="iid"></div><img id="pic" alt=""><div id="last" class="hint" style="color:#2e9d5b;font-weight:600;min-height:18px"></div><div class="hint">বোতাম চাপলে উত্তর সেভ হয়ে পরের ছবি আসবে। ভুল হলে "← আগের" চেপে ঠিক করুন। কীবোর্ড: 1 = SD · 2 = HR · 3 = AP · 4 = EX · ← → আগের/পরের ছবি</div></div>
  <div class="side">
   <button class="lab sd" data-l="SD"><b>1 · SD — ক্ষয়ক্ষতি</b><span>ভাঙা/ডুবে যাওয়া ঘরবাড়ি, রাস্তা, সেতু, গাছ পড়া, নষ্ট গাড়ি/নৌকা</span></button>
   <button class="lab hr" data-l="HR"><b>2 · HR — উদ্ধার/ত্রাণ</b><span>উদ্ধারকাজ, ত্রাণ বিতরণ, ত্রাণের প্যাকেট, স্বেচ্ছাসেবক, মেডিকেল ক্যাম্প</span></button>
@@ -73,7 +77,7 @@ details li{margin:4px 0}.hint{font-size:13px;color:var(--mute)}
 </main>
 <script>
 const ITEMS = __ITEMS__;
-const KEY = "bd_labels_v1";
+const KEY = "bd_labels_v2";
 let st = JSON.parse(localStorage.getItem(KEY) || "{}");
 st.labels = st.labels || {}; st.i = st.i || 0;
 while (!st.name) { st.name = (prompt("আপনার নাম লিখুন (ইংরেজিতে, যেমন Rafi):") || "").trim(); }
@@ -87,7 +91,11 @@ function show() {
   $("#who").textContent = "লেবেলার: " + st.name; save();
 }
 function go(d) { st.i = Math.max(0, Math.min(ITEMS.length - 1, st.i + d)); show(); }
-function label(l) { st.labels[ITEMS[st.i].id] = l; if (st.i < ITEMS.length - 1) st.i++; show(); }
+function label(l) {
+  const id = ITEMS[st.i].id; st.labels[id] = l;
+  $("#last").textContent = `✔ ${id} → ${l} সেভ হয়েছে`;
+  if (st.i < ITEMS.length - 1) st.i++; show();
+}
 document.querySelectorAll(".lab").forEach(b => b.onclick = () => label(b.dataset.l));
 $("#prev").onclick = () => go(-1); $("#next").onclick = () => go(1);
 $("#skip").onclick = () => { const k = ITEMS.findIndex(x => !st.labels[x.id]); if (k >= 0) { st.i = k; show(); } };
@@ -106,10 +114,6 @@ $("#dl").onclick = () => {
 show();
 </script></body></html>"""
 
-with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
-    z.writestr("লেবেলিং_শুরু_করুন.html", HTML.replace("__ITEMS__", json.dumps(items)))
-    for r in df.itertuples():
-        im = Image.open(os.path.join(IMG, r.file)).convert("RGB"); im.thumbnail((480, 480))
-        buf = io.BytesIO(); im.save(buf, "JPEG", quality=85)
-        z.writestr(f"images/{r.file}", buf.getvalue())
-print(f"[+] {len(items)} images -> {OUT} ({os.path.getsize(OUT) / 1e6:.1f} MB)")
+with open(OUT, "w", encoding="utf-8") as f:
+    f.write(HTML.replace("__ITEMS__", json.dumps(items)))
+print(f"[+] {len(items)} images embedded -> {OUT} ({os.path.getsize(OUT) / 1e6:.1f} MB)")

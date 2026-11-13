@@ -9,9 +9,9 @@
 ## ১. ধাপগুলো (সহজ পথ)
 
 1. ✅ ছবি নামানো হয়ে গেছে (৪১৯টা) — `data/bd_external/images/`।
-2. ✅ বন্ধুদের জন্য প্যাকেজ তৈরি — `data/bd_external/BD_labelling_package.zip` (`python src/bd_make_label_package.py`)।
-3. **একই ZIP দুজনকেই পাঠাও** (WhatsApp/Drive)। দুজনেই **সব ৪১৯টা ছবি** লেবেল করবে — ভাগ করে নয় (দুজনের উত্তর মিলিয়েই মান মাপা হয়)।
-4. প্রত্যেকে: ZIP unzip → `লেবেলিং_শুরু_করুন.html` Chrome/Edge-এ খোলো → নাম লেখো → প্রতিটা ছবিতে বোতাম চাপো (বা 1/2/3/4) → শেষে "ফলাফল ডাউনলোড" → `labels_<নাম>.csv` ফেরত পাঠাও।
+2. ✅ বন্ধুদের জন্য একটাই ফাইল — `data/bd_external/BD_labelling_tool.html` (২৩ MB, সব ছবি ভেতরে; `python src/bd_make_label_package.py`)।
+3. **একই HTML ফাইল দুজনকেই পাঠাও** (WhatsApp/Drive)। দুজনেই **সব ৪১৯টা ছবি** লেবেল করবে — ভাগ করে নয় (দুজনের উত্তর মিলিয়েই মান মাপা হয়)।
+4. প্রত্যেকে: ফাইলটা download করে Chrome/Edge-এ খোলো (unzip লাগবে না) → নাম লেখো → প্রতিটা ছবিতে বোতাম চাপো (বা 1/2/3/4) → শেষে "ফলাফল ডাউনলোড" → `labels_<নাম>.csv` ফেরত পাঠাও।
 5. দুটো ফাইল `bd_external/`-এ রাখো → `python src/bd_merge_labels.py` → মতভেদের ছবি `bd_external/disagreements.html`-এ।
 6. মতভেদগুলো দুজন একসঙ্গে দেখে `bd_labels.csv`-এর `final_label`-এ লেখো (Excel-এ)।
 7. Drive থেকে `models/cls_only_grouped_s42.pt` → `models/`; তারপর `python src/bd_external_eval.py --no-captions`।
