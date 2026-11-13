@@ -229,6 +229,17 @@
 
 ---
 
+## Phase 6 (ঐচ্ছিক) — BD external test set (domain shift)
+
+**উদ্দেশ্য:** US/Caribbean hurricane-এ train করা মডেল বাংলাদেশের বন্যা/ঘূর্ণিঝড়ের ছবিতে কতটা কাজ করে — শুধু test, কোনো training নয়। Paper-এর জন্য মূল নতুন অবদান; থিসিসে "preliminary external validation" (সময় থাকলে)।
+
+- [x] **6.1 ছবি সংগ্রহ (automatic)** — [src/bd_fetch_wikimedia.py](src/bd_fetch_wikimedia.py): Wikimedia Commons-এর ৬টা category থেকে **৪১৯টা CC/public-domain candidate** (Sidr 212, Floods in Bangladesh 105, Amphan 49, Aila 22, 2017 South Asian floods 22, Remal 9), উৎস/লেখক/লাইসেন্সসহ → `bd_external/bd_labels.csv` + `bd_external/review.html`। ছবি `data/bd_external/images/` (git-এ নয়)। অনুমান: satellite/মানচিত্র/ভারতের ছবি বাদে ব্যবহারযোগ্য ~২০০–২৫০; `AP` কম পড়তে পারে।
+- [ ] **6.2 🧑 Labelling (তোমার + একজন)** — [docs/bd_external_labelling_guide.md](docs/bd_external_labelling_guide.md); দুজন আলাদাভাবে `label_a` / `label_b`, মতভেদ মিটিয়ে `final_label`; ঐচ্ছিক `description_bn` (মানুষের লেখা)। **AI দিয়ে লেবেল বা বর্ণনা নয়।** জনপ্রতি ~১–১.৫ ঘণ্টা।
+- [ ] **6.3 Evaluation (laptop, CPU)** — [src/bd_external_eval.py](src/bd_external_eval.py): κ, CrisisMMD-duplicate check (dHash), Macro F1 + 95% bootstrap CI, CrisisMMD-এর 74.83%-এর সঙ্গে পার্থক্য, Grad-CAM figure, ঐচ্ছিক caption-বনাম-মানুষের-বর্ণনা (sacreBLEU/chrF + shuffled baseline)। নকল label আর random weight দিয়ে চালিয়ে script যাচাই করা। লাগবে Drive থেকে `models/cls_only_grouped_s42.pt` (+ caption-এর জন্য `drishti_multitask_v3.pt`)।
+- [ ] **6.4 সিদ্ধান্ত:** labelling ~১ সপ্তাহের মধ্যে শেষ হলে থিসিসে যোগ; না হলে future work, defense-এর পর paper-এর জন্য।
+
+---
+
 ## Result Log
 
 > Colab থেকে paste করা ফল এখানে সংক্ষেপে জমা হবে। পূর্ণ output থাকবে `results/defense_fixes/<phase>/`-এ।
@@ -267,4 +278,5 @@
 | 2026-11-12 | 2 ✅ | Phase 2-এর ফল সংরক্ষণ; নতুন C19 (classifier text প্রায় ব্যবহার করে না), C13 চূড়ান্ত; demo-র পরামর্শ 5.4-এ | `8b629b2` |
 | 2026-11-12 | 4 (script) | T*-এর অমিলের কারণ (integrated pipeline-এর নিজস্ব split) আর পুরনো Grad-CAM-এর শূন্য-gradient bug ধরা; Phase 4 Colab script (calibration, ঠিক Grad-CAM, Rollout, v3 cross-attention, faithfulness test) | `6f55911` |
 | 2026-11-12 | 4 ✅ | Phase 4-এর ফল: T* = 1.1349, ECE 2.57→2.99%; ঠিক করা Grad-CAM faithful (random-এর ~২০ গুণ), Rollout দুর্বল, cross-attention ≈ random; C3, C7, C8, C20 চূড়ান্ত | `59ae7a2` |
-| 2026-11-12 | 5 ✅ | CLAUDE.md চূড়ান্ত; README পুনর্লিখন; demo নতুন (CLS-only + v3 + Grad-CAM, hardcoded caption সরানো); Figure 4.2 / 4.3 / 4.9; পুরনো figure `figures_superseded/`-এ; defense Q&A | (এই commit) |
+| 2026-11-12 | 5 ✅ | CLAUDE.md চূড়ান্ত; README পুনর্লিখন; demo নতুন (CLS-only + v3 + Grad-CAM, hardcoded caption সরানো); Figure 4.2 / 4.3 / 4.9; পুরনো figure `figures_superseded/`-এ; defense Q&A | `6698abd` |
+| 2026-11-13 | 6 (ঐচ্ছিক, শুরু) | BD external test set: Wikimedia downloader (৪১৯ candidate), labelling নির্দেশিকা, CPU evaluation script | (এই commit) |
