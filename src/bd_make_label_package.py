@@ -58,7 +58,7 @@ details li{margin:4px 0}.hint{font-size:13px;color:var(--mute)}
 </style></head><body>
 <header><b>ছবি লেবেলিং</b><span id="who"></span><div class="bar"><i id="prog"></i></div><span id="cnt"></span></header>
 <main>
- <div class="img"><div class="id" id="iid"></div><img id="pic" alt=""><div id="last" class="hint" style="color:#2e9d5b;font-weight:600;min-height:18px"></div><div class="hint">বোতাম চাপলে উত্তর সেভ হয়ে পরের ছবি আসবে। ভুল হলে "← আগের" চেপে ঠিক করুন। কীবোর্ড: 1 = SD · 2 = HR · 3 = AP · 4 = EX · ← → আগের/পরের ছবি</div></div>
+ <div class="img"><div class="id" id="iid"></div><img id="pic" alt=""><div id="last" class="hint" style="color:#2e9d5b;font-weight:600;min-height:18px"></div><div class="hint">একটা বোতাম বেছে নিন (রঙিন হবে), তারপর "পরের →" চাপুন। মত বদলালে অন্য বোতাম চাপুন। কীবোর্ড: 1 = SD · 2 = HR · 3 = AP · 4 = EX · → বা Enter = পরের · ← = আগের</div></div>
  <div class="side">
   <button class="lab sd" data-l="SD"><b>1 · SD — ক্ষয়ক্ষতি</b><span>ভাঙা/ডুবে যাওয়া ঘরবাড়ি, রাস্তা, সেতু, গাছ পড়া, নষ্ট গাড়ি/নৌকা</span></button>
   <button class="lab hr" data-l="HR"><b>2 · HR — উদ্ধার/ত্রাণ</b><span>উদ্ধারকাজ, ত্রাণ বিতরণ, ত্রাণের প্যাকেট, স্বেচ্ছাসেবক, মেডিকেল ক্যাম্প</span></button>
@@ -90,18 +90,18 @@ function show() {
   $("#cnt").textContent = `${n} / ${ITEMS.length} সম্পন্ন`; $("#prog").style.width = (100 * n / ITEMS.length) + "%";
   $("#who").textContent = "লেবেলার: " + st.name; save();
 }
-function go(d) { st.i = Math.max(0, Math.min(ITEMS.length - 1, st.i + d)); show(); }
+function go(d) { st.i = Math.max(0, Math.min(ITEMS.length - 1, st.i + d)); $("#last").textContent = ""; show(); }
 function label(l) {
   const id = ITEMS[st.i].id; st.labels[id] = l;
-  $("#last").textContent = `✔ ${id} → ${l} সেভ হয়েছে`;
-  if (st.i < ITEMS.length - 1) st.i++; show();
+  $("#last").textContent = `✔ ${id} → ${l} সেভ হয়েছে — পরের ছবিতে যেতে "পরের →" চাপুন`;
+  show();
 }
 document.querySelectorAll(".lab").forEach(b => b.onclick = () => label(b.dataset.l));
 $("#prev").onclick = () => go(-1); $("#next").onclick = () => go(1);
 $("#skip").onclick = () => { const k = ITEMS.findIndex(x => !st.labels[x.id]); if (k >= 0) { st.i = k; show(); } };
 document.addEventListener("keydown", e => {
   const m = {"1": "SD", "2": "HR", "3": "AP", "4": "EX"};
-  if (m[e.key]) label(m[e.key]); else if (e.key === "ArrowLeft") go(-1); else if (e.key === "ArrowRight") go(1);
+  if (m[e.key]) label(m[e.key]); else if (e.key === "ArrowLeft") go(-1); else if (e.key === "ArrowRight" || e.key === "Enter") go(1);
 });
 $("#dl").onclick = () => {
   const left = ITEMS.filter(x => !st.labels[x.id]).length;
