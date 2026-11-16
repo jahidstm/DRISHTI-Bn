@@ -11,6 +11,7 @@ This script keeps the same 21 random samples and selects the rows by a fixed, st
 All 21 samples remain in the appendix figure (results/defense_fixes/phase4/xai_all_21_samples.png).
 
 Needs: models/cls_only_grouped_s42.pt, models/drishti_multitask_v3.pt, data/processed/.
+Output: figures/figure_4_4..4_7_*.png
 Usage: python src/make_xai_main_figures.py        (~2 min on CPU)
 """
 import os, sys
@@ -162,8 +163,8 @@ def grid(cols, path, title):
 
 
 ALL = [("Image", None), ("Grad-CAM", "_g"), ("Attention Rollout", "_r"), ("Cross-attn (v3 decoder)", "_c")]
-grid(ALL[:2], os.path.join(ROOT, "figure_4_4_gradcam_grouped.png"), "Grad-CAM (CLS-Only, predicted class)")
-grid([ALL[0], ALL[3]], os.path.join(ROOT, "figure_4_5_crossattn_grouped.png"),
+grid(ALL[:2], os.path.join(ROOT, "figures", "figure_4_4_gradcam_grouped.png"), "Grad-CAM (CLS-Only, predicted class)")
+grid([ALL[0], ALL[3]], os.path.join(ROOT, "figures", "figure_4_5_crossattn_grouped.png"),
      "Cross-attention of the v3 caption decoder (auxiliary)")
-grid([ALL[0], ALL[2]], os.path.join(ROOT, "figure_4_6_rollout_grouped.png"), "Attention Rollout (CLS-Only)")
-grid(ALL, os.path.join(ROOT, "figure_4_7_integrated_xai_grouped.png"), "Integrated XAI comparison")
+grid([ALL[0], ALL[2]], os.path.join(ROOT, "figures", "figure_4_6_rollout_grouped.png"), "Attention Rollout (CLS-Only)")
+grid(ALL, os.path.join(ROOT, "figures", "figure_4_7_integrated_xai_grouped.png"), "Integrated XAI comparison")

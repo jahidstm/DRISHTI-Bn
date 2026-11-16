@@ -149,7 +149,7 @@ Bengali texts are **machine translations** of the CrisisMMD tweets (`monirbishal
 | `human_eval_outputs/human_eval_report.md` | Human eval full report |
 | `human_eval_outputs/iaa_scores.csv` | IAA scores |
 
-## Generated Figures (all in project root) — use the `_grouped` / new versions in the thesis
+## Generated Figures (all in `figures/`) — use the `_grouped` / new versions in the thesis
 | File | Content |
 |------|---------|
 | `figure_1_1_flood_stats.png` | Flood statistics (introduction) |

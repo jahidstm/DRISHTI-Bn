@@ -48,7 +48,7 @@ ax.set_xlim(65, 78); ax.set_xticks(range(65, 79, 2))
 ax.set_xlabel("Macro F1 (%) on the grouped test set (n = 375)")
 ax.xaxis.grid(True, color=GRID, zorder=0); ax.set_axisbelow(True)
 plt.tight_layout()
-plt.savefig(R("figure_4_2_baseline_comparison_grouped.png"), bbox_inches="tight"); plt.close()
+plt.savefig(R("figures", "figure_4_2_baseline_comparison_grouped.png"), bbox_inches="tight"); plt.close()
 
 # ---------------------------------------------------------------- Fig 4.3
 abl = [("No-LoRA (head only)", 77.74, GRAY), ("LoRA r = 4", 79.41, GRAY), ("LoRA r = 16", 79.14, GRAY),
@@ -65,7 +65,7 @@ ax.annotate("", xy=(83.21, 5.42), xytext=(81.47, 5.42),
             arrowprops=dict(arrowstyle="<->", color=INK, lw=1))
 ax.text(82.34, 5.55, "same config:\n1.74 pp apart", ha="center", va="bottom", fontsize=8.5, color=INK)
 plt.tight_layout()
-plt.savefig(R("figure_4_3_ablation_original_split.png"), bbox_inches="tight"); plt.close()
+plt.savefig(R("figures", "figure_4_3_ablation_original_split.png"), bbox_inches="tight"); plt.close()
 
 # ---------------------------------------------------------------- Fig 4.9
 fa = pd.read_csv(R("results", "defense_fixes", "phase4", "phase4_faithfulness.csv"))
@@ -87,6 +87,6 @@ for ax in axes:
     ax.yaxis.grid(True, color=GRID, zorder=0); ax.set_axisbelow(True)
 axes[0].set_title("(a) Confidence drop", fontsize=11); axes[1].set_title("(b) Accuracy", fontsize=11)
 plt.tight_layout()
-plt.savefig(R("figure_4_9_faithfulness_deletion.png"), bbox_inches="tight"); plt.close()
+plt.savefig(R("figures", "figure_4_9_faithfulness_deletion.png"), bbox_inches="tight"); plt.close()
 print("[+] Saved figure_4_2_baseline_comparison_grouped.png, figure_4_3_ablation_original_split.png, "
       "figure_4_9_faithfulness_deletion.png")
