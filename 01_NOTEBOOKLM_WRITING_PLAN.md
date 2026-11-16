@@ -648,7 +648,7 @@ Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completel
 
 SECTION: Write "3.3 Dataset Construction" with a two-sentence lead-in, then "3.3.1 Source Data and Class Definition".
 TARGET LENGTH: 310–350 words (including the lead-in).
-CONTENT: CrisisMMD v2.0 and its humanitarian categories; mapping of the CrisisMMD categories into three classes (fact sheet §2.1); excluded categories; resulting 3,755 images and class shares; event composition (95.2% hurricanes, 4.8% Sri Lanka floods, no Bangladeshi images) — explain why the thesis says "disaster images" rather than "flood images"; class imbalance (Affected People 8.8%).
+CONTENT: CrisisMMD v2.0 and its humanitarian categories; mapping of the CrisisMMD categories into three classes (fact sheet §2.1); excluded categories; resulting 3,755 images and class shares; event composition (95.2% hurricanes, 4.8% Sri Lanka floods; only 71 samples, 1.9%, have tweets mentioning Bangladesh or Cyclone Mora — never write "no images from Bangladesh") — explain why the thesis says "disaster images" rather than "flood images"; class imbalance (Affected People 8.8%).
 PLACEHOLDERS: [TABLE 3.1: Mapping of CrisisMMD humanitarian categories to the three classes of this study, with image counts]
 CITATIONS: Include 1–2 [REF] placeholders.
 ```
@@ -759,7 +759,7 @@ Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completel
 
 SECTION: 3.6.2 Optimization and Hyperparameters
 TARGET LENGTH: 230–270 words.
-CONTENT: AdamW (lr 1 × 10⁻⁴, weight decay 0.01), cosine annealing, batch 16, mixed precision; CLS-Only 10 epochs, checkpoint with best validation Macro F1, seeds 42/123/2024; Multi-Task 15 epochs, checkpoint with lowest validation total loss (epoch 4), seed 42; the test set is used only once per final model.
+CONTENT: AdamW (lr 1 × 10⁻⁴, weight decay 0.01), cosine annealing, batch 16, mixed precision; CLS-Only 10 epochs, checkpoint with best validation Macro F1, seeds 42/123/2024; Multi-Task 15 epochs, checkpoint with lowest validation total loss (epoch 4), seed 42; the test set was never used for training, checkpoint selection or hyperparameter choice (do not write that it was evaluated only once — the seed-42 model was analyzed on it several times).
 PLACEHOLDERS: [TABLE 3.4: Training hyperparameters of the CLS-Only and Multi-Task models]
 CITATIONS: Include 1–2 [REF] placeholders (AdamW / cosine schedule if available; otherwise [REF]).
 ```
@@ -1039,7 +1039,7 @@ Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completel
 
 SECTION: 4.8.3 Agreement Between Explanation Methods
 TARGET LENGTH: 160–200 words.
-CONTENT: top-10% patch IoU — Grad-CAM vs Rollout 0.148 (2.7× chance), Grad-CAM vs decoder cross-attention 0.059 (chance 0.054); so the caption decoder looks at different regions than the classifier uses; cross-attention is therefore reported only as an explanation of text generation.
+CONTENT: top-10% patch IoU, mean over the 21 qualitative samples (not all 375) — Grad-CAM vs Rollout 0.148 (2.7× chance), Grad-CAM vs decoder cross-attention 0.059 (chance 0.054); so the caption decoder looks at different regions than the classifier uses; cross-attention is therefore reported only as an explanation of text generation.
 CITATIONS: Include 0–1 [REF] placeholders.
 ```
 

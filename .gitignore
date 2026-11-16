@@ -13,3 +13,8 @@ __pycache__/
 venv/
 .env
 results/bd_external/*.png
+
+# thesis prose stays local (public repo would show up in Turnitin)
+thesis_build/
+DRISTHI-Bn thesis writing.md
+*.thesis.md

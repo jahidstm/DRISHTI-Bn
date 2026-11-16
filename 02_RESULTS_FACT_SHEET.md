@@ -26,7 +26,7 @@
 
 ### 2.1 Source and classes
 - Source: **CrisisMMD v2.0** (Alam et al., 2018) — tweets with images from 2017 disasters, annotated with humanitarian categories.
-- Events in the final corpus: **95.2% hurricanes** (Harvey, Irma, Maria; United States and Caribbean) and **4.8% Sri Lanka floods**. **No images from Bangladesh** in training data.
+- Events in the final corpus: **95.2% hurricanes** (Harvey, Irma, Maria; United States and Caribbean) and **4.8% Sri Lanka floods**. Bangladesh is almost absent: only **71 samples (1.9%)** have tweets that mention Bangladesh or Cyclone Mora (62 of them in CrisisMMD's Sri Lanka floods event, which also covered Cyclone Mora in May 2017; 50 train / 6 val / 15 test). Whether these images were taken in Bangladesh was not verified. Never write that the corpus contains "no images from Bangladesh".
 - Class mapping from CrisisMMD humanitarian categories:
 
 | Class (this study) | CrisisMMD categories merged | Images | Share |
@@ -209,7 +209,7 @@ The 16 × 16 patches ranked highest by each map are removed (set to zero after n
 → Grad-CAM identifies the regions the classifier relies on (≈ 20× the effect of random patches at 10%); Rollout is weak.
 
 ### 7.4 Agreement between methods (top-10% patch IoU)
-Grad-CAM vs Rollout 0.148 (2.7× chance) · Grad-CAM vs decoder cross-attention 0.059 (≈ chance level 0.054) → cross-attention does not explain the classification decision.
+Mean over the **21 qualitative samples** (not the full test set): Grad-CAM vs Rollout 0.148 (2.7× chance) · Grad-CAM vs decoder cross-attention 0.059 (≈ chance level 0.054 for two random top-10% selections) → cross-attention does not explain the classification decision.
 
 ## 8. Calibration (CLS-Only seed 42; temperature fitted on validation n = 373 by NLL; test n = 375; 10 bins)
 | Metric | Before (T = 1) | After temperature scaling (T* = 1.1349) |
@@ -240,7 +240,7 @@ Grad-CAM vs Rollout 0.148 (2.7× chance) · Grad-CAM vs decoder cross-attention 
 | Confusion (rows SD, HR, AP) | [100, 1, 1] · [4, 172, 12] · [7, 8, 20] |
 | Mean confidence correct / wrong | 0.884 / 0.726 |
 
-Sensitivity to the reference labels (same predictions): annotator 1 only 81.65% · annotator 2 only 81.36% · **annotator 3 only 55.82%** · unanimous images only 86.93% (n = 179). Most disagreement is on the Humanitarian Rescue vs Affected People boundary.
+Sensitivity to the reference labels (same predictions; each annotator's own exclusions removed): annotator 1 only 81.65% (n = 319) · annotator 2 only 81.36% (n = 322) · **annotator 3 only 55.82% (n = 321)** · unanimous images only 86.93% (n = 179). Most disagreement is on the Humanitarian Rescue vs Affected People boundary.
 Interpretation: **no performance drop is observed** on this small set, but the estimate depends strongly on the annotator; it is **not a measure of domain shift** (label source and image style differ from CrisisMMD; Wikimedia photos are more professional than social-media images).
 
 ---
@@ -275,7 +275,7 @@ Interpretation: **no performance drop is observed** on this small set, but the e
 6. Human evaluation used the earlier v2 captions; 3 annotators without a calibration session; agreement fair (α = 0.38).
 7. Class imbalance: Affected People only 8.8% of the data.
 8. Temperature scaling fitted on a small validation set (n = 373).
-9. Training data are mostly US/Caribbean hurricanes; the Bangladesh test is small (n = 325, AP 35), uses Wikimedia rather than social-media images, has no text, and depends on the annotator (one annotator is the researcher).
+9. Training data are mostly US/Caribbean hurricanes (Bangladesh-related tweets only 1.9%); the Bangladesh test is small (n = 325, AP 35), uses Wikimedia rather than social-media images, has no text, and depends on the annotator (one annotator is the researcher).
 10. Single dataset, single GPU budget; no comparison with large vision-language models.
 
 ## 13. Figures available (file → number in the thesis)

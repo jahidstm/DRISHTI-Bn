@@ -32,7 +32,7 @@ an annotator-dependent, preliminary external check.
 |------|--------|
 | Source | CrisisMMD v2.0 (Alam et al.), humanitarian-category images |
 | Size | 3,755 images: Severe_Damage 2,240 · Humanitarian_Rescue 1,185 · Affected_People 330 (8.8%) |
-| Events | 95.2% hurricanes (Harvey, Maria, Irma, US/Caribbean), 4.8% Sri Lanka floods; **no Bangladeshi images** in training |
+| Events | 95.2% hurricanes (Harvey, Maria, Irma, US/Caribbean), 4.8% Sri Lanka floods; Bangladesh almost absent (71 tweets, 1.9%, mention Bangladesh / Cyclone Mora) |
 | Bengali text | Machine translation of the tweets (`monirbishal/en-bn-nmt`), **not human-verified**; 8.9% untranslated, 97.3% contain URLs |
 | Split | Tweet/caption-grouped 80/10/10 → train 3,007 / val 373 / test 375 (`results/defense_fixes/phase3/grouped_split.csv`) |
 | Old split | Un-grouped (test n = 376): 21.3% of test texts also in train → inflated numbers, superseded |

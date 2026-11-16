@@ -288,5 +288,5 @@
 5. ✅ Class imbalance: Affected_People মাত্র 330টা (8.8%) — সব মডেলে এই class-এর F1 সবচেয়ে কম।
 6. ✅ Temperature scaling-এ উন্নতি হয়নি; validation set ছোট (C8)।
 7. ✅ Human eval-এর model caption পুরনো checkpoint (v2) থেকে; চূড়ান্ত মডেল (v3) শুধু automatic metric দিয়ে মাপা (C2, ৩B.4 = ক)।
-8. ✅ Dataset-এর 95.2% ছবি যুক্তরাষ্ট্র ও ক্যারিবিয়ানের hurricane থেকে, বাকি 4.8% Sri Lanka-র বন্যা; বাংলাদেশের নিজস্ব কোনো ছবি নেই (C16)। বাংলাদেশের ছবিতে শুধু একটা ছোট preliminary যাচাই হয়েছে (C21)।
+8. ✅ Dataset-এর 95.2% ছবি যুক্তরাষ্ট্র ও ক্যারিবিয়ানের hurricane থেকে, বাকি 4.8% Sri Lanka-র বন্যা; বাংলাদেশ বা Cyclone Mora-র উল্লেখ আছে মাত্র ৭১টা tweet-এ (1.9%, বেশিরভাগ CrisisMMD-এর Sri Lanka event-এ), ছবিগুলো বাংলাদেশের কিনা যাচাই হয়নি (C16; 2026-11-16 সংশোধিত — আগে ভুল লেখা ছিল "কোনো ছবি নেই")। বাংলাদেশের ছবিতে শুধু একটা ছোট preliminary যাচাই হয়েছে (C21)।
 13. ✅ Bangladesh external test (C21) ছোট (n = 325, AP মাত্র ৩৫), Wikimedia-র ছবি সোশ্যাল মিডিয়ার ছবির চেয়ে আলাদা ধরনের, annotator-নির্ভরতা বেশি (একজনের লেবেলে F1 55.8%), আর একজন annotator গবেষক নিজে।

@@ -31,7 +31,7 @@ Severe Damage / Humanitarian Rescue / Affected People-এ ভাগ করা �
 |------|--------|
 | উৎস | CrisisMMD v2.0 (Alam et al.), humanitarian category-র ছবি |
 | আকার | ৩,৭৫৫টা ছবি: Severe_Damage 2,240 · Humanitarian_Rescue 1,185 · Affected_People 330 (8.8%) |
-| ঘটনা | 95.2% hurricane (Harvey, Maria, Irma — যুক্তরাষ্ট্র/ক্যারিবিয়ান), 4.8% Sri Lanka-র বন্যা; training-এ **বাংলাদেশের কোনো ছবি নেই** |
+| ঘটনা | 95.2% hurricane (Harvey, Maria, Irma — যুক্তরাষ্ট্র/ক্যারিবিয়ান), 4.8% Sri Lanka-র বন্যা; বাংলাদেশ প্রায় নেই (মাত্র ৭১টা tweet-এ, 1.9%, বাংলাদেশ / Cyclone Mora-র উল্লেখ) |
 | বাংলা text | Tweet-এর মেশিন অনুবাদ (`monirbishal/en-bn-nmt`), **মানুষ দিয়ে যাচাই করা নয়**; 8.9% অনুবাদ হয়নি, 97.3%-এ URL |
 | Split | Tweet/caption-grouped 80/10/10 → train 3,007 / val 373 / test 375 |
 | পুরনো split | Un-grouped (test n = 376): test-এর 21.3% text train-এও ছিল → ফুলানো সংখ্যা, বাতিল |

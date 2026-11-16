@@ -16,7 +16,7 @@
 "A single run is not reliable: two runs of the identical configuration on the old split differed by 1.7 points. Over seeds 42, 123 and 2024 the model gives 74.83, 75.02 and 77.22%. Most of the variance comes from Affected People, which has only 32 test images."
 
 ### Q3. Your dataset is called a 'flood corpus' but it is mostly hurricanes.
-"That is correct: 95.2% of the images come from Hurricanes Harvey, Maria and Irma, and 4.8% from the 2017 Sri Lanka floods. Harvey and Maria caused extensive flooding, so the images are flood- and storm-related, but the corpus is not flood-only, and it contains no images from Bangladesh. Generalisation to Bangladeshi floods is untested and is listed as a limitation."
+"That is correct: 95.2% of the images come from Hurricanes Harvey, Maria and Irma, and 4.8% from the 2017 Sri Lanka floods. Harvey and Maria caused extensive flooding, so the images are flood- and storm-related, but the corpus is not flood-only. Bangladesh is almost absent: only 71 tweets (1.9%) mention Bangladesh or Cyclone Mora. To check generalisation I ran a small external test on 325 Bangladeshi flood and cyclone images (Macro F1 81.98%, but annotator-dependent), which is preliminary and listed as a limitation."
 
 ### Q4. How were the Bengali texts produced? Were they verified?
 "They are machine translations of the CrisisMMD tweets using the `monirbishal/en-bn-nmt` model. They were not manually verified; about 8.9% were left untranslated and most contain URLs. I state this explicitly."
