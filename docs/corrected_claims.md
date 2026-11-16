@@ -136,6 +136,12 @@
 
 ---
 
+### C21. বাংলাদেশের ছবিতে external validation (preliminary) — ✅ Phase 6
+- **ফল:** Wikimedia Commons-এর ৩২৫টা বাংলাদেশি বন্যা/ঘূর্ণিঝড়ের ছবি (CC/public domain; CrisisMMD-এর সঙ্গে near-duplicate ০), ৩ জন annotator-এর majority label (Fleiss' κ = 0.613)। CLS-Only (seed 42, placeholder text): **Macro F1 81.98% (95% bootstrap CI 76.1–87.2)**, accuracy 89.85%; AP-এর F1 58.8% (সবচেয়ে দুর্বল, CrisisMMD-এর মতোই)।
+- **যা লেখা যাবে:** "On a small, independently annotated set of Bangladeshi flood and cyclone images, the CrisisMMD-trained classifier did not show a performance drop (Macro F1 82.0%, 95% CI 76.1–87.2, n = 325), although the estimate depends strongly on the annotator (55.8–81.7% against single annotators)."
+- **যা লেখা যাবে না:** "the model generalizes to Bangladesh" / "outperforms on real Bangladeshi data" / "+7.15 pp domain shift"। 74.83%-এর সঙ্গে পার্থক্য domain shift-এর মাপ নয় — label কে দিয়েছে (CrisisMMD crowd বনাম আমাদের annotator), ছবির ধরন (Wikimedia-র পেশাদার ছবি বনাম tweet-এর ছবি) দুটোই আলাদা; আর CI দুটো প্রায় ছুঁয়ে যায়।
+- **সতর্কতা:** (১) একজন annotator-এর লেবেলে F1 55.82% — HR/AP সীমারেখা অস্পষ্ট, সংখ্যাটা reference-নির্ভর; (২) annotator-দের একজন গবেষক নিজে; (৩) মাত্র ৩৫টা AP; (৪) text নেই (placeholder); (৫) কোনো hyperparameter এই সেটে বদলানো হয়নি (শুধু test)।
+
 ## C. সঠিক কিন্তু সৎভাবে/সম্পূর্ণভাবে লিখতে হবে
 
 ### C8. Calibration — ✅ Phase 4 (নতুন মডেল, grouped split)
@@ -282,4 +288,5 @@
 5. ✅ Class imbalance: Affected_People মাত্র 330টা (8.8%) — সব মডেলে এই class-এর F1 সবচেয়ে কম।
 6. ✅ Temperature scaling-এ উন্নতি হয়নি; validation set ছোট (C8)।
 7. ✅ Human eval-এর model caption পুরনো checkpoint (v2) থেকে; চূড়ান্ত মডেল (v3) শুধু automatic metric দিয়ে মাপা (C2, ৩B.4 = ক)।
-8. ✅ Dataset-এর 95.2% ছবি যুক্তরাষ্ট্র ও ক্যারিবিয়ানের hurricane থেকে, বাকি 4.8% Sri Lanka-র বন্যা; বাংলাদেশের নিজস্ব কোনো ছবি নেই (C16)। বাংলাদেশের বন্যায় generalization যাচাই করা হয়নি।
+8. ✅ Dataset-এর 95.2% ছবি যুক্তরাষ্ট্র ও ক্যারিবিয়ানের hurricane থেকে, বাকি 4.8% Sri Lanka-র বন্যা; বাংলাদেশের নিজস্ব কোনো ছবি নেই (C16)। বাংলাদেশের ছবিতে শুধু একটা ছোট preliminary যাচাই হয়েছে (C21)।
+13. ✅ Bangladesh external test (C21) ছোট (n = 325, AP মাত্র ৩৫), Wikimedia-র ছবি সোশ্যাল মিডিয়ার ছবির চেয়ে আলাদা ধরনের, annotator-নির্ভরতা বেশি (একজনের লেবেলে F1 55.8%), আর একজন annotator গবেষক নিজে।

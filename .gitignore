@@ -12,3 +12,4 @@ __pycache__/
 # Virtual environments
 venv/
 .env
+results/bd_external/*.png

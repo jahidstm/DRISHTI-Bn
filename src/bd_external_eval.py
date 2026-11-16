@@ -181,7 +181,15 @@ say(f"Confusion (rows true SD, HR, AP; cols pred): {cm.tolist()}")
 say(f"Mean confidence: correct {test.confidence[y == yp].mean():.3f} | wrong "
     f"{test.confidence[y != yp].mean() if (y != yp).any() else float('nan'):.3f}")
 say(f"Reference — same model on the CrisisMMD grouped test set: {CRISISMMD_REF:.2f}% "
-    f"(difference {mf1(y, yp) - CRISISMMD_REF:+.2f} pp = domain shift estimate)")
+    f"(difference {mf1(y, yp) - CRISISMMD_REF:+.2f} pp; not a pure domain-shift measure — label source and image style differ)")
+
+# robustness: score the same predictions against each labeller alone, and on unanimous images only
+say("\n## Sensitivity to the reference labels (same predictions)")
+for k, c in enumerate(LCOLS):
+    m = test[c].isin(CODES).values
+    say(f"  vs annotator {k + 1} only: Macro F1 = {mf1(test[c][m].map(CODES).values, yp[m]):.2f}% (n = {m.sum()})")
+m = ((test[LCOLS].nunique(axis=1) == 1) & test[LCOLS[0]].isin(CODES)).values
+say(f"  unanimous images only: Macro F1 = {mf1(y[m], yp[m]):.2f}% (n = {m.sum()})")
 
 # ---- 4. Grad-CAM figure ----------------------------------------------------------
 import matplotlib; matplotlib.use("Agg")
@@ -255,7 +263,7 @@ if not args.no_captions and os.path.exists(CAP_CKPT) and (desc != "").sum() >= 1
 elif not args.no_captions:
     say("\n(Text generation skipped: needs models/drishti_multitask_v3.pt and >= 10 descriptions.)")
 
-test.drop(columns=[c for c in ("label_a", "label_b") if c in test]).to_csv(
+test.drop(columns=[c for c in LCOLS if c in test]).to_csv(
     os.path.join(OUT_DIR, "bd_per_sample.csv"), index=False, encoding="utf-8-sig")
 open(os.path.join(OUT_DIR, "bd_eval_summary.md"), "w", encoding="utf-8").write("\n".join(report) + "\n")
 print(f"\n[+] Saved to {OUT_DIR}")
