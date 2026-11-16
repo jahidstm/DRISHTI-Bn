@@ -160,7 +160,7 @@ Bengali texts are **machine translations** of the CrisisMMD tweets (`monirbishal
 | `figure_4_1_confusion_matrix_grouped.png` | **Fig 4.1** — CLS-Only seed 42, grouped test n=375, Macro F1 74.83% |
 | `figure_4_2_baseline_comparison_grouped.png` | **Fig 4.2** — baselines on grouped split (mean ± std) |
 | `figure_4_3_ablation_original_split.png` | **Fig 4.3** — ablation (original split, single seed, relabelled per C4–C6) |
-| `figure_4_4_gradcam_grouped.png` | **Fig 4.4** — fixed Grad-CAM (first random sample per class) |
+| `figure_4_4_gradcam_grouped.png` | **Fig 4.4** — fixed Grad-CAM; rows = most confident correct sample per class (#1, #10, #18) + most confident error (#21) among the 21 random samples (`src/make_xai_main_figures.py`); same rows in 4.5–4.7 |
 | `figure_4_5_crossattn_grouped.png` | **Fig 4.5** — v3 decoder cross-attention (auxiliary) |
 | `figure_4_6_rollout_grouped.png` | **Fig 4.6** — Attention Rollout |
 | `figure_4_7_integrated_xai_grouped.png` | **Fig 4.7** — Grad-CAM / Rollout / cross-attention side by side |
