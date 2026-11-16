@@ -637,9 +637,9 @@ Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completel
 
 SECTION: 3.2 Overview of the Proposed Framework
 TARGET LENGTH: 240–280 words.
-CONTENT: walk through Figure 3.1: image → ViT-Base/16; Bengali text → BanglaBERT; both frozen with LoRA adapters; [CLS] vectors concatenated → MLP head → three classes. The multi-task variant adds a 3-layer Transformer decoder that cross-attends to the ViT patch tokens and generates Bengali tokens. State clearly that the CLS-Only model is the main model and why (equal or better classification with 1.38 M instead of 74.79 M trainable parameters). Mention the explanation and calibration analysis applied after training (Section 3.8).
+CONTENT: walk through Figure 3.1: image → ViT-Base/16; Bengali text → BanglaBERT; both frozen with LoRA adapters; [CLS] vectors concatenated → MLP head → three classes. The multi-task variant adds a 3-layer Transformer decoder that cross-attends to the ViT patch tokens and generates Bengali tokens. State clearly that the CLS-Only model is the main model and why: its classification performance is comparable to the multi-task model (75.69 ± 1.33% over 3 seeds vs 77.29% for one seed, which lies within the seed variance), while it trains 1.38 M instead of 74.79 M parameters. Never write that CLS-Only "matches or exceeds" or "outperforms" the multi-task model. Cite ViT [REF: Dosovitskiy et al., 2021], BanglaBERT [REF: Bhattacharjee et al., 2022] and LoRA [REF: Hu et al., 2022] each at its own sentence. Do not write "before deployment". Mention the explanation and calibration analysis applied after training (Section 3.8).
 PLACEHOLDERS: [FIGURE 3.1: figure_3_1_architecture.png — Architecture of DRISHTI-Bn. Solid: CLS-Only model; dashed: caption branch of the multi-task variant]
-CITATIONS: Include 0–1 [REF] placeholders.
+CITATIONS: Include 3 [REF] placeholders (ViT, BanglaBERT, LoRA, each at its own claim).
 ```
 
 #### PROMPT 3.3.1 — Source Data and Class Definition
@@ -659,8 +659,8 @@ Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completel
 
 SECTION: 3.3.2 Bengali Text through Machine Translation
 TARGET LENGTH: 240–280 words.
-CONTENT: English tweet text translated automatically to Bengali with the open-source model monirbishal/en-bn-nmt; no manual verification; observed properties (8.9% partly untranslated, 97.3% with URL fragments, hashtags and mentions); consequence: the Bengali text is a translated tweet that often does not describe the image — important for Sections 4.3.3 and 4.6. Be explicit that the translation was not human-verified.
-CITATIONS: Include 1–2 [REF] placeholders (Bengali–English MT literature).
+CONTENT: English tweet text translated automatically to Bengali with the open-source model monirbishal/en-bn-nmt; no manual verification; observed properties (8.9% partly untranslated, 97.3% with URL fragments, hashtags and mentions); consequence: the Bengali text is a translated tweet that often does not describe the image — important for Sections 4.3.3 and 4.6. Be explicit that the translation was not human-verified. Do not invent causes for the untranslated parts or describe tweet contents beyond what the fact sheet states (no hotline numbers, headlines, sentiment).
+CITATIONS: Include 1 [REF] placeholder: Hasan et al., 2020 only, for the general difficulty of Bengali–English machine translation. Do NOT cite any paper for the monirbishal/en-bn-nmt model itself (cite it as a Hugging Face model in the reference list) and do NOT cite the chrF paper here.
 ```
 
 #### PROMPT 3.3.3 — Leakage-Free Grouped Data Split
@@ -904,7 +904,7 @@ Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completel
 
 SECTION: 4.2 Effect of Data Leakage on Reported Performance
 TARGET LENGTH: 350–410 words.
-CONTENT: use fact sheet §4.6 and §2.3: the random split shared text for 21.3% of test samples; under the grouped split CLS-Only falls from 83.21% (1 seed) to 75.69 ± 1.33% (−7.5 pp), ViT-Only and CrisisViT-style fall less; interpret why text-using models gain most from leakage (exact text match); consequence for published CrisisMMD results that use random splits (cautious wording); from here on only grouped-split numbers are used. This is the ONLY section where 83.21% may appear.
+CONTENT: use fact sheet §4.6 and §2.3: the random split shared text for 21.3% of test samples; under the grouped split CLS-Only falls from 83.21% (1 seed) to 75.69 ± 1.33% (−7.5 pp), ViT-Only and CrisisViT-style fall less; consequence for published CrisisMMD results that use random splits (cautious wording); from here on only grouped-split numbers are used. This is the ONLY section where 83.21% may appear. Mechanism: do NOT claim that the network profits from matching text, because the text ablation (Section 4.3.3) shows the classifier barely uses the text. Say instead that images of the same tweet (and retweets) are related or near-identical and appear on both sides of a random split, and that the exact mechanism was not isolated in this study (hedged language).
 PLACEHOLDERS: [TABLE 4.1: Macro F1 on the original random split and on the tweet-grouped split]
 CITATIONS: Include 1–2 [REF] placeholders.
 ```
