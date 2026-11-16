@@ -1,5 +1,10 @@
 # DRISHTI-Bn: Phase 4 — Thesis Writing Plan & NotebookLM Prompts
 
+> ⚠️ **SUPERSEDED (2026-11-12) — ignored.** Written before the pre-defense corrections; its numbers and claims
+> (83.21%, 17/21 "XAI accuracy", human-verified translation, …) must not be used. New writing prompts will be
+> built from [`docs/corrected_claims.md`](docs/corrected_claims.md) and [`CLAUDE.md`](CLAUDE.md).
+
+
 > **Thesis:** DRISHTI-Bn: An Explainable Multimodal Deep Learning Framework for Bengali Disaster Image Captioning and Classification
 > **Student:** Jahid Hasan | ID: 0242 | Supervisor: Md. Fahad Hossain
 > **Date:** 2 November 2026

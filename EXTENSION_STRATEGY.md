@@ -1,6 +1,12 @@
 # EXTENSION_STRATEGY.md
 # DRISHTI-Bn → Q1 পাবলিকেশন: এক্সটেনশন আর্কিটেকচার ও জার্মানি মাস্টার্স কৌশল
 
+> ⚠️ **আংশিক পুরনো (2026-11-16 নোট):** সেপ্টেম্বর ২০২৬-এর পরিকল্পনা। এখানকার "বর্তমান অবস্থা"র সংখ্যা (n = 2-এ 66.67%, BLEU-4 5.14)
+> আর "deep-translator + verify" বাতিল — অনুবাদ `monirbishal/en-bn-nmt`, মানুষ দিয়ে যাচাই নয়। Baseline, ablation, METEOR/BERTScore,
+> human eval, calibration, Grad-CAM, বাংলাদেশ external test — এগুলো এখন হয়ে গেছে; ফল [`CLAUDE.md`](CLAUDE.md)-এ, দাবির ভাষা
+> [`docs/corrected_claims.md`](docs/corrected_claims.md)-এ। Paper-পরিকল্পনার ধারণা হিসেবে পড়ো, সংখ্যা এখান থেকে নিও না।
+
+
 > **ভূমিকা:** Principal AI Researcher + German University Admissions Strategist হিসেবে বিশ্লেষণ
 > **টার্গেট:** TH Köln (M.Sc. Digital Sciences) | HHU Düsseldorf (M.Sc. AI & Data Science)
 > **ডেডলাইন:** Preliminary results → ফেব্রুয়ারি-মার্চ ২০২৭ | Final submission → মে ২০২৭
@@ -296,7 +302,7 @@ HHU-র প্রোগ্রামটি **data efficiency, statistical learnin
 │  │   ├── Earthquake (~3,000)                                 │
 │  │   ├── Hurricane (~4,000)                                  │
 │  │   └── Others (~5,000)                                     │
-│  ├── Bengali Translation Pipeline (deep-translator + verify)  │
+│  ├── Bengali Translation Pipeline (MT, unverified)    │
 │  └── Curriculum Schedule:                                    │
 │      Stage 1: Flood only (easy — existing data)              │
 │      Stage 2: Flood + Hurricane (medium)                     │

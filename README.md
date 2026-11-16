@@ -95,6 +95,23 @@ zero gradient because the pooler reads only the `[CLS]` token).
 **Calibration:** ECE 2.57% without post-hoc scaling (mean confidence 88.84% vs accuracy 88.27%);
 temperature scaling (T* = 1.1349) does not improve it (ECE 2.99%).
 
+### External test on Bangladeshi images (preliminary)
+
+325 Creative-Commons photos of floods and cyclones in Bangladesh (Wikimedia Commons; no near-duplicates of
+CrisisMMD images), labelled independently by three annotators (Fleiss' κ = 0.613, majority vote). The
+CLS-Only model (seed 42, image + placeholder text) was only tested, never tuned, on this set:
+
+| Metric | Value |
+|--------|-------|
+| Macro F1 | 81.98% (95% bootstrap CI 76.1–87.2) |
+| Accuracy | 89.85% |
+| Per-class F1 | SD 93.9 · HR 93.2 · AP 58.8 |
+| Macro F1 against single annotators | 81.65% · 81.36% · 55.82% |
+
+No performance drop is seen, but the estimate depends strongly on who labels the images (the
+Humanitarian Rescue / Affected People boundary is ambiguous), so it is not a measure of domain shift.
+Images are not redistributed; `bd_external/bd_labels.csv` lists the source URL, author and licence of each.
+
 ### Bengali text generation (multi-task model, experimental)
 
 | Metric (sacreBLEU 2.6.0, beam 3) | Raw references | URLs/mentions/hashtags removed |
@@ -161,9 +178,15 @@ src/
   caption_metrics_v3.py    standard sacreBLEU / chrF evaluation
   human_eval_unblind.py    corrected human-evaluation analysis
   make_phase5_figures.py   thesis figures 4.2, 4.3, 4.9
+  make_xai_main_figures.py thesis figures 4.4-4.7 (CPU)
+  bd_fetch_wikimedia.py    Bangladesh external test set: download candidates from Wikimedia Commons
+  bd_merge_labels.py       ... merge annotators (majority vote, kappa)
+  bd_external_eval.py      ... evaluation (Macro F1 + bootstrap CI, Grad-CAM)
 colab/                     self-contained Colab scripts for every GPU experiment
 results/defense_fixes/     all corrected results, by phase
 docs/corrected_claims.md   what may and may not be claimed, with wording
+bd_external/               Bangladesh external test set: labels, annotator files, metadata
+figures/                   final thesis figures
 figures_superseded/        figures from before the corrections (do not use)
 app.py                     Gradio demo
 ```
@@ -172,8 +195,8 @@ app.py                     Gradio demo
 
 ## Limitations
 
-- Mostly hurricane imagery from the US and Caribbean; no images from Bangladesh, so generalisation to
-  Bangladeshi floods is untested.
+- Training data are mostly hurricane imagery from the US and Caribbean. Generalisation to Bangladesh was
+  checked only on a small external set (325 images, 35 Affected People), whose result depends on the annotator.
 - Bengali texts are unverified machine translations of tweets.
 - The classifier makes little use of the text, so the gain from multimodality is not demonstrated.
 - The text-generation branch does not produce image descriptions.

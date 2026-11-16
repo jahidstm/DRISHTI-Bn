@@ -160,7 +160,7 @@
 
 - **নতুন লেখা (English):**
   > "Without any post-hoc correction the model is already well calibrated (ECE = 2.57%; mean confidence 88.84% vs. accuracy 88.27%). Temperature scaling (T* = 1.1349, fitted on the validation set, n = 373) slightly softened the predictions but did not improve calibration on the test set (ECE 2.99%), which we attribute to the small validation set. We therefore report the uncalibrated model as reliable and temperature scaling as giving no additional benefit."
-- Figure 4.8 → `figure_4_8_calibration_diagram_grouped.png`।
+- Figure 4.8 → `figures/figure_4_8_calibration_diagram_grouped.png`।
 
 ### C9. Trainable parameter — ✅ (CLAUDE.md-এর সংখ্যা বদল Phase 5-এ, অনুমতি সাপেক্ষে)
 - **সমস্যা:** "0.30%" গোনা হয়েছিল classifier head তৈরির **আগে** (`cls_only_ablation.py:212`), তাই head বাদ পড়েছে। No-LoRA-তে "0 trainable" লেখা, অথচ head train হয়েছে। README-তে আবার "~0.1%"।

@@ -284,3 +284,4 @@
 | 2026-11-16 | 6 ✅ | 6.4: থিসিসে preliminary external validation; annotator ফাইল/কলাম Annotator_1/2/3-এ বেনামী | (এই commit) |
 | 2026-11-16 | 4 (figure) | Figure 4.4–4.7-এর সারি বদল: আগের "প্রতি class-এর প্রথম random sample" (#8 শিশুদের মুখ, #15 CNN screenshot) → ঘোষিত নিয়ম: প্রতি class-এর সবচেয়ে confident সঠিক (#1, #10, #18) + সবচেয়ে confident ভুল (#21), একই ২১টা random sample থেকে; লোকালি CPU-তে Phase 4-এর prediction হুবহু reproduce; পুরনো figure `figures_superseded/*_first_sample.png` | (এই commit) |
 | 2026-11-16 | — | সব চূড়ান্ত figure (`figure_*.png`) project root থেকে `figures/` ফোল্ডারে; script-গুলো এখন সেখানে লেখে | (এই commit) |
+| 2026-11-16 | — | Root-এর md হালনাগাদ: THESIS_SUMMARY (EN/BN) নতুন করে লেখা; README-তে BD external test ও নতুন ফাইল; OBJECTIVE_ANALYSIS / EXTENSION_STRATEGY-তে "আংশিক পুরনো" নোট + ভুল দাবি ঠিক; PHASE4_WRITING_PLAN-এ superseded নোট | (এই commit) |
