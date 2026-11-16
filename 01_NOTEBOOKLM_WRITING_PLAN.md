@@ -84,10 +84,11 @@ Method আর result আগে লিখলে introduction আর conclusion �
 | 8 | Abavisani, Wu, Hu, Tetreault & Jaimes (2020). *Multimodal Categorization of Crisis Events in Social Media.* CVPR | arXiv 2004.04917 | 2.2.2 |
 | 9 | Hasan et al. (2020). *Not Low-Resource Anymore: Aligner Ensembling, Batch Filtering, and New Datasets for Bengali-English Machine Translation.* EMNLP | arXiv 2009.09359 | 2.4.1, 3.3.2 |
 | 10 | Zhang, Kishore, Wu, Weinberger & Artzi (2020). *BERTScore: Evaluating Text Generation with BERT.* ICLR | arXiv 1904.09675 | 2.7.2, 3.9.2 |
-| 11 | van der Lee, Gatt, van Miltenburg & Krahmer (2021). *Human evaluation of automatically generated text: Current trends and best practice guidelines.* Computer Speech & Language | journal site (open access) | 2.7.2, 3.9.3 |
-| 12 | Rentschler, Salhab & Jafino (2022). *Flood exposure and poverty in 188 countries.* Nature Communications (অথবা এর আগের World Bank working paper: Rentschler & Salhab, 2020, *People in Harm's Way*) | nature.com (open access) | 1.1.1, Figure 1.1 |
+| 11 | van der Lee, Gatt, van Miltenburg, Wubben & Krahmer (2019). *Best practices for the human evaluation of automatically generated text.* INLG (✅ নামানো আছে; এর journal সংস্করণ 2021, Computer Speech & Language, doi 10.1016/j.csl.2020.101151) | ACL Anthology W19-8643 | 2.7.2, 3.9.3 |
+| 12 | Rentschler, Salhab & Jafino (2022). *Flood exposure and poverty in 188 countries.* Nature Communications, 13, 3527 + Supplementary Information (Table 1) | nature.com (open access) | 1.1.1, Figure 1.1 |
 
-> Figure 1.1-এর সংখ্যা (94.42 million, 57.5%) Rentschler & Salhab (2020)-এর World Bank working paper থেকে নেওয়া। Paper খুলে Bangladesh-এর সংখ্যাটা একবার মিলিয়ে নিও। 2022-এর paper-এ সংখ্যা আলাদা হলে caption-এ যে paper থেকে সংখ্যা নিয়েছ সেটাই cite করবে।
+> ✅ যাচাই করা: Figure 1.1-এর সংখ্যা (94.42 million, 57.5%) **Rentschler, Salhab & Jafino (2022)-এর Supplementary Table 1** থেকে। 2020-এর World Bank working paper-এ Bangladesh-এর সংখ্যা আলাদা (51.9 million, 31.6%) — ওটা cite করবে না।
+> উপরের ১–১২ নম্বর paper `literature/5. methods_and_evaluation/`-এ নামানো আছে।
 
 **ভালো হয় (৬টা)**
 | # | Paper | কোথায় পাবে | কোন section |
@@ -312,11 +313,11 @@ Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completel
 SECTION: Begin with "CHAPTER 1 INTRODUCTION", then "1.1 Background of the Study" with a two-sentence lead-in, then "1.1.1 Disasters in Bangladesh and the Need for Rapid Information".
 TARGET LENGTH: 300–340 words (including the lead-in).
 CONTENT:
-- Bangladesh's exposure to floods and cyclones (deltaic geography, monsoon, cyclones from the Bay of Bengal); population exposed to flood risk: 94.42 million, 57.5% of the population (Rentschler & Salhab).
+- Bangladesh's exposure to floods and cyclones (deltaic geography, monsoon, cyclones from the Bay of Bengal); population exposed to significant flood risk (> 0.15 m inundation in a 1-in-100-year flood): 94.42 million, 57.5% of the population (Rentschler, Salhab & Jafino, 2022).
 - Use the Ganges Delta satellite-monitoring paper for the geographic context.
 - Why responders need rapid situational information in the first hours: damage location, people affected, relief activity.
 - Limits of manual assessment and of satellite-only monitoring (coarse, no ground-level human context).
-PLACEHOLDERS: [FIGURE 1.1: figure_1_1_flood_stats.png — Population of Bangladesh exposed to flood risk (Rentschler & Salhab, 2020)] after the sentence giving the exposure figure; refer to it in the text.
+PLACEHOLDERS: [FIGURE 1.1: figure_1_1_flood_stats.png — Population of Bangladesh exposed to significant flood risk (data: Rentschler, Salhab & Jafino, 2022)] after the sentence giving the exposure figure; refer to it in the text.
 CITATIONS: Include 3–5 [REF] placeholders; put author/year inside when known.
 ```
 

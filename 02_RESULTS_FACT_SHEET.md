@@ -281,7 +281,7 @@ Interpretation: **no performance drop is observed** on this small set, but the e
 ## 13. Figures available (file → number in the thesis)
 | Thesis number | File | Content |
 |---------------|------|---------|
-| Figure 1.1 | figures/figure_1_1_flood_stats.png | Population of Bangladesh exposed to flood risk: 94.42 M of 164.2 M (57.5%) (Rentschler & Salhab, 2020) |
+| Figure 1.1 | figures/figure_1_1_flood_stats.png | Population of Bangladesh exposed to flood risk: 94.42 M of 164.1 M (57.5%), exposed to > 0.15 m inundation in a 1-in-100-year flood (Rentschler, Salhab & Jafino, 2022, Supplementary Table 1) |
 | Figure 1.2 | figures/figure_1_2_system_pipeline.png | Where DRISHTI-Bn sits in a disaster-information workflow; responder use is out of scope |
 | Figure 2.1 | figures/figure_2_1_lora.png | LoRA update h = W₀x + (α/r)·BAx |
 | Figure 3.1 | figures/figure_3_1_architecture.png | CLS-Only architecture (solid) and the multi-task caption branch (dashed) |

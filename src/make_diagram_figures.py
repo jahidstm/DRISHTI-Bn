@@ -1,7 +1,7 @@
 """
 Thesis diagrams (Chapters 1-3), redrawn after the pre-defense corrections
 =========================================================================
-  figures/figure_1_1_flood_stats.png      population exposed to flood risk (Rentschler & Salhab, 2020)
+  figures/figure_1_1_flood_stats.png      population exposed to flood risk (Rentschler, Salhab & Jafino, 2022)
   figures/figure_1_2_system_pipeline.png  where DRISHTI-Bn sits in a disaster-information workflow
   figures/figure_2_1_lora.png             LoRA update on a frozen weight matrix
   figures/figure_3_1_architecture.png     CLS-Only model (solid) + multi-task caption branch (dashed)
@@ -59,14 +59,14 @@ def save(fig, name):
 
 # ---- Figure 1.1: flood exposure ---------------------------------------------------
 fig, ax = plt.subplots(figsize=(8, 2.6))
-exp, rest = 94.42, 164.2 - 94.42
+exp, rest = 94.424, 164.109 - 94.424
 ax.barh([0], [exp], color=C["blue"], height=0.5)
 ax.barh([0], [rest], left=[exp], color="#CBD5E0", height=0.5)
 ax.text(exp / 2, 0, f"Exposed to flood risk\n{exp:.2f} million (57.5%)", ha="center", va="center",
         color="white", fontweight="bold", fontsize=10)
 ax.text(exp + rest / 2, 0, f"Not exposed\n{rest:.2f} million (42.5%)", ha="center", va="center",
         color=C["ink"], fontsize=10)
-ax.set_xlim(0, 164.2); ax.set_yticks([]); ax.set_xlabel("Population of Bangladesh (millions; total 164.2)")
+ax.set_xlim(0, 164.109); ax.set_yticks([]); ax.set_xlabel("Population of Bangladesh (millions; total 164.1; > 0.15 m inundation, 1-in-100-year flood)")
 for s in ("top", "right", "left"): ax.spines[s].set_visible(False)
 save(fig, "figure_1_1_flood_stats.png")
 
