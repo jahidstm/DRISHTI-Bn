@@ -58,27 +58,33 @@ def say(s=""):
 
 # ---- 1. labels + agreement ---------------------------------------------------
 df = pd.read_csv(LABELS_CSV, dtype=str, keep_default_na=False)
-for c in ("label_a", "label_b", "final_label"):
+LCOLS = sorted(c for c in df.columns if c.startswith("label_"))      # label_a, label_b, (label_c ...)
+for c in LCOLS + ["final_label"]:
     df[c] = df[c].str.strip().str.upper()
-bad = df[~df.label_a.isin(["", *CODES, "EX"]) | ~df.label_b.isin(["", *CODES, "EX"])
-         | ~df.final_label.isin(["", *CODES, "EX"])]
+bad = df[~df[LCOLS + ["final_label"]].isin(["", *CODES, "EX"]).all(axis=1)]
 if len(bad):
     sys.exit(f"Invalid label codes (use SD / HR / AP / EX) in: {', '.join(bad.image_id)}")
 
-both = df[(df.label_a != "") & (df.label_b != "")]
-auto = (df.final_label == "") & (df.label_a != "") & (df.label_a == df.label_b)
-df.loc[auto, "final_label"] = df.loc[auto, "label_a"]
-unresolved = df[(df.final_label == "") & (df.label_a != "") & (df.label_b != "")]
+full = df[(df[LCOLS] != "").all(axis=1)]
+unresolved = df[(df.final_label == "") & (df[LCOLS] != "").all(axis=1)]
 if len(unresolved):
-    sys.exit(f"{len(unresolved)} disagreements without final_label: {', '.join(unresolved.image_id)}")
+    sys.exit(f"{len(unresolved)} images have no final_label (run src/bd_merge_labels.py, then decide the rest "
+             f"together): {', '.join(unresolved.image_id)}")
 
+from itertools import combinations
 from sklearn.metrics import cohen_kappa_score, f1_score, precision_score, recall_score, confusion_matrix
 say("# BD external test set — results\n")
-say(f"Candidates in CSV: {len(df)} | labelled by both A and B: {len(both)}")
-if len(both) >= 10:
-    k = cohen_kappa_score(both.label_a, both.label_b)
-    say(f"Inter-annotator agreement (A vs B, incl. EX): Cohen's kappa = {k:.3f} | "
-        f"raw agreement = {(both.label_a == both.label_b).mean() * 100:.1f}% (n = {len(both)})")
+say(f"Candidates in CSV: {len(df)} | labellers: {len(LCOLS)} | labelled by all: {len(full)}")
+if len(full) >= 10:
+    for c1, c2 in combinations(LCOLS, 2):
+        say(f"  Cohen's kappa {c1[-1].upper()} vs {c2[-1].upper()} = {cohen_kappa_score(full[c1], full[c2]):.3f} "
+            f"(raw agreement {(full[c1] == full[c2]).mean() * 100:.1f}%)")
+    if len(LCOLS) >= 3:
+        cats = ["SD", "HR", "AP", "EX"]
+        t = np.stack([(full[LCOLS] == k).sum(axis=1).values for k in cats], 1); n = len(LCOLS)
+        Pi = ((t ** 2).sum(1) - n) / (n * (n - 1)); pj = t.sum(0) / t.sum()
+        say(f"  Fleiss' kappa (all {n}) = {(Pi.mean() - (pj ** 2).sum()) / (1 - (pj ** 2).sum()):.3f} | "
+            f"unanimous {(full[LCOLS].nunique(axis=1) == 1).mean() * 100:.1f}%")
 test = df[df.final_label.isin(CODES)].reset_index(drop=True)
 say(f"Excluded (EX): {(df.final_label == 'EX').sum()} | unlabelled: {(df.final_label == '').sum()}")
 say("Test images per class: " + " | ".join(f"{n} {int((test.final_label == c).sum())}"
