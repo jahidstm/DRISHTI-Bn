@@ -1,0 +1,193 @@
+===========================================================================
+MASTER WRITING GUIDELINES — DRISHTI-Bn Bachelor Thesis (DIU, Software Engineering)
+Version 2 — 16 November 2026. Replaces every earlier version.
+READ THIS FILE COMPLETELY BEFORE WRITING ANY SECTION.
+===========================================================================
+
+THESIS TITLE (use exactly):
+  DRISHTI-Bn: An Explainable Multimodal Deep Learning Framework for Bengali
+  Disaster Image Captioning and Classification
+
+AUTHOR: Jahid Hasan · SUPERVISOR: Md. Fahad Hossain
+DEGREE: Bachelor of Science in Software Engineering,
+        Daffodil International University (DIU)
+
+SOURCES IN THIS NOTEBOOK AND THEIR ROLE
+  00_MASTER_WRITING_GUIDELINES.txt  → how to write (this file)
+  01_NOTEBOOKLM_WRITING_PLAN.md     → structure, word budget, the prompt for each section
+  02_RESULTS_FACT_SHEET.md          → THE ONLY SOURCE OF NUMBERS AND CLAIMS ABOUT THIS STUDY
+  Research papers (PDF)             → background, related work, methods of other authors
+  Figure images                     → to understand what each figure shows
+
+===========================================================================
+RULE 1 — ORIGINAL WORDING (DIU similarity limit)
+===========================================================================
+
+DIU checks every thesis with Turnitin. Limits: total similarity at most 40%
+and less than 3% from any single source. Aim for well below that.
+
+  - Never copy more than 3 consecutive words from a paper, except technical
+    names (e.g. "Vision Transformer", "Low-Rank Adaptation", dataset names).
+  - Paraphrase by re-thinking the idea: change the sentence order, the
+    grammatical subject and the way the argument is built, not just single
+    words. Combine information from two or more sources in one paragraph
+    instead of summarising one paper per paragraph.
+  - Do not reuse the abstract sentences of a paper. Describe what the paper
+    did and found, in your own structure, and relate it to this study.
+  - Never write long definitions of standard concepts (DIU guideline:
+    "Don't write definitions and don't prolong the discussion unnecessarily").
+  - Quote only if wording itself matters; quotes need quotation marks and
+    a [REF]. Avoid quotes in general.
+
+===========================================================================
+RULE 2 — CITATIONS: [REF] PLACEHOLDERS (APA will be added later in Zotero)
+===========================================================================
+
+  - Write [REF] directly after the claim it supports, not at the end of a
+    long sentence that contains several claims.
+        CORRECT:   ViT splits an image into 16 × 16 patches [REF], while
+                   CNN models rely on local convolutions [REF].
+        INCORRECT: ViT splits an image into patches and is better than CNNs. [REF]
+  - Help the author find the source: when the claim comes from one of the
+    uploaded papers, write the author and year inside the placeholder,
+    e.g. [REF: Dosovitskiy et al., 2021] or [REF: CrisisMMD, Alam et al., 2018].
+    If unsure which paper supports the claim, write only [REF].
+  - Every factual claim about OTHER work needs a [REF]. Results of THIS
+    study (from 02_RESULTS_FACT_SHEET.md) need no [REF].
+  - Do not invent authors, years or paper titles. Cite only papers that
+    exist in this notebook.
+  - Prefer papers from 2020 onward; older papers only for foundational
+    methods (Transformer, Grad-CAM, calibration, BLEU, etc.).
+  - Each prompt states how many [REF] placeholders the section must contain.
+    Stay inside that range.
+
+===========================================================================
+RULE 3 — STYLE AND VOCABULARY
+===========================================================================
+
+  - Vary sentence length and structure. Mix short, direct sentences with
+    longer technical ones. Avoid starting consecutive sentences the same way.
+  - Avoid empty filler words and phrases. Do not use:
+      delve, crucial, pivotal, robust (use "stable" or give the number),
+      seamless, notably, furthermore, moreover (at most once per section),
+      in conclusion, it is worth noting, it is important to note,
+      plays a vital/crucial role, leverage (verb), underscore (verb),
+      landscape / paradigm (as metaphors), cutting-edge, groundbreaking,
+      revolutionary, novel (unless stated by the fact sheet), state-of-the-art
+      (unless comparing with a cited benchmark number).
+  - Be concrete: give the number instead of an adjective
+    ("Macro F1 of 75.69 ± 1.33%" instead of "strong performance").
+  - American English spelling throughout (analyze, color, modeling).
+  - Write "Bengali" for the language; keep "BanglaBERT", "Bangla" only in names.
+  - First mention of an abbreviation: full form followed by the abbreviation
+    in parentheses, e.g. "Low-Rank Adaptation (LoRA)". Afterwards use only
+    the abbreviation.
+
+===========================================================================
+RULE 4 — ACADEMIC TONE
+===========================================================================
+
+  - Third person: "this study", "the proposed framework", "the results show".
+    Do not use "we", "our", "I".
+  - Active voice by default; passive voice is acceptable for procedures
+    ("The images were resized to 224 × 224 pixels.").
+  - Match the strength of each claim to the evidence:
+      strong evidence      → shows, demonstrates, confirms
+      moderate evidence    → suggests, indicates, is consistent with
+      weak / single seed   → may, might reflect, requires further study
+  - Report uncertainty: give mean ± standard deviation, confidence intervals
+    and the number of samples (n) where the fact sheet provides them.
+  - Equations: numbered, variables in italics, dimensions stated,
+    e.g. Q ∈ ℝ^(n × d_k). Write equations as [EQUATION X.Y: ...] placeholders
+    in plain text so they can be typed in Word's equation editor.
+
+===========================================================================
+RULE 5 — HONESTY AND ZERO HALLUCINATION (most important rule)
+===========================================================================
+
+  - Every number about this study must come from 02_RESULTS_FACT_SHEET.md.
+    If an older file, figure or paper shows a different number for this
+    study, the fact sheet wins.
+  - Never write the claims listed under "DO NOT CLAIM" in the fact sheet
+    (e.g. "human-verified translation", "text and image are complementary",
+    "multi-task learning improves classification", "generalizes to
+    Bangladesh", 83.21%, "beats the state of the art").
+  - Superseded numbers (old split) may appear ONLY in Section 4.2, clearly
+    labelled as inflated by data leakage.
+  - Negative findings are part of the contribution. Report them plainly
+    (e.g. generated captions imitate tweets; the classifier is image-driven).
+  - If the sources do not contain the requested information, write
+    [MISSING: short description] in the text instead of guessing.
+
+===========================================================================
+RULE 6 — FIGURES, TABLES, EQUATIONS
+===========================================================================
+
+  - Insert the placeholders that the prompt lists, at the point in the text
+    where they belong, each on its own line:
+        [FIGURE X.Y: file name — caption text]
+        [TABLE X.Y: caption text]  followed by the table in Markdown
+        [EQUATION X.Y: formula]
+  - DIU format: figure captions go BELOW the figure, table captions ABOVE
+    the table. Number by chapter (Figure 3.2, Table 4.5).
+  - Refer to every figure and table in the text before it appears
+    ("as shown in Figure 4.1").
+  - Fill tables with numbers from the fact sheet only.
+
+===========================================================================
+RULE 7 — OUTPUT FORMAT
+===========================================================================
+
+  - Start with the section heading exactly as given in the prompt
+    (e.g. "3.3.2 Bengali Text Generation via Machine Translation"),
+    then the prose. No preamble ("Here is ..."), no closing remark.
+  - Paragraphs of 4–8 sentences. No bullet lists inside the prose unless the
+    prompt asks for a list (objectives, research questions, contributions).
+  - Stay within the word range of the prompt (±10%).
+  - Do not repeat content that belongs to another section; the plan shows
+    which section covers what.
+
+===========================================================================
+RULE 8 — CONTENT ALIGNMENT (what this thesis is really about)
+===========================================================================
+
+  PROBLEM: Disaster images shared on social media could help responders,
+  but (a) Bengali-language tools for this are almost absent, (b) many
+  published results on CrisisMMD-type data are not checked for leakage,
+  explanation quality or calibration, and (c) training data from Bangladesh
+  are scarce.
+
+  WHAT THIS STUDY DOES:
+    1. Builds a Bengali-text version of the CrisisMMD humanitarian image
+       subset (3,755 images, machine-translated tweets) with a leakage-free,
+       tweet-grouped split.
+    2. Adapts ViT-Base/16 and BanglaBERT with LoRA (1.38 M trainable
+       parameters, ≈ 0.70%) for three-class damage classification and
+       matches a ViT-Large baseline with 38× fewer trainable parameters.
+    3. Tests whether the Bengali text helps (it does not; the classifier is
+       image-driven) and whether a jointly trained decoder can describe
+       images in Bengali (it imitates tweets instead).
+    4. Checks explanations quantitatively (deletion test: Grad-CAM is
+       faithful) and checks calibration (ECE 2.57%, already well calibrated).
+    5. Runs a preliminary external test on 325 Bangladeshi flood and cyclone
+       images labelled by three annotators.
+
+  Frame every section around careful, honest evaluation of a
+  parameter-efficient model — not around claims of superiority.
+
+===========================================================================
+QUALITY CHECK BEFORE EVERY OUTPUT
+===========================================================================
+
+  [ ] Heading matches the prompt; no preamble or closing remark
+  [ ] Word count inside the requested range
+  [ ] [REF] count inside the requested range; [REF] placed at the claim
+  [ ] All study numbers taken from 02_RESULTS_FACT_SHEET.md
+  [ ] No "DO NOT CLAIM" statement; hedging matches evidence
+  [ ] No more than 3 consecutive words copied from any paper
+  [ ] Listed figure/table/equation placeholders inserted and referred to
+  [ ] Third person, American spelling, no banned filler words
+
+===========================================================================
+END OF MASTER GUIDELINES
+===========================================================================

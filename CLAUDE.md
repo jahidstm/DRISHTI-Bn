@@ -140,7 +140,10 @@ Bengali texts are **machine translations** of the CrisisMMD tweets (`monirbishal
 |------|---------|
 | `DEFENSE_FIX_PLAN.md` | **Active:** phase-by-phase pre-defense fix plan (update after each phase, then commit + push) |
 | `docs/corrected_claims.md` | **Reference for writing:** how each claim must be phrased, what is dropped, limitations |
-| `PHASE4_WRITING_PLAN.md` | Old writing plan — **ignored** (new prompts will be built from `docs/corrected_claims.md`) |
+| `00_MASTER_WRITING_GUIDELINES.txt` | NotebookLM writing rules (v2, 2026-11-16) |
+| `01_NOTEBOOKLM_WRITING_PLAN.md` | **Active writing plan:** thesis structure, word budget (~20k), one NotebookLM prompt per section, sources to upload/download |
+| `02_RESULTS_FACT_SHEET.md` | NotebookLM source of truth for all numbers/claims (keep in sync with this file) |
+| `PHASE4_WRITING_PLAN.md` | Old writing plan — **superseded** by `01_NOTEBOOKLM_WRITING_PLAN.md` |
 | `Thesis Writing/` | DIU guidelines, SWE thesis template, defense slide templates |
 | `DRISHTI_XAI_CHECKLIST.md` | XAI task checklist |
 | `test_set_indices_grouped.csv` | Grouped (leakage-free) test set, n=375 — use this |
@@ -153,10 +156,10 @@ Bengali texts are **machine translations** of the CrisisMMD tweets (`monirbishal
 | File | Content |
 |------|---------|
 | `figure_1_1_flood_stats.png` | Flood statistics (introduction) |
-| `figure_1_2_system_pipeline.png` | System pipeline (introduction) |
+| `figure_1_2_system_pipeline.png` | Workflow / scope diagram (introduction; redrawn 2026-11-16 by `src/make_diagram_figures.py`) |
 | `figure_2_1_lora.png` | LoRA injection diagram |
-| `figure_3_1_architecture.png` | DRISHTI-Bn architecture |
-| `figure_3_3_xai_pipeline.png` | XAI pipeline flowchart |
+| `figure_3_1_architecture.png` | DRISHTI-Bn architecture (redrawn: BanglaBERT = text encoder, separate 3-layer decoder) |
+| `figure_3_3_xai_pipeline.png` | Explanation + reliability analysis (redrawn; thesis Figure 3.2) |
 | `figure_4_1_confusion_matrix_grouped.png` | **Fig 4.1** — CLS-Only seed 42, grouped test n=375, Macro F1 74.83% |
 | `figure_4_2_baseline_comparison_grouped.png` | **Fig 4.2** — baselines on grouped split (mean ± std) |
 | `figure_4_3_ablation_original_split.png` | **Fig 4.3** — ablation (original split, single seed, relabelled per C4–C6) |
