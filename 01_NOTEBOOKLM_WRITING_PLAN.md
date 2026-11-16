@@ -88,7 +88,7 @@ Method আর result আগে লিখলে introduction আর conclusion �
 | 12 | Rentschler, Salhab & Jafino (2022). *Flood exposure and poverty in 188 countries.* Nature Communications, 13, 3527 + Supplementary Information (Table 1) | nature.com (open access) | 1.1.1, Figure 1.1 |
 
 > ✅ যাচাই করা: Figure 1.1-এর সংখ্যা (94.42 million, 57.5%) **Rentschler, Salhab & Jafino (2022)-এর Supplementary Table 1** থেকে। 2020-এর World Bank working paper-এ Bangladesh-এর সংখ্যা আলাদা (51.9 million, 31.6%) — ওটা cite করবে না।
-> উপরের ১–১২ নম্বর paper `literature/5. methods_and_evaluation/`-এ নামানো আছে।
+> উপরের ১–১৮ নম্বর (নিচের "ভালো হয়" তালিকাসহ) সব paper `literature/5. methods_and_evaluation/`-এ নামানো আছে (১৯টা PDF, Rentschler-এর supplementary সহ)।
 
 **ভালো হয় (৬টা)**
 | # | Paper | কোথায় পাবে | কোন section |
