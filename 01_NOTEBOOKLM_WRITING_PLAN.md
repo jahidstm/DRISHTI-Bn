@@ -417,7 +417,7 @@ CITATIONS: Include 2–3 [REF] placeholders.
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
 SECTION: 1.7 Research Contributions
-TARGET LENGTH: 280–320 words: one introductory sentence and a numbered list of the six contributions in fact sheet §10, each in 2–3 sentences with the key number.
+TARGET LENGTH: 280–320 words: one introductory sentence and a numbered list of the three to four contributions in fact sheet §10, each in 2–3 sentences with the key number.
 Do not add contributions that are not in §10. Respect the "DO NOT CLAIM" list (§11).
 CITATIONS: Do not include any [REF].
 ```
