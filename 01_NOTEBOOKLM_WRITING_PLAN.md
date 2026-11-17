@@ -281,8 +281,10 @@ REFERENCES (Zotero, APA 7) · APPENDICES
 ## Part E — Common rules for every prompt
 
 Every prompt below starts with the same first line. **Copy the whole code block**, including that line.
-If a parent section (e.g. 3.3) has sub-sections, the first sub-section prompt also writes the parent heading
-and a two-sentence lead-in; the other sub-section prompts write only their own heading.
+If a parent section (e.g. 3.3) has sub-sections, the first sub-section prompt also writes the parent heading,
+**directly followed by the first sub-section heading with no text in between** (no lead-in paragraph under a heading
+that is immediately followed by a sub-heading); the other sub-section prompts write only their own heading.
+Any context a lead-in would have given goes into the first sentences of the first sub-section.
 
 ---
 
@@ -310,8 +312,8 @@ CITATIONS: Do not include any [REF] in the Abstract.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
-SECTION: Begin with "CHAPTER 1 INTRODUCTION", then "1.1 Background of the Study" with a two-sentence lead-in, then "1.1.1 Disasters in Bangladesh and the Need for Rapid Information".
-TARGET LENGTH: 300–340 words (including the lead-in).
+SECTION: Begin with "CHAPTER 1 INTRODUCTION", then "1.1 Background of the Study", then directly (no text between the headings) "1.1.1 Disasters in Bangladesh and the Need for Rapid Information".
+TARGET LENGTH: 260–300 words.
 CONTENT:
 - Bangladesh's exposure to floods and cyclones (deltaic geography, monsoon, cyclones from the Bay of Bengal); population exposed to significant flood risk (> 0.15 m inundation in a 1-in-100-year flood): 94.42 million, 57.5% of the population (Rentschler, Salhab & Jafino, 2022).
 - Use the Ganges Delta satellite-monitoring paper for the geographic context.
@@ -446,8 +448,8 @@ CITATIONS: Include 0–1 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule.
 
-SECTION: Write "2.2 Deep Learning for Disaster Image Analysis" with a two-sentence lead-in, then "2.2.1 Unimodal Crisis Image Classification".
-TARGET LENGTH: 430–470 words (including the lead-in).
+SECTION: Write the heading "2.2 Deep Learning for Disaster Image Analysis" and, directly below it with NO text in between, the heading "2.2.1 Unimodal Crisis Image Classification".
+TARGET LENGTH: 390–430 words.
 CONTENT — synthesize, do not summarize paper by paper:
 - Image-only classification of crisis imagery: CNN baselines on CrisisMMD; CrisisViT (crisis-specific Vision Transformer pretraining, reported accuracy); MEDIC multi-task disaster image dataset (if uploaded).
 - Flood-specific work: explainable flood damage assessment with multi-atrous self-attention and vision-language integration; satellite deep learning for flood dynamics in the Ganges Delta.
@@ -475,7 +477,7 @@ CITATIONS: Include 5–7 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule.
 
-SECTION: Write "2.3 Transformers and Vision-Language Models" with a two-sentence lead-in, then "2.3.1 Transformer Encoders for Vision and Language".
+SECTION: Write the heading "2.3 Transformers and Vision-Language Models" and, directly below it with NO text in between, the heading "2.3.1 Transformer Encoders for Vision and Language".
 TARGET LENGTH: 310–350 words.
 CONTENT:
 - Transformer self-attention (Vaswani et al.) in brief — no textbook definition, only what is needed later.
@@ -502,7 +504,7 @@ CITATIONS: Include 3–5 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule.
 
-SECTION: Write "2.4 Bengali Language Processing" with a two-sentence lead-in, then "2.4.1 Bengali Language Models and Machine Translation".
+SECTION: Write the heading "2.4 Bengali Language Processing" and, directly below it with NO text in between, the heading "2.4.1 Bengali Language Models and Machine Translation".
 TARGET LENGTH: 300–340 words.
 CONTENT:
 - Bengali as a widely spoken but low-resource language for NLP.
@@ -544,7 +546,7 @@ CITATIONS: Include 3–4 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule.
 
-SECTION: Write "2.6 Explainability and Reliability of Deep Models" with a two-sentence lead-in, then "2.6.1 Visual Explanation Methods for Vision Transformers".
+SECTION: Write the heading "2.6 Explainability and Reliability of Deep Models" and, directly below it with NO text in between, the heading "2.6.1 Visual Explanation Methods for Vision Transformers".
 TARGET LENGTH: 330–370 words.
 CONTENT:
 - Why explanations matter in humanitarian decisions.
@@ -579,7 +581,7 @@ CITATIONS: Include 2–3 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule.
 
-SECTION: Write "2.7 Evaluation Practice" with a one-sentence lead-in, then "2.7.1 Data Leakage and Reproducibility".
+SECTION: Write the heading "2.7 Evaluation Practice" and, directly below it with NO text in between, the heading "2.7.1 Data Leakage and Reproducibility".
 TARGET LENGTH: 180–220 words.
 CONTENT: types of leakage described by Kapoor & Narayanan (e.g. duplicates or dependent samples across train and test); why social-media datasets are prone to it (several images per tweet, retweets, copied text); group-aware splitting as the remedy; the value of reporting several random seeds.
 CITATIONS: Include 2–3 [REF] placeholders.
@@ -646,8 +648,8 @@ CITATIONS: Include 3 [REF] placeholders (ViT, BanglaBERT, LoRA, each at its own 
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
-SECTION: Write "3.3 Dataset Construction" with a two-sentence lead-in, then "3.3.1 Source Data and Class Definition".
-TARGET LENGTH: 310–350 words (including the lead-in).
+SECTION: Write the heading "3.3 Dataset Construction" and, directly below it with NO text in between, the heading "3.3.1 Source Data and Class Definition".
+TARGET LENGTH: 270–310 words.
 CONTENT: CrisisMMD v2.0 and its humanitarian categories; mapping of the CrisisMMD categories into three classes (fact sheet §2.1); excluded categories; resulting 3,755 images and class shares; event composition (95.2% hurricanes, 4.8% Sri Lanka floods; only 71 samples, 1.9%, have tweets mentioning Bangladesh or Cyclone Mora — never write "no images from Bangladesh") — explain why the thesis says "disaster images" rather than "flood images"; class imbalance (Affected People 8.8%).
 PLACEHOLDERS: [TABLE 3.1: Mapping of CrisisMMD humanitarian categories to the three classes of this study, with image counts]
 CITATIONS: Include 1–2 [REF] placeholders.
@@ -688,7 +690,7 @@ CITATIONS: Include 1–2 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
-SECTION: Write "3.4 Model Architecture" with a two-sentence lead-in, then "3.4.1 Vision Encoder: ViT-Base/16".
+SECTION: Write the heading "3.4 Model Architecture" and, directly below it with NO text in between, the heading "3.4.1 Vision Encoder: ViT-Base/16".
 TARGET LENGTH: 260–300 words.
 CONTENT: google/vit-base-patch16-224-in21k; image split into 196 patches of 16 × 16 pixels, linearly projected to d = 768, plus a [CLS] token and position embeddings; 12 layers, 12 heads; pooled [CLS] vector v_CLS ∈ ℝ^768 used by the classifier; the 196 patch tokens used by the caption decoder and by Grad-CAM; pretrained weights frozen.
 PLACEHOLDERS: [EQUATION 3.1: z₀ = [x_cls ; x_p¹E ; … ; x_p¹⁹⁶E] + E_pos, E ∈ ℝ^((16·16·3)×768)]
@@ -744,7 +746,7 @@ CITATIONS: Include 1–2 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
-SECTION: Write "3.6 Training Procedure" with a one-sentence lead-in, then "3.6.1 Loss Functions".
+SECTION: Write the heading "3.6 Training Procedure" and, directly below it with NO text in between, the heading "3.6.1 Loss Functions".
 TARGET LENGTH: 200–240 words.
 CONTENT: cross-entropy for classification; token-level negative log-likelihood for captioning (padding ignored); multi-task loss with λ_cls = 1.0, λ_cap = 0.5; CLS-Only uses only the classification loss.
 PLACEHOLDERS:
@@ -782,7 +784,7 @@ CITATIONS: Include 1–3 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
-SECTION: Write "3.8 Explainability and Reliability Analysis" with a two-sentence lead-in referring to Figure 3.2, then "3.8.1 Grad-CAM for the Vision Transformer".
+SECTION: Write the heading "3.8 Explainability and Reliability Analysis" and, directly below it with NO text in between, the heading "3.8.1 Grad-CAM for the Vision Transformer".
 TARGET LENGTH: 230–270 words.
 CONTENT: Grad-CAM computed on the 196 patch tokens entering the last ViT block; weights = mean gradient of the predicted-class logit over tokens; map = ReLU of the weighted sum, reshaped to 14 × 14 and upsampled; explain why the input of the last block is used (patch outputs of the last block receive no gradient because only [CLS] reaches the classifier; an earlier implementation produced blank maps for this reason).
 PLACEHOLDERS:
@@ -829,7 +831,7 @@ CITATIONS: Include 1–2 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
-SECTION: Write "3.9 Evaluation Protocol" with a one-sentence lead-in, then "3.9.1 Classification Metrics and Seed Protocol".
+SECTION: Write the heading "3.9 Evaluation Protocol" and, directly below it with NO text in between, the heading "3.9.1 Classification Metrics and Seed Protocol".
 TARGET LENGTH: 150–190 words.
 CONTENT: Macro F1 as the main metric because of class imbalance; also macro precision, recall, accuracy, per-class F1 and confusion matrices; mean ± sample standard deviation over seeds 42, 123, 2024; differences smaller than about 2.5 percentage points treated as within seed variance.
 PLACEHOLDERS: [EQUATION 3.11: Macro-F1 = (1/C) Σ_c 2·P_c·R_c / (P_c + R_c), C = 3]
@@ -913,7 +915,7 @@ CITATIONS: Include 1–2 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
-SECTION: Write "4.3 Classification Performance" with a one-sentence lead-in, then "4.3.1 Main Results Across Seeds".
+SECTION: Write the heading "4.3 Classification Performance" and, directly below it with NO text in between, the heading "4.3.1 Main Results Across Seeds".
 TARGET LENGTH: 280–320 words.
 CONTENT: CLS-Only Macro F1 75.69 ± 1.33%, precision 77.09 ± 1.31%, recall 74.93 ± 1.59%, accuracy 88.00 ± 0.27%; per-seed values 74.83 / 75.02 / 77.22; the ~2.4 pp spread means single-seed differences of this size are not meaningful; gap between accuracy and Macro F1 explained by the weak minority class.
 PLACEHOLDERS: [TABLE 4.2: CLS-Only results per seed and mean ± standard deviation]
@@ -975,7 +977,7 @@ CITATIONS: Do not include any [REF].
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
-SECTION: Write "4.6 Bengali Text Generation" with a one-sentence lead-in, then "4.6.1 Automatic Evaluation".
+SECTION: Write the heading "4.6 Bengali Text Generation" and, directly below it with NO text in between, the heading "4.6.1 Automatic Evaluation".
 TARGET LENGTH: 310–350 words.
 CONTENT: BLEU 14.38 / chrF 14.19 / BERTScore 69.66% on raw tweet references; 0.11 / 8.46 / 62.27% on cleaned references; trivial baselines score higher (random tweet chrF 21.58 / 11.93; constant tweet 20.46 / 15.19). Interpretation: the raw BLEU comes from shared tweet patterns (URLs, hashtags, event names), not from describing the image; the model performs below a system that ignores the image.
 PLACEHOLDERS: [TABLE 4.7: Automatic evaluation of the generated Bengali text, with trivial reference baselines]
@@ -1008,7 +1010,7 @@ CITATIONS: Include 0–1 [REF] placeholders.
 ```
 Read "00_MASTER_WRITING_GUIDELINES.txt" and "02_RESULTS_FACT_SHEET.md" completely before writing and follow every rule. Take every number about this study only from the fact sheet.
 
-SECTION: Write "4.8 Explainability Analysis" with a one-sentence lead-in, then "4.8.1 Qualitative Analysis of Explanation Maps".
+SECTION: Write the heading "4.8 Explainability Analysis" and, directly below it with NO text in between, the heading "4.8.1 Qualitative Analysis of Explanation Maps".
 TARGET LENGTH: 370–430 words.
 CONTENT: 21 random test images (7 per class, seed 42, not cherry-picked) — 15 correct (SD 6/7, HR 7/7, AP 2/7), errors have lower confidence (0.58 vs 0.89); never call 15/21 an accuracy of the explanation. Figures 4.5–4.8 show by a fixed rule the most confident correct prediction per class (#1 SD aerial flood, #10 HR relief boxes, #18 AP people in flood water) and the most confident error (#21, AP predicted as SD). Describe what each method highlights: Grad-CAM on flooded roads/vegetation (#1), relief boxes (#10), flood water rather than the people (#18) — a sign the model uses scene context; Rollout more diffuse; cross-attention spread across the image. All 21 samples in Appendix B.
 PLACEHOLDERS:

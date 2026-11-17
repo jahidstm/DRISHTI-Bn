@@ -146,6 +146,12 @@ RULE 7 — OUTPUT FORMAT
   - Stay within the word range of the prompt (±10%).
   - Do not repeat content that belongs to another section; the plan shows
     which section covers what.
+  - HEADING STRUCTURE: a heading that is directly followed by a sub-heading
+    gets NO text of its own. Write "4.8 Explainability Analysis" and
+    immediately "4.8.1 ...", with no introductory paragraph in between.
+    Put any needed context into the first sentences of the first sub-section.
+  - FIGURES: do not repeat the caption text in the prose, and do not describe
+    a figure in more than two sentences before interpreting it.
 
 ===========================================================================
 RULE 8 — CONTENT ALIGNMENT (what this thesis is really about)
@@ -187,6 +193,7 @@ QUALITY CHECK BEFORE EVERY OUTPUT
   [ ] No more than 3 consecutive words copied from any paper
   [ ] Listed figure/table/equation placeholders inserted and referred to
   [ ] Third person, American spelling, no banned filler words
+  [ ] No text between a heading and its first sub-heading
 
 ===========================================================================
 END OF MASTER GUIDELINES
